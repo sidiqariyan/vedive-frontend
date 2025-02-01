@@ -1,0 +1,18 @@
+ul li a {
+  transition: color 0.3s ease;
+}
+
+ul li a:hover {
+  color: #0059FF; /* Hover effect for links */
+}
+
+button {
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+.container {
+  max-width: 100%;
+}

@@ -1,0 +1,17 @@
+.box-main-container-home {
+    background-image: url(../../../assets/mailerBackground.png) !important;
+}
+.box-container-home{
+    border: 2px solid #000000;
+    border-radius: 33px;
+    /* background-image: url(../../assets/blue.png) !important; */
+    /* -webkit-filter: blur(1px) */
+    /* filter: blur(2px); */
+}
+.button-boxes{
+    position: relative;
+    margin-top: -53px;
+}
+
+
+

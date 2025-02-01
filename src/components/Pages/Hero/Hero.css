@@ -1,0 +1,10 @@
+/* HomePage.css */
+
+/* General styling */
+
+  h1 {
+    font-size: 80px !important;
+  }
+.tool-buttons{
+  padding: 6px 14px !important;
+}
