@@ -22,7 +22,7 @@ const NumberScraper = () => {
     setError("");
 
     try {
-      const response = await axios.get("http://ec2-3-111-32-68.ap-south-1.compute.amazonaws.com:3001/api/search", {
+      const response = await axios.get("http://localhost:3000/api/numberScraper", {
         params: { query: combinedQuery },
       });
 
@@ -37,7 +37,7 @@ const NumberScraper = () => {
   };
 
   const handleDownload = () => {
-    window.open("http://ec2-3-111-32-68.ap-south-1.compute.amazonaws.com:3001/api/download");
+    window.open("http://localhost:3000/api/download");
   };
 
   return (
@@ -105,25 +105,6 @@ const NumberScraper = () => {
 
         {businesses.length > 0 && (
           <div className="mt-6">
-            <table className="w-full border border-gray-700 rounded-lg overflow-hidden">
-              <thead className="bg-gray-700 text-white">
-                <tr>
-                  <th className="p-3">Name</th>
-                  <th className="p-3">Phone</th>
-                  <th className="p-3">Address</th>
-                </tr>
-              </thead>
-              <tbody>
-                {businesses.map((business, index) => (
-                  <tr key={index} className="bg-gray-600 odd:bg-gray-700">
-                    <td className="p-3">{business.name}</td>
-                    <td className="p-3">{business.phone}</td>
-                    <td className="p-3">{business.address}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          
             <button
               onClick={handleDownload}
               className="w-full mt-4 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-bold transition duration-300"

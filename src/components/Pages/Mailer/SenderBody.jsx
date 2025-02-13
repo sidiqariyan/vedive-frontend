@@ -64,7 +64,7 @@ function SenderBody() {
         ]);
 
         const response = await axios.post(
-          "http://ec2-3-111-32-68.ap-south-1.compute.amazonaws.com:3001/api/send-bulk-mail",
+          "http://localhost:3000/api/send-bulk-mail",
           form,
           {
             headers: {
@@ -102,6 +102,7 @@ function SenderBody() {
 
   return (
     <div className="bg-[#121212] p-4 border rounded-lg absolute bottom-3 -ml-8">
+      
       <div className='flex justify-end border-b-white'>
         <h4 className="flex font-secondary mb-2 text-primary text-[12px]">
           SMTP Configuration:{" "}

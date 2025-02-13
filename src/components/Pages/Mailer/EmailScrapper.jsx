@@ -14,42 +14,36 @@ const EmailScrapper = () => {
     setError("");
     setResponse("");
     setIsDownloading(true);
-
+  
     try {
-      const combinedQuery = [keyword, country, city].filter(item => item.trim() !== '').join(' ');
-      const res = await fetch("http://ec2-3-111-32-68.ap-south-1.compute.amazonaws.com:3001/api/email-scraper", {
+      const combinedQuery = [keyword, country, city].filter(item => item.trim()).join(' ');
+      const res = await fetch("http://localhost:3000/api/email-scraper", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: combinedQuery }),
       });
-
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-
-      const contentType = res.headers.get("Content-Type");
-      if (contentType && contentType === "application/octet-stream") {
+  
+      if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+  
+      if (res.headers.get("Content-Type") === "application/octet-stream") {
         const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
-        link.href = window.URL.createObjectURL(blob);
+        link.href = url;
         link.download = "emails.csv";
         link.click();
-
-        setIsDownloadReady(true);
+        window.URL.revokeObjectURL(url);
         setResponse("CSV file downloaded successfully!");
       } else {
-        const data = await res.json();
-        setResponse(data.message);
+        setResponse(await res.json());
       }
-      setIsDownloading(false);
     } catch (error) {
-      console.error("Error during fetch:", error);
       setError("Failed to fetch data. Please try again.");
+    } finally {
       setIsDownloading(false);
     }
   };
+  
 
   return (
     <div className="bg-[#121212] p-4 pt-[70px] border rounded-lg mt-5">
