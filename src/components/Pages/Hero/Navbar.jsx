@@ -1,54 +1,79 @@
-import React from "react";
-import "./Navbar.css";
-import { FaDumbbell } from "react-icons/fa"; // Correct import of the icon
-import { NavbarMenu } from "../../NavbarData/data"; // Ensure this is correctly defined and imported
-import { MdMenu } from "react-icons/md";
-import ResponsiveMenu from "./ResponsiveMenu";
+import React, { useState, useEffect } from "react";
+import "./styles.css"; // Ensure your CSS is imported
 import logo from "../../../assets/logo.png";
+import { Link, useNavigate } from "react-router-dom";
 
-function Navbar() {
-  const [open, setOpen] = React.useState(false);
+const Navbar = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    navigate("/login");
+  };
 
   return (
-    <nav className=" text-white">
-      <div className="container flex justify-between items-center py-4 px-6">
-        {/* Logo section */}
-        <div className="text-2xl flex items-center gap-2 font-bold uppercase">
-          <img src={logo} className="w-36"/>
-        </div>
-        {/* Menu section */}
-        <div className="hidden md:flex items-center gap-8 ml-[190px]">
-          <ul className="flex items-center gap-8">
-            {NavbarMenu.map((item) => (
-              <li key={item.id}>
-                <a
-                  href={item.url}
-                  className="text-white font-secondary hover:text-third font-regular text-lg"
-                >
-                  {item.title}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-        {/* Login/Signup section */}
-        <div className="hidden md:flex items-center gap-4">
-        <button className="text-primary border border-primary  hover:bg-third hover:text-white font-semibold py-1 px-11 rounded">
-            Login
-          </button>
-          <button className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">
-          Get started for free
-          </button>
-        </div>
-        {/* Mobile responsive section */}
-        <div className="md:hidden" onClick={() => setOpen(!open)}>
-          <MdMenu className="text-3xl text-white" />
-        </div>
-        {/* Mobile sidebar section */}
-        {open && <ResponsiveMenu open={open} />}
+    <div className="navbar">
+      <div className="logo-main">
+        <img src={logo} alt="Logo" />
       </div>
-    </nav>
+      <ul className="nav-links">
+        <li>
+          <Link to="/">Home</Link>
+        </li>
+        <li>
+          <Link to="/about">About Us</Link>
+        </li>
+        <li>
+          <Link to="/services">Services</Link>
+        </li>
+        <li>
+          <Link to="/pricing">Pricing</Link>
+        </li>
+        <li>
+          <Link to="/contact">Contact Us</Link>
+        </li>
+      </ul>
+      <div className="buttons">
+        {isLoggedIn ? (
+          <>
+            <Link to="/dashboard">
+              <img
+                src="profile-icon.png"
+                alt="Profile"
+                style={{ width: "30px", height: "30px" }}
+              />
+            </Link>
+            <button onClick={handleLogout} style={{ marginLeft: "10px" }}>
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/login" style={{ padding: "5px 25px" }}>
+              Log in
+            </Link>
+            <Link
+              to="/signup"
+              style={{
+                backgroundColor: "#1E90FF",
+                border: "solid #1E90FF 1px",
+                padding: "5px 25px",
+              }}
+            >
+              Get Started For Free
+            </Link>
+          </>
+        )}
+      </div>
+    </div>
   );
-}
+};
 
 export default Navbar;
