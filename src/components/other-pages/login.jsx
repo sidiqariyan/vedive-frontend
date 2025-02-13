@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "./secondarystyles.css"; // Import your styles
+import "./secondarystyles.css";
+import Vedive from "../assets/Vedive.png";
+import Google from "../assets/google-icon.svg";
 
 const Login = () => {
   const [emailOrUsername, setEmailOrUsername] = useState("");
@@ -34,10 +36,16 @@ const Login = () => {
   return (
     <div>
       <header className="login-header">
-        <h1>Login to Vedive</h1>
+        <img src={Vedive} alt="logo" />
       </header>
       <div className="login-container">
+        <h2>Login to Vedive</h2>
+        <hr className="login-hr" />
         <form onSubmit={handleLogin}>
+          <button className="google-btn">
+            <img src={Google} alt="Google Icon" /> Continue with Google
+          </button>
+
           <div className="input-login-group">
             <input
               type="text"

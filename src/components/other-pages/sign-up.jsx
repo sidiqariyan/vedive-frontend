@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "./secondarystyles.css"; // Import your styles
+import "./secondarystyles.css";
+import Vedive from "../assets/Vedive.png";
+import Google from "../assets/google-icon.svg";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -23,31 +25,40 @@ const Signup = () => {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("http://localhost:3000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error || 'Registration failed.');
+        throw new Error(data.error || "Registration failed.");
       }
 
       setMessage(data.message);
       setTimeout(() => navigate("/login"), 3000); // Redirect to login after 3 seconds
     } catch (err) {
-      setError(err.message || 'An unexpected error occurred. Please try again.');
+      setError(
+        err.message || "An unexpected error occurred. Please try again."
+      );
     }
   };
 
   return (
     <div>
-      <header className='login-header'>
-        <h1>Sign Up to Vedive</h1>
+      <header className="login-header">
+        <img src={Vedive} alt="logo" />
       </header>
       <div className="login-container">
+        <h2>Sign Up to Vedive</h2>
+        <hr className="login-hr" />
+
         <form onSubmit={handleSubmit}>
+          <button className="google-btn">
+            <img src={Google} alt="Google Icon" /> Continue with Google
+          </button>
+
           <div className="input-login-group">
             <input
               type="text"
