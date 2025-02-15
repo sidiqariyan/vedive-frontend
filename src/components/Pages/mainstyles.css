@@ -840,7 +840,7 @@ font-size: 28px;
 }
 }
 
-      .grid {
+      .grids {
       display: grid;
       gap: 1rem;
       width: 98vw;
@@ -905,7 +905,7 @@ font-size: 28px;
       .section-number{
         font-size: 63px;
       } /* Tablets */
-      .grid {
+      .grids {
         width: 97vw;
         grid-template-columns: repeat(2, 1fr);
       }

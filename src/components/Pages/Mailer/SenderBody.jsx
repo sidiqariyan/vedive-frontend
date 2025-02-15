@@ -101,7 +101,7 @@ function SenderBody() {
   };
 
   return (
-    <div className="bg-[#121212] p-4 border rounded-lg absolute bottom-3 -ml-8">
+    <div className="bg-[#121212] p-4 border rounded-lg top-4 -ml-8">
       
       <div className='flex justify-end border-b-white'>
         <h4 className="flex font-secondary mb-2 text-primary text-[12px]">
@@ -121,7 +121,7 @@ function SenderBody() {
         <hr />
       </div>
 
-      <h3 className="text-[32px] font-semibold font-primary mb-4 -mt-4 flex justify-center text-primary">Mail Sender</h3>
+      <h3 className="text-[32px] font-semibold font-primary mb-4 -mt-4 flex justify-center text-primary[!important]">Mail Sender</h3>
 
       <div className="mb-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

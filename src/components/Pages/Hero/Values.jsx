@@ -1,5 +1,5 @@
 import React from 'react';
-import "../mainstyles.css"; // Make sure you create a separate CSS file for styling
+// import "../mainstyles.css"; // Make sure you create a separate CSS file for styling
 
 const CoreValues = () => {
   return (

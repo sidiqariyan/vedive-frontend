@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useState, useEffect } from "react";
+=======
+import React from "react";
+>>>>>>> 90ae9e8 (New changes added)
 import bgImage from "../../../assets/mainBackground.png";
 import "./Hero.css";
 import Navbar from "./Navbar";
@@ -7,10 +11,12 @@ import EmailScrapper from "../Mailer/EmailScrapper";
 import GmailSender from "../Gmail/GmailSender";
 import NumberScraper from "../Whatsapp/NumberScraper";
 import WhatsAppSender from "../Whatsapp/WhatsAppSender";
+import { useAuth } from "../../utils/auth"; // Import the login check utility
 
 const Hero = () => {
   const [activeComponent, setActiveComponent] = useState("whatsAppSender");
   const [showPopup, setShowPopup] = useState(true);
+  const { isLoggedIn, loading } = useAuth(); // Check login status
 
   useEffect(() => {
     const consent = localStorage.getItem("userConsent");
@@ -31,6 +37,21 @@ const Hero = () => {
     }
   };
 
+  if (loading) {
+    return <div className="text-white text-center">Loading...</div>;
+  }
+
+  if (!isLoggedIn) {
+    return (
+      <div className="text-white text-center">
+        <p>You must be logged in to access this page.</p>
+        <a href="/login" className="text-third underline">
+          Login here
+        </a>
+      </div>
+    );
+  }
+
   return (
     <div
       className={`w-full h-screen text-white flex flex-col relative ${
@@ -46,6 +67,7 @@ const Hero = () => {
       {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center backdrop-blur-3xl z-50">
           <div className="p-80 rounded-lg text-center">
+<<<<<<< HEAD
             <h1 className="text-[80px]  text-primary font-bold ">
               Welcome to Vedive
             </h1>
@@ -72,6 +94,12 @@ const Hero = () => {
               These choices will be communicated to our partners and will not
               affect your browsing experience. You may withdraw your consent at
               any time by visiting the Privacy Hub.
+=======
+            <h1 className="text-[80px] text-primary font-bold">Welcome to Vedive</h1>
+            <h2 className="text-[64px] text-primary">One Click For Bulk Reaching.</h2>
+            <p className="text-white mt-2">
+              By accepting our cookies, you directly help us to expand our pledge to the planet...
+>>>>>>> 90ae9e8 (New changes added)
             </p>
             <div className="mt-4 flex justify-center gap-4">
               <button
@@ -90,15 +118,13 @@ const Hero = () => {
           </div>
         </div>
       )}
-
       {/* Navbar */}
       <Navbar />
-
       {/* Hero Content */}
       <div className="z-10 text-center px-6">
         <h1 className="font-semibold bg-clip-text text-primary to-gray-400 mt-6">
-          Where <span className="text-third">Messages</span>
-          <br /> Meet <span className="text-third">Meaning</span>
+          Where <span className="text-third font-primary">Messages</span>
+          <br /> Meet <span className="text-third font-primary">Meaning</span>
         </h1>
         <p className="text-[26px]">
           Trusted for <span className="text-third">99.9%</span> Delivery
@@ -106,7 +132,6 @@ const Hero = () => {
           Messaging for Modern Businesses
         </p>
       </div>
-
       {/* Button Section */}
       <div className="flex gap-4 justify-center mt-4">
         <button
@@ -160,7 +185,6 @@ const Hero = () => {
           WhatsApp Sender
         </button>
       </div>
-
       {/* Render components conditionally */}
       <div className="flex justify-center mt-8">
         {activeComponent === "bulkMailer" && <SenderBody />}

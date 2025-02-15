@@ -1,5 +1,5 @@
 import React from "react";
-import "./mainstyles.css"; // Make sure you create a separate CSS file for styling
+import "./mainstyles.css";
 import Navbar from "./Hero/Navbar";
 import Footer from "./Hero/Footer";
 
@@ -35,7 +35,7 @@ const Services = () => {
       {/* Wrap everything inside this div */}
       <TopSection />
       <div className="container">
-        <div className="grid">
+        <div className="grids">
           <ServiceSection
             number="01"
             title="Mail Scraper"

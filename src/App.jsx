@@ -12,6 +12,7 @@ import Dashboard from "./components/other-pages/dashboard.jsx";
 import Account from "./components/other-pages/account.jsx";
 import PostForm from "./components/other-pages/PostForm.jsx";
 import PostList from "./components/other-pages/PostList.jsx";
+import VerifyEmail from "./components/other-pages/VerifyEmail"; // Import the VerifyEmail component
 
 const App = () => {
   return (
@@ -19,7 +20,6 @@ const App = () => {
       <div>
         <Routes>
           <Route path="/" element={<Hero />} />
-
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/pricing" element={<Pricing />} />
@@ -31,6 +31,8 @@ const App = () => {
           <Route path="/signup" element={<Signup />} />
           <Route path="/post-form" element={<PostForm />} />
           <Route path="/templates" element={<PostList />} />
+          {/* Add the verify-email route */}
+          <Route path="/verify-email" element={<VerifyEmail />} />
         </Routes>
       </div>
     </Router>

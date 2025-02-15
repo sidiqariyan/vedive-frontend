@@ -19,11 +19,11 @@ const Navbar = () => {
   };
 
   return (
-    <div className="navbar">
+    <div className="navbar ">
       <div className="logo-main">
         <img src={logo} alt="Logo" />
       </div>
-      <ul className="nav-links">
+      <ul className="nav-links ml-36">
         <li>
           <Link to="/">Home</Link>
         </li>
@@ -34,11 +34,18 @@ const Navbar = () => {
           <Link to="/services">Services</Link>
         </li>
         <li>
+          <Link to="/templates">Templates</Link>
+        </li>
+        <li>
           <Link to="/pricing">Pricing</Link>
+        </li>
+        <li>
+          <Link to="/blog">Blogs</Link>
         </li>
         <li>
           <Link to="/contact">Contact Us</Link>
         </li>
+       
       </ul>
       <div className="buttons">
         {isLoggedIn ? (
