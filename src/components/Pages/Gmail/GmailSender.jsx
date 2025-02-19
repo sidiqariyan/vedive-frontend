@@ -11,7 +11,6 @@ const GmailSender = () => {
   const [htmlFile, setHtmlFile] = useState(null);
   const [htmlTemplateName, setHtmlTemplateName] = useState("");
   const [recipientsFileName, setRecipientsFileName] = useState("");
-
   const htmlTemplateRef = useRef(null);
   const recipientsFileRef = useRef(null);
 
@@ -40,11 +39,17 @@ const GmailSender = () => {
   const handleSendEmail = async (e) => {
     e.preventDefault();
 
+    // Prompt user to enter campaign name
+    const campaignNameInput = prompt("Please name your campaign:");
+    if (!campaignNameInput || campaignNameInput.trim() === "") {
+      alert("Campaign name is required!");
+      return;
+    }
+
     if (!contactsFile) {
       alert("Please upload a contacts file.");
       return;
     }
-
     if (!htmlFile) {
       alert("Please upload an HTML file for the mail body.");
       return;
@@ -63,9 +68,9 @@ const GmailSender = () => {
           subject,
           contacts: contacts.split("\n").map((email) => email.trim()),
           body,
+          campaignName: campaignNameInput, // Include campaign name in the payload
         }
       );
-
       alert(response.data.message || "Emails sent successfully!");
     } catch (error) {
       console.error("Error sending email:", error);
@@ -75,19 +80,29 @@ const GmailSender = () => {
 
   return (
     <div className="bg-[#121212] p-4 pt-[70px] border rounded-lg mt-4">
-          <div className="how-to-sec">
-          <span className="text-primary flex  text-base">
-            <svg className="mr-2 ml-2" width="12" height="15" viewBox="0 0 20 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="10" cy="12.069" r="10" fill="#FFE100" />
-              <path d="M9.63863 7.45658C9.35173 7.45658 9.10897 7.35727 8.91035 7.15865C8.71173 6.96003 8.61242 6.71727 8.61242 6.43037C8.61242 6.14348 8.71173 5.90072 8.91035 5.7021C9.10897 5.50348 9.35173 5.40417 9.63863 5.40417C9.91449 5.40417 10.1462 5.50348 10.3338 5.7021C10.5324 5.90072 10.6317 6.14348 10.6317 6.43037C10.6317 6.71727 10.5324 6.96003 10.3338 7.15865C10.1462 7.35727 9.91449 7.45658 9.63863 7.45658ZM10.3669 8.92969V18H8.86069V8.92969H10.3669Z" fill="#0F0E0D" />
-            </svg>
-            <span className='text-[12px] mt-[-4px]' >How to do? (</span>
-            <a href="#" className="underline text-third text-[12px] mt-[-4px]">
-              Click Here - Video
-            </a>{" "}
-            <span className='text-[12px] mt-[-4px]' >)</span>
-          </span>
-            </div>
+      <div className="how-to-sec">
+        <span className="text-primary flex text-base">
+          <svg
+            className="mr-2 ml-2"
+            width="12"
+            height="15"
+            viewBox="0 0 20 25"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="10" cy="12.069" r="10" fill="#FFE100" />
+            <path
+              d="M9.63863 7.45658C9.35173 7.45658 9.10897 7.35727 8.91035 7.15865C8.71173 6.96003 8.61242 6.71727 8.61242 6.43037C8.61242 6.14348 8.71173 5.90072 8.91035 5.7021C9.10897 5.50348 9.35173 5.40417 9.63863 5.40417C9.91449 5.40417 10.1462 5.50348 10.3338 5.7021C10.5324 5.90072 10.6317 6.14348 10.6317 6.43037C10.6317 6.71727 10.5324 6.96003 10.3338 7.15865C10.1462 7.35727 9.91449 7.45658 9.63863 7.45658ZM10.3669 8.92969V18H8.86069V8.92969H10.3669Z"
+              fill="#0F0E0D"
+            />
+          </svg>
+          <span className="text-[12px] mt-[-4px]">How to do? (</span>
+          <a href="#" className="underline text-third text-[12px] mt-[-4px]">
+            Click Here - Video
+          </a>{" "}
+          <span className="text-[12px] mt-[-4px]">)</span>
+        </span>
+      </div>
       <div className="max-w-4xl mx-auto p-4">
         <h2 className="text-[32px] font-semibold font-primary mb-4 -mt-8 flex justify-center text-primary">
           Send Bulk Emails
@@ -108,7 +123,6 @@ const GmailSender = () => {
                 required
               />
             </div>
-
             <div className="flex">
               <label htmlFor="appPassword" className="font-secondary text-[14px] text-primary mt-1">
                 App Password:
@@ -123,7 +137,6 @@ const GmailSender = () => {
                 required
               />
             </div>
-
             <div className="flex">
               <label htmlFor="from" className="font-secondary text-[14px] text-primary mt-1 ml-[60px]">
                 From:
@@ -138,7 +151,6 @@ const GmailSender = () => {
                 required
               />
             </div>
-
             <div className="flex">
               <label htmlFor="subject" className="font-secondary text-[14px] text-primary mt-1 ml-11">
                 Subject:
@@ -153,7 +165,6 @@ const GmailSender = () => {
                 required
               />
             </div>
-
             <div className="flex items-center gap-4">
               <label className="font-secondary text-[14px] text-primary">Mail Template (.html):</label>
               <button
@@ -172,7 +183,6 @@ const GmailSender = () => {
                 style={{ display: "none" }}
               />
             </div>
-
             <div className="flex items-center gap-4">
               <label className="block font-secondary text-[14px] text-primary">
                 Upload Recipients (.txt file):
@@ -197,7 +207,6 @@ const GmailSender = () => {
               />
             </div>
           </div>
-
           <div className="flex flex-row-reverse mt-5">
             <button type="submit" className="bg-black rounded-lg text-white px-4 py-2">
               Send Emails

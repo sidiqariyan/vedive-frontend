@@ -11,23 +11,33 @@ const NumberScraper = () => {
 
   const handleSearch = async (event) => {
     event.preventDefault();
+    // Prompt user to enter campaign name
+    const campaignNameInput = prompt("Please name your campaign:");
+    if (!campaignNameInput || campaignNameInput.trim() === "") {
+      alert("Campaign name is required!");
+      return;
+    }
     const combinedQuery = [keyword, country, city].filter(Boolean).join(" ").trim();
-
     if (!combinedQuery) {
       setError("At least one field (Keyword, Country, or City) is required.");
       return;
     }
-
     setLoading(true);
     setError("");
-
     try {
       const response = await axios.get("http://localhost:3000/api/numberScraper", {
-        params: { query: combinedQuery },
+        params: { query: combinedQuery, campaignName: campaignNameInput }, // Include campaign name in the request
       });
 
-      setBusinesses(response.data);
-      if (response.data.length === 0) setError("No results found.");
+      // Extract businesses and csvFileName from the response
+      const { businesses, csvFileName } = response.data;
+
+      if (!businesses || businesses.length === 0) {
+        setError("No results found.");
+      } else {
+        setBusinesses(businesses); // Set the businesses array
+        localStorage.setItem("csvFileName", csvFileName); // Save the file name for download
+      }
     } catch (err) {
       console.error("Error fetching data:", err);
       setError("Error fetching data. Please try again.");
@@ -37,12 +47,18 @@ const NumberScraper = () => {
   };
 
   const handleDownload = () => {
-    window.open("http://localhost:3000/api/download");
+    const csvFileName = localStorage.getItem("csvFileName");
+    if (!csvFileName) {
+      alert("No file available for download.");
+      return;
+    }
+    window.open(`http://localhost:3000/api/download?filename=${csvFileName}`);
   };
 
   return (
     <div className="bg-[#121212] p-4 pt-[60px] border rounded-lg absolute mt-5 -ml-8">
       <div className="">
+        {/* How-to Section */}
         <div className="how-to-sec overflow-wrap break-word">
           <span className="text-primary flex text-base">
             <svg className="mr-2 ml-2" width="12" height="15" viewBox="0 0 20 25" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -56,54 +72,64 @@ const NumberScraper = () => {
             <span className="text-[12px] mt-[-4px]">)</span>
           </span>
         </div>
+        {/* Main Heading */}
         <h2 className="text-[32px] font-semibold font-primary mb-4 -mt-4 flex justify-center text-primary">Number Scraper</h2>
-
+        {/* Form */}
         <form className="space-y-4" onSubmit={handleSearch}>
           <div className="flex gap-4">
-          <div className="flex">
-          <label htmlFor="" className="block font-secondary text-[14px] text-primary mt-1">Enter Keyword:</label>
-          <input
-            type="text"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Enter keyword"
-            className="border-gray-300 border p-1 ml-2 rounded-md text-secondary" style={{ height: "30px" }}
-          />
-</div>
-<div className="flex">
-<label htmlFor="" className="block font-secondary text-[14px] text-primary mt-1">Country:</label>
-          <input
-            type="text"
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-            placeholder="Enter country"
-            className="border-gray-300 border p-1 ml-2 rounded-md text-secondary" style={{ height: "30px" }}
-          />
-</div>
-</div>
-<div className="flex ml-[70px]">
-<label htmlFor="" className="block font-secondary text-[14px] text-primary mt-1">City:</label>
-          <input
-            type="text"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            placeholder="Enter city"
-            className="border-gray-300 border p-1 ml-2 rounded-md text-secondary" style={{ height: "30px" }}
-          />
-</div>
-<div className="flex justify-center mt-[20px]">
-          <button
-            type="submit"
-            className=" mt-4 bg-third text-[16px] text-primary px-12 py-2 rounded-md font-secondary whitespace-nowrap flex items-center justify-center"
-          >
-            {loading ? "Searching..." : "Search"}
-          </button>
+            <div className="flex">
+              <label htmlFor="" className="block font-secondary text-[14px] text-primary mt-1">
+                Enter Keyword:
+              </label>
+              <input
+                type="text"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder="Enter keyword"
+                className="border-gray-300 border p-1 ml-2 rounded-md text-secondary"
+                style={{ height: "30px" }}
+              />
+            </div>
+            <div className="flex">
+              <label htmlFor="" className="block font-secondary text-[14px] text-primary mt-1">
+                Country:
+              </label>
+              <input
+                type="text"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                placeholder="Enter country"
+                className="border-gray-300 border p-1 ml-2 rounded-md text-secondary"
+                style={{ height: "30px" }}
+              />
+            </div>
+          </div>
+          <div className="flex ml-[70px]">
+            <label htmlFor="" className="block font-secondary text-[14px] text-primary mt-1">
+              City:
+            </label>
+            <input
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="Enter city"
+              className="border-gray-300 border p-1 ml-2 rounded-md text-secondary"
+              style={{ height: "30px" }}
+            />
+          </div>
+          <div className="flex justify-center mt-[20px]">
+            <button
+              type="submit"
+              className="mt-4 bg-third text-[16px] text-primary px-12 py-2 rounded-md font-secondary whitespace-nowrap flex items-center justify-center"
+            >
+              {loading ? "Searching..." : "Search"}
+            </button>
           </div>
         </form>
-
+        {/* Error Message */}
         {error && <p className="text-red-400 text-center mt-4">{error}</p>}
-
-        {businesses.length > 0 && (
+        {/* Download Button */}
+        {localStorage.getItem("csvFileName") && (
           <div className="mt-6">
             <button
               onClick={handleDownload}
