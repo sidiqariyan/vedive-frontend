@@ -19,6 +19,13 @@ const EmailScrapper = () => {
       return;
     }
 
+    // Prompt user to enter campaign name
+    const campaignNameInput = prompt("Please name your campaign:");
+    if (!campaignNameInput || campaignNameInput.trim() === "") {
+      alert("Campaign name is required!");
+      return;
+    }
+
     setError("");
     setResponse("");
     setIsDownloading(true);
@@ -28,7 +35,10 @@ const EmailScrapper = () => {
       const res = await fetch("http://localhost:3000/api/email-scraper", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: combinedQuery }),
+        body: JSON.stringify({
+          query: combinedQuery,
+          campaignName: campaignNameInput, // Include campaign name in the payload
+        }),
       });
 
       if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
