@@ -13,6 +13,8 @@ const Signup = () => {
   });
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -23,27 +25,41 @@ const Signup = () => {
     e.preventDefault();
     setMessage(null);
     setError(null);
-
+    setLoading(true);
     try {
       const response = await fetch("http://localhost:3000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.error || "Registration failed.");
       }
-
       setMessage(data.message);
-      setTimeout(() => navigate("/login"), 3000); // Redirect to login after 3 seconds
+      setFormData({
+        name: "",
+        username: "",
+        email: "",
+        password: "",
+      });
+      setTimeout(() => navigate("/dashboard"), 3000);
     } catch (err) {
-      setError(
-        err.message || "An unexpected error occurred. Please try again."
-      );
+      console.error("Signup failed:", err);
+      setError(err.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
     }
   };
+
+  // const handleGoogleSignup = () => {
+  //   try {
+  //     window.location.href = "http://localhost:3000/api/auth/google";
+  //   } catch (error) {
+  //     console.error("Google signup failed:", error);
+  //     setError("An error occurred while trying to sign up with Google.");
+  //   }
+  // };
 
   return (
     <div>
@@ -53,12 +69,10 @@ const Signup = () => {
       <div className="login-container">
         <h2>Sign Up to Vedive</h2>
         <hr className="login-hr" />
-
         <form onSubmit={handleSubmit}>
-          <button className="google-btn">
+          {/* <button className="google-btn" onClick={handleGoogleSignup}>
             <img src={Google} alt="Google Icon" /> Continue with Google
-          </button>
-
+          </button> */}
           <div className="input-login-group">
             <input
               type="text"
@@ -97,7 +111,7 @@ const Signup = () => {
           </div>
           <div className="input-login-group">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               name="password"
               value={formData.password}
               onChange={handleChange}
@@ -106,11 +120,18 @@ const Signup = () => {
               required
             />
             <label className="input-login-label">Password</label>
+            <button
+              type="button"
+              className="toggle-password-btn"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
           </div>
           {message && <p className="success-message">{message}</p>}
           {error && <p className="error-message">{error}</p>}
-          <button type="submit" className="login-btn">
-            Sign Up
+          <button type="submit" className="login-btn" disabled={loading}>
+            {loading ? "Signing up..." : "Sign Up"}
           </button>
         </form>
         <div className="links">

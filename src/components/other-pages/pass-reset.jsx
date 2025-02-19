@@ -1,27 +1,36 @@
-import React, { useEffect } from "react"; // Importing necessary hooks
-import { Link } from "react-router-dom"; // Import Link for routing
-import "./secondarystyles.css"; // Assuming styles for the page are in this CSS file
-import Vedive from "../assets/Vedive.png";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 const Passreset = () => {
-  useEffect(() => {
-    // Handle focus and blur for input fields (similar to the provided JS)
-    document.querySelectorAll(".input-login-field").forEach((input) => {
-      if (input.value) {
-        input.nextElementSibling.classList.add("active");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send reset link.");
       }
 
-      input.addEventListener("focus", () => {
-        input.nextElementSibling.classList.add("active");
-      });
-
-      input.addEventListener("blur", () => {
-        if (!input.value) {
-          input.nextElementSibling.classList.remove("active");
-        }
-      });
-    });
-  }, []); // Empty dependency array to run this effect only once after the first render
+      setMessage("Reset link sent to your email.");
+      setTimeout(() => navigate("/login"), 3000);
+    } catch (err) {
+      setError(err.message || "An unexpected error occurred.");
+    }
+  };
 
   return (
     <div>
@@ -31,29 +40,32 @@ const Passreset = () => {
       <div className="login-container">
         <h2>Trouble with logging in?</h2>
         <p>
-          Enter your email address, phone number, or username, and we’ll send
-          you a link to get back into your account.
+          Enter your email address, and we’ll send you a link to reset your
+          password.
         </p>
         <hr className="login-hr" />
-        <div className="input-login-group">
-          <input
-            type="text"
-            className="input-login-field"
-            id="recovery"
-            placeholder=" "
-          />
-          <label className="input-login-label" htmlFor="recovery">
-            Email or Phone Number
-          </label>
-        </div>
-        <button className="login-btn">Send Login Link</button>
+        <form onSubmit={handleSubmit}>
+          <div className="input-login-group">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="input-login-field"
+              placeholder=" "
+              required
+            />
+            <label className="input-login-label">Email</label>
+          </div>
+          {message && <p style={{ color: "green" }}>{message}</p>}
+          {error && <p style={{ color: "red" }}>{error}</p>}
+          <button type="submit" className="login-btn">
+            Send Reset Link
+          </button>
+        </form>
         <div className="links">
           <Link to="/login" style={{ borderBottom: "solid 1px #0059FF" }}>
             Back to Login
           </Link>
-          <p>
-            No Account? <Link to="/signup">Create One</Link>
-          </p>
         </div>
       </div>
     </div>

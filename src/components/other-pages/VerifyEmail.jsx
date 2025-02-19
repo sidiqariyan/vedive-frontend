@@ -18,14 +18,17 @@ const VerifyEmail = () => {
       }
 
       try {
-        const response = await fetch(`http://localhost:3000/api/auth/verify-email?token=${token}`);
+        const response = await fetch(
+          `http://localhost:3000/api/auth/verify-email?token=${token}`
+        );
         const data = await response.json();
 
         if (!response.ok) {
           setError(data.error || "Verification failed.");
         } else {
           setMessage(data.message);
-          setTimeout(() => navigate("/login"), 3000); // Redirect to login after 3 seconds
+          localStorage.setItem("token", data.token); // Save the token securely
+          setTimeout(() => navigate("/dashboard"), 3000);
         }
       } catch (err) {
         setError("An unexpected error occurred. Please try again.");

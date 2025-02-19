@@ -1,13 +1,8 @@
-<<<<<<< HEAD
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import "./secondarystyles.css";
-=======
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import axios from "axios"; // Import Axios for API requests
-import "./secondarystyles.css"; // Ensure your styles are imported
->>>>>>> 90ae9e8 (New changes added)
+import axios from "axios";
+import jwtDecode from "jwt-decode"; // Correct import for jwt-decode
+import "./secondarystyles.css";
 import Vedive from "../assets/Vedive.png";
 import Google from "../assets/google-icon.svg";
 
@@ -18,76 +13,88 @@ const Login = () => {
   // State for input fields
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(""); // State for error messages
 
+  // State for error messages and loading
+  const [error, setError] = useState(""); // Error message state
+  const [loading, setLoading] = useState(false); // Loading state for login button
+
+  // Handle token from URL (e.g., after Google OAuth)
   useEffect(() => {
-    // Extract token from URL query parameters
     const urlParams = new URLSearchParams(location.search);
     const token = urlParams.get("token");
     if (token) {
-      // Store token in localStorage
-      localStorage.setItem("token", token);
-      navigate("/dashboard"); // Redirect to dashboard
+      try {
+        const decoded = jwtDecode(token); // Decode the token
+        if (decoded.exp * 1000 < Date.now()) {
+          console.error("Token has expired");
+          setError("Your session has expired. Please log in again.");
+          navigate("/login");
+          return;
+        }
+        localStorage.setItem("token", token);
+        navigate("/dashboard");
+      } catch (error) {
+        console.error("Invalid token:", error);
+        setError("Invalid session. Please log in again.");
+        navigate("/login");
+      }
     }
   }, [location, navigate]);
 
-  // Handle Google Login
-  const handleGoogleLogin = () => {
-    // Redirect to backend Google authentication route
-    window.location.href = "http://localhost:3000/api/auth/google";
-  };
-
   // Handle Email/Password Login
   const handleLogin = async (e) => {
-    e.preventDefault(); // Prevent default form submission behavior
-    setError(""); // Clear previous errors
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
     try {
-      // Send login request to backend
       const response = await axios.post("http://localhost:3000/api/auth/login", {
         emailOrUsername,
         password,
       });
 
-      // Save token in localStorage
       localStorage.setItem("token", response.data.token);
-
-      // Redirect to dashboard
+      setEmailOrUsername("");
+      setPassword("");
       navigate("/dashboard");
     } catch (err) {
       console.error("Login failed:", err);
       setError(err.response?.data?.error || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Handle Google Sign-In (Optional)
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:3000/api/auth/google";
   };
 
   return (
     <div>
       {/* Header Section */}
       <header className="login-header">
-        <img src={Vedive} alt="logo" />
+        <img src={Vedive} alt="Vedive Logo" />
       </header>
 
       {/* Login Container */}
       <div className="login-container">
         <h2>Login to Vedive</h2>
         <hr className="login-hr" />
-<<<<<<< HEAD
-        <form onSubmit={handleLogin}>
-          <button className="google-btn">
-            <img src={Google} alt="Google Icon" /> Continue with Google
-          </button>
-
-=======
 
         {/* Form */}
         <form onSubmit={handleLogin}>
           {/* Google Sign-In Button */}
-          <button className="google-btn" onClick={handleGoogleLogin}>
+          <button
+            type="button"
+            className="google-btn"
+            onClick={handleGoogleLogin}
+            aria-label="Continue with Google"
+          >
             <img src={Google} alt="Google Icon" /> Continue with Google
           </button>
 
           {/* Email/Username Input */}
->>>>>>> 90ae9e8 (New changes added)
           <div className="input-login-group">
             <input
               type="text"
@@ -96,6 +103,7 @@ const Login = () => {
               className="input-login-field"
               placeholder=" "
               required
+              aria-label="Email or Username"
             />
             <label className="input-login-label">Email or Username</label>
           </div>
@@ -109,6 +117,7 @@ const Login = () => {
               className="input-login-field"
               placeholder=" "
               required
+              aria-label="Password"
             />
             <label className="input-login-label">Password</label>
           </div>
@@ -117,18 +126,30 @@ const Login = () => {
           {error && <p className="error-message">{error}</p>}
 
           {/* Submit Button */}
-          <button type="submit" className="login-btn">
-            Login
+          <button
+            type="submit"
+            className="login-btn"
+            disabled={loading}
+            aria-label="Login"
+          >
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
         {/* Links */}
         <div className="links">
-          <Link to="/reset" style={{ borderBottom: "solid 1px #0059FF" }}>
+          <Link
+            to="/reset"
+            style={{ borderBottom: "solid 1px #0059FF" }}
+            aria-label="Forgot Password"
+          >
             Forgot Password?
           </Link>
           <p>
-            Don't have an account? <Link to="/signup">Sign Up</Link>
+            Don't have an account?{" "}
+            <Link to="/signup" aria-label="Sign Up">
+              Sign Up
+            </Link>
           </p>
         </div>
       </div>
