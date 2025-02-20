@@ -1,62 +1,45 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import QRCodeDisplay from "./Auth";
 
 const MessageForm = () => {
   const [users, setUsers] = useState("");
   const [message, setMessage] = useState("");
   const [media, setMedia] = useState(null);
   const [response, setResponse] = useState("");
-  const [qrCode, setQrCode] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token")); // Check if user is logged in
-  const navigate = useNavigate();
-
-  // Update isLoggedIn state when the component mounts
-  useEffect(() => {
-    setIsLoggedIn(!!localStorage.getItem("token"));
-  }, []);
-
-  // Fetch QR Code
-  const fetchQrCode = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login"); // Redirect to login page if not logged in
-      return;
-    }
-    try {
-      const response = await axios.get("http://localhost:3000/api/whatsapp/qr", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (response.data.qrCode) {
-        setQrCode(response.data.qrCode);
-      } else {
-        alert(response.data.message || "No QR code available.");
-      }
-    } catch (error) {
-      console.error("Error fetching QR code:", error);
-      alert("Failed to fetch QR code.");
-    }
-  };
+  const [campaignName, setCampaignName] = useState(""); // State to store campaign name
 
   // Handle Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login"); // Redirect to login page if not logged in
+
+    // Prompt user to enter campaign name
+    const campaignNameInput = prompt("Please name your campaign:");
+    if (!campaignNameInput || campaignNameInput.trim() === "") {
+      alert("Campaign name is required!");
       return;
     }
+
+    // Update campaign name state
+    setCampaignName(campaignNameInput);
+
+    if (!users || !message) {
+      alert("Please provide users and message.");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("users", users);
     formData.append("message", message);
+    formData.append("campaignName", campaignNameInput); // Include campaign name in the request
     if (media) formData.append("media", media);
+
     try {
       const response = await axios.post(
         "http://localhost:3000/api/whatsapp/send",
         formData,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
         }
@@ -70,21 +53,17 @@ const MessageForm = () => {
 
   return (
     <div className="bg-[#121212] p-4 border rounded-lg">
-      {/* QR Code Section */}
+      {/* QR Code Display Section */}
       <div className="mb-6 text-center">
-        <button
-          type="button"
-          onClick={fetchQrCode}
-          className="mt-2 py-1 px-4 bg-third text-white rounded-md shadow-md"
-        >
-          Get QR Code
-        </button>
-        {qrCode && (
-          <div className="mt-4">
-            <img src={qrCode} alt="QR Code" className="mx-auto" />
-          </div>
-        )}
+        <QRCodeDisplay /> {/* Embed the QRCodeDisplay component here */}
       </div>
+
+      {/* Campaign Name Display */}
+      {campaignName && (
+        <div className="mb-4 text-center">
+          <p className="text-primary font-semibold">Selected Campaign: {campaignName}</p>
+        </div>
+      )}
 
       {/* Message Form Section */}
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -118,7 +97,8 @@ const MessageForm = () => {
             />
           </div>
         </div>
-        <div className="flex">
+
+        <div className="flex gap-3">
           {/* Media Input */}
           <div>
             <label htmlFor="media" className="block text-sm font-medium text-gray-700">
@@ -131,6 +111,7 @@ const MessageForm = () => {
               className="mt-1 block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:second hover:file:bg-indigo-100"
             />
           </div>
+
           {/* Submit Button */}
           <button
             type="submit"
@@ -139,6 +120,7 @@ const MessageForm = () => {
             Send Messages
           </button>
         </div>
+
         {/* Response Message */}
         {response && (
           <p
