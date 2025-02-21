@@ -9,7 +9,7 @@ import NumberScraper from "../Whatsapp/NumberScraper";
 import WhatsAppSender from "../Whatsapp/WhatsAppSender";
 
 const Hero = () => {
-  const [activeComponent, setActiveComponent] = useState("whatsAppSender");
+  const [activeComponent, setActiveComponent] = useState("bulkmailsender");
   const [showPopup, setShowPopup] = useState(true);
 
   useEffect(() => {

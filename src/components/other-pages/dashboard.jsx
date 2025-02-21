@@ -12,7 +12,6 @@ const Dashboard = () => {
   const [user, setUser] = useState(null); // State to store user data
   const [campaigns, setCampaigns] = useState([]); // State to store campaign data
   const [error, setError] = useState(null); // State to handle errors
-  // const [loading, setLoading] = useState(true); // State to track loading
 
   // Helper function to fetch data from the backend
   const fetchData = async (url, options = {}) => {
@@ -40,48 +39,42 @@ const Dashboard = () => {
 
     // Fetch user data
     const fetchUserData = async () => {
-      const userData = await fetchData("http://localhost:3000/api/auth/user", {
+      const userData = await fetchData("http://localhost:3000/api/dashboard", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      if (userData) {
-        setUser(userData);
+      if (userData?.user) {
+        setUser(userData.user);
       }
     };
 
-    // Fetch campaign data
-    // const fetchCampaignData = async () => {
-    //   const campaignData = await fetchData("http://localhost:3000/api/campaigns", {
-    //     method: "GET",
-    //     headers: {
-    //       Authorization: `Bearer ${token}`,
-    //     },
-    //   });
-    //   if (campaignData) {
-    //     setCampaigns(campaignData);
-    //   }
-    // };
+    // Fetch campaign data (example placeholder)
+    const fetchCampaignData = async () => {
+      const campaignData = await fetchData("http://localhost:3000/api/campaigns", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (campaignData) {
+        setCampaigns(campaignData);
+      }
+    };
 
     // Apply specific styles for the body when the Dashboard page is mounted
     document.body.style.backgroundColor = "#ffffff"; // Example: Set background color
 
-    // Fetch data and mark loading as complete
-    // Promise.all([fetchUserData(), fetchCampaignData()]).finally(() => {
-    //   setLoading(false);
-    // });
+    // Fetch data
+    fetchUserData();
+    fetchCampaignData();
 
     // Clean up when the component is unmounted
     return () => {
       document.body.style.backgroundColor = ""; // Reset the background color
     };
   }, [navigate]);
-
-  // Loading state
-  // if (loading) {
-  //   return <div className="loading">Loading...</div>;
-  // }
 
   // Error state
   if (error) {
@@ -129,42 +122,26 @@ const Dashboard = () => {
           <h1>Welcome {user?.name || "Guest"}</h1>
           <hr className="hr2" />
           <div className="cards">
-            <div className="card">
-              <img src={emailImg} alt="Email Campaigns" />
-              <div>
-                <h3>
-                  Total Email Campaign <br />
-                  ({campaigns.emailCount || 0})
-                </h3>
+            {campaigns.map((campaign, index) => (
+              <div className="card" key={index}>
+                <img
+                  src={
+                    campaign.type === "email"
+                      ? emailImg
+                      : campaign.type === "whatsapp"
+                      ? whatsappImg
+                      : campaign.type === "data"
+                      ? dataImg
+                      : selfieImg
+                  }
+                  alt={`${campaign.type} Campaign`}
+                />
+                <div>
+                  <h3>{campaign.name}</h3>
+                  <p>{campaign.description}</p>
+                </div>
               </div>
-            </div>
-            <div className="card">
-              <img src={whatsappImg} alt="WhatsApp Campaigns" />
-              <div>
-                <h3>
-                  Total WhatsApp Campaign <br />
-                  ({campaigns.whatsappCount || 0})
-                </h3>
-              </div>
-            </div>
-            <div className="card">
-              <img src={dataImg} alt="Email Scraped" />
-              <div>
-                <h3>
-                  Total Email Scraped <br />
-                  ({campaigns.emailScrapedCount || 0})
-                </h3>
-              </div>
-            </div>
-            <div className="card">
-              <img src={selfieImg} alt="Number Scraped" />
-              <div>
-                <h3>
-                  Total Number Scraped <br />
-                  ({campaigns.numberScrapedCount || 0})
-                </h3>
-              </div>
-            </div>
+            ))}
           </div>
           <hr className="hr1" />
           <div className="recent-campaigns">
@@ -181,8 +158,8 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {/* {campaigns.recentCampaigns?.length > 0 ? (
-                  campaigns.recentCampaigns.map((campaign, index) => (
+                {campaigns.length > 0 ? (
+                  campaigns.map((campaign, index) => (
                     <tr key={index}>
                       <td>{index + 1}</td>
                       <td>{campaign.name || "N/A"}</td>
@@ -198,7 +175,7 @@ const Dashboard = () => {
                       No recent campaigns available.
                     </td>
                   </tr>
-                )} */}
+                )}
               </tbody>
             </table>
           </div>
