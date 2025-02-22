@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import emailImg from "../assets/email(1) 1.svg";
 import whatsappImg from "../assets/whatsapp 1.svg";
 import dataImg from "../assets/data 1.svg";
@@ -9,9 +9,9 @@ import "./thirdstyles.css";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null); // State to store user data
-  const [campaigns, setCampaigns] = useState([]); // State to store campaign data
-  const [error, setError] = useState(null); // State to handle errors
+  const [user, setUser] = useState(null);
+  const [campaigns, setCampaigns] = useState([]);
+  const [error, setError] = useState(null);
 
   // Helper function to fetch data from the backend
   const fetchData = async (url, options = {}) => {
@@ -21,19 +21,18 @@ const Dashboard = () => {
         throw new Error(`Failed to fetch data: ${response.statusText}`);
       }
       return await response.json();
-    } catch (error) {
-      console.error("Error fetching data:", error.message);
-      setError(error.message);
-      navigate("/login"); // Redirect to login on critical errors
+    } catch (err) {
+      console.error("Error fetching data:", err.message);
+      setError(err.message);
+      navigate("/login");
       return null;
     }
   };
 
-  // Fetch user and campaign data when the component mounts
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      navigate("/login"); // Redirect to login if no token exists
+      navigate("/login");
       return;
     }
 
@@ -50,79 +49,55 @@ const Dashboard = () => {
       }
     };
 
-    // Fetch campaign data (example placeholder)
-    const fetchCampaignData = async () => {
-      const campaignData = await fetchData("http://localhost:3000/api/campaigns", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (campaignData) {
-        setCampaigns(campaignData);
-      }
-    };
+    // Fetch campaign data
+    // const fetchCampaignData = async () => {
+    //   const campaignData = await fetchData("http://localhost:3000/api/campaigns", {
+    //     method: "GET",
+    //     headers: {
+    //       Authorization: `Bearer ${token}`,
+    //     },
+    //   });
+    //   if (campaignData) {
+    //     setCampaigns(campaignData);
+    //   }
+    // };
 
-    // Apply specific styles for the body when the Dashboard page is mounted
-    document.body.style.backgroundColor = "#ffffff"; // Example: Set background color
+    // Set specific styles for the Dashboard page
+    document.body.style.backgroundColor = "#ffffff";
 
-    // Fetch data
     fetchUserData();
-    fetchCampaignData();
+    // fetchCampaignData();
 
-    // Clean up when the component is unmounted
     return () => {
-      document.body.style.backgroundColor = ""; // Reset the background color
+      document.body.style.backgroundColor = "";
     };
   }, [navigate]);
 
-  // Error state
   if (error) {
     return <div className="error">An error occurred: {error}</div>;
   }
 
   return (
     <>
-      <Navbar /> {/* Header is placed outside of dashboard-contain */}
+      <Navbar />
       <div className="Dashboard-contain">
         <div className="sidebar">
-          <a className="big-a" href="#">
-            Dashboard
-          </a>
-          <a className="big-a" href="#">
-            Campaigns
-          </a>
-          <a className="big-a" href="#">
-            Account
-          </a>
-          <a className="big-a" href="#">
-            Billing
-          </a>
-          <a className="big-a" href="#">
-            Tools ▾
-          </a>
-          <a className="small-a" href="#">
-            Mail Sender
-          </a>
-          <a className="small-a" href="#">
-            Mail Scraper
-          </a>
-          <a className="small-a" href="#">
-            Gmail Sender
-          </a>
-          <a className="small-a" href="#">
-            WhatsApp Sender
-          </a>
-          <a className="small-a" href="#">
-            Number Scraper
-          </a>
+          <Link className="big-a" to="/dashboard">Dashboard</Link>
+          <Link className="big-a" to="/campaigns">Campaigns</Link>
+          <Link className="big-a" to="/account">Account</Link>
+          <Link className="big-a" to="/billing">Billing</Link>
+          <div className="big-a">Tools ▾</div>
+          <Link className="small-a" to="/mail-sender">Mail Sender</Link>
+          <Link className="small-a" to="/mail-scraper">Mail Scraper</Link>
+          <Link className="small-a" to="/gmail-sender">Gmail Sender</Link>
+          <Link className="small-a" to="/whatsapp-sender">WhatsApp Sender</Link>
+          <Link className="small-a" to="/number-scraper">Number Scraper</Link>
         </div>
         <div className="main-content">
-          {/* Dynamically display the user's name */}
           <h1>Welcome {user?.name || "Guest"}</h1>
           <hr className="hr2" />
           <div className="cards">
-            {campaigns.map((campaign, index) => (
+            {/* {campaigns.map((campaign, index) => (
               <div className="card" key={index}>
                 <img
                   src={
@@ -141,7 +116,7 @@ const Dashboard = () => {
                   <p>{campaign.description}</p>
                 </div>
               </div>
-            ))}
+            ))} */}
           </div>
           <hr className="hr1" />
           <div className="recent-campaigns">
