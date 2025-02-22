@@ -87,60 +87,63 @@ const Hero = () => {
       <Navbar />
 
       {/* Hero Content */}
-      <div className="z-10 text-center px-6">
-        <h1 className="font-semibold bg-clip-text text-primary to-gray-400 mt-6">
+      <div className="z-10 text-center px-2">
+        <h1 className="font-primary mb-4 font-semibold text-[48px] leading-[59.31px] text-center tracking-[0%] text-primary mt-6  
+        md:text-[80px] md:leading-[93.92px] lg:text-[60px] lg:leading-[75px] 2xl:text-[80px] 2xl:leading-[93.92px]">
           Where <span className="text-third font-primary">Messages</span>
           <br /> Meet <span className="text-third font-primary">Meaning</span>
         </h1>
-        <p className="text-[26px]">
+        <p className="text-[26px] text-center  
+      max-sm:text-[14px] max-sm:leading-[19.07px] max-sm:font-[400] max-sm:font-openSans 
+      lg:text-[22px] 2xl:text-[26px]">
           Trusted for <span className="text-third">99.9%</span> Delivery Success. Spam-Free <br />
           Messaging for Modern Businesses
         </p>
       </div>
 
       {/* Button Section */}
-      <div className="flex gap-4 justify-center mt-4">
-        <button
-          className={`tool-buttons font-secondary rounded-md text-lg transition-all ${
-            activeComponent === "bulkMailer" ? "bg-third text-white" : "bg-transparent border hover:bg-third"
-          }`}
-          onClick={() => setActiveComponent("bulkMailer")}
-        >
-          Bulk Mailer
-        </button>
-        <button
-          className={`tool-buttons rounded-md font-secondary text-lg transition-all ${
-            activeComponent === "mailScraper" ? "bg-third text-white" : "bg-transparent border hover:bg-third"
-          }`}
-          onClick={() => setActiveComponent("mailScraper")}
-        >
-          Mail Scraper
-        </button>
-        <button
-          className={`tool-buttons rounded-md font-secondary text-lg transition-all ${
-            activeComponent === "gmailSender" ? "bg-third text-white" : "bg-transparent border hover:bg-third"
-          }`}
-          onClick={() => setActiveComponent("gmailSender")}
-        >
-          Gmail Sender
-        </button>
-        <button
-          className={`tool-buttons rounded-md font-secondary text-lg transition-all ${
-            activeComponent === "numberScraper" ? "bg-third text-white" : "bg-transparent border hover:bg-third"
-          }`}
-          onClick={() => setActiveComponent("numberScraper")}
-        >
-          Number Scraper
-        </button>
-        <button
-          className={`tool-buttons rounded-md font-secondary text-lg transition-all ${
-            activeComponent === "whatsAppSender" ? "bg-third text-white" : "bg-transparent border hover:bg-third"
-          }`}
-          onClick={() => setActiveComponent("whatsAppSender")}
-        >
-          WhatsApp Sender
-        </button>
-      </div>
+      <div className="w-full max-w-[900px] mx-auto grid md:grid-cols-5 grid-cols-3 gap-4 justify-center mt-4 max-sm:grid-cols-2 max-sm:w-[95%]">
+      <button
+    className={`tool-buttons font-secondary rounded-md text-lg px-4 py-2 transition-all ${
+      activeComponent === "bulkMailer" ? "bg-third text-white" : "bg-transparent border hover:bg-third"
+    }`}
+    onClick={() => setActiveComponent("bulkMailer")}
+  >
+    Bulk Mailer
+  </button>
+  <button
+    className={`tool-buttons rounded-md font-secondary text-lg px-4 py-2 transition-all ${
+      activeComponent === "mailScraper" ? "bg-third text-white" : "bg-transparent border hover:bg-third"
+    }`}
+    onClick={() => setActiveComponent("mailScraper")}
+  >
+    Mail Scraper
+  </button>
+  <button
+    className={`tool-buttons rounded-md font-secondary text-lg px-4 py-2 transition-all ${
+      activeComponent === "gmailSender" ? "bg-third text-white" : "bg-transparent border hover:bg-third"
+    }`}
+    onClick={() => setActiveComponent("gmailSender")}
+  >
+    Gmail Sender
+  </button>
+  <button
+    className={`tool-buttons rounded-md font-secondary text-lg px-4 py-2 transition-all ${
+      activeComponent === "numberScraper" ? "bg-third text-white" : "bg-transparent border hover:bg-third"
+    }`}
+    onClick={() => setActiveComponent("numberScraper")}
+  >
+    Number Scraper
+  </button>
+  <button
+    className={`tool-buttons rounded-md font-secondary text-lg px-4 py-2 transition-all ${
+      activeComponent === "whatsAppSender" ? "bg-third text-white" : "bg-transparent border hover:bg-third"
+    }`}
+    onClick={() => setActiveComponent("whatsAppSender")}
+  >
+    WhatsApp Sender
+  </button>
+</div>
 
       {/* Render components conditionally */}
       <div className="flex justify-center mt-8">

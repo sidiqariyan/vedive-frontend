@@ -120,149 +120,176 @@ function SenderBody() {
   };
 
   return (
-    <div className="bg-[#121212] p-4 border rounded-lg top-4 -ml-8">
-      <h3 className="text-[32px] font-semibold font-primary mb-4 -mt-4 flex justify-center text-primary[!important]">
-        Mail Sender
-      </h3>
+    <div className="bg-[#121212] p-4 w-[95%] sm:w-auto mx-auto border rounded-lg top-4">
+  <h3 className="text-[32px] font-semibold font-primary mb-4 flex justify-center text-primary">
+    Mail Sender
+  </h3>
 
-      {/* SMTP Configuration Fields */}
-      <div className="mb-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="flex">
-            <label htmlFor="smtpHost" className="block font-secondary text-[14px] mt-1 ml-10 text-primary">
-              SMTP Host:
-            </label>
-            <input
-              type="text"
-              id="smtpHost"
-              className="border-gray-300 border p-1 rounded-md ml-2 text-secondary"
-              style={{ height: '30px' }}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="flex">
-            <label htmlFor="smtpPort" className="block font-secondary text-[14px] mt-1 ml-8 text-primary">
-              SMTP Port:
-            </label>
-            <input
-              type="text"
-              id="smtpPort"
-              className="border-gray-300 border p-1 rounded-md ml-4 text-secondary"
-              style={{ height: '30px' }}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="flex">
-            <label htmlFor="smtpUsername" className="block font-secondary text-[14px] mt-1 text-primary ml-[70px]">
-              Email:
-            </label>
-            <input
-              type="text"
-              id="smtpUsername"
-              className="border-gray-300 border p-1 rounded-md ml-3 text-secondary"
-              style={{ height: '30px' }}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="flex">
-            <label htmlFor="smtpPassword" className="block font-secondary text-[14px] mt-1 text-primary ml-10">
-              Password:
-            </label>
-            <input
-              type="password"
-              id="smtpPassword"
-              className="border-gray-300 border p-1 rounded-md ml-3 text-secondary"
-              style={{ height: '30px' }}
-              onChange={handleInputChange}
-            />
-          </div>
+  {/* SMTP Configuration Fields */}
+  <div className="mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* SMTP Host */}
+      <div className="flex items-center">
+        <label htmlFor="smtpHost" className="hidden sm:block flex-1 text-right text-primary text-[14px] mr-4">
+          SMTP Host:
+        </label>
+        <input
+          type="text"
+          id="smtpHost"
+          className="border-gray-300 border p-1 rounded-md w-full sm:w-auto 
+                     placeholder:text-secondary sm:placeholder-transparent"
+          style={{ height: "30px" }}
+          placeholder="Enter SMTP Host"
+          onChange={handleInputChange}
+        />
+      </div>
+
+      {/* SMTP Port */}
+      <div className="flex items-center">
+        <label htmlFor="smtpPort" className="hidden sm:block flex-1 text-right text-primary text-[14px] mr-4">
+          SMTP Port:
+        </label>
+        <input
+          type="text"
+          id="smtpPort"
+          className="border-gray-300 border p-1 rounded-md w-full sm:w-auto 
+                     placeholder:text-secondary sm:placeholder-transparent"
+          style={{ height: "30px" }}
+          placeholder="Enter SMTP Port"
+          onChange={handleInputChange}
+        />
+      </div>
+
+      {/* Email */}
+      <div className="flex items-center">
+        <label htmlFor="smtpUsername" className="hidden sm:block flex-1 text-right text-primary text-[14px] mr-4">
+          Email:
+        </label>
+        <input
+          type="text"
+          id="smtpUsername"
+          className="border-gray-300 border p-1 rounded-md w-full sm:w-auto 
+                     placeholder:text-secondary sm:placeholder-transparent"
+          style={{ height: "30px" }}
+          placeholder="Enter Email"
+          onChange={handleInputChange}
+        />
+      </div>
+
+      {/* Password */}
+      <div className="flex items-center">
+        <label htmlFor="smtpPassword" className="hidden sm:block flex-1 text-right text-primary text-[14px] mr-4">
+          Password:
+        </label>
+        <input
+          type="password"
+          id="smtpPassword"
+          className="border-gray-300 border p-1 rounded-md w-full sm:w-auto 
+                     placeholder:text-secondary sm:placeholder-transparent"
+          style={{ height: "30px" }}
+          placeholder="Enter Password"
+          onChange={handleInputChange}
+        />
+      </div>
+    </div>
+  </div>
+
+  {/* Email Body and Recipients Section */}
+  <div className="mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* From Email */}
+      <div className="flex items-center">
+        <label htmlFor="fromEmail" className="hidden sm:block flex-1 text-right text-primary text-[14px] mr-4">
+          From Email:
+        </label>
+        <input
+          type="email"
+          id="fromEmail"
+          className="border-gray-300 border p-1 rounded-md w-full sm:w-auto 
+                     placeholder:text-secondary sm:placeholder-transparent"
+          style={{ height: "30px" }}
+          placeholder="Enter From Email"
+          onChange={handleInputChange}
+        />
+      </div>
+
+      {/* Email Subject */}
+      <div className="flex items-center">
+        <label htmlFor="emailSubject" className="hidden sm:block flex-1 text-right text-primary text-[14px] mr-4">
+          Email Subject:
+        </label>
+        <input
+          type="text"
+          id="emailSubject"
+          className="border-gray-300 border p-1 rounded-md w-full sm:w-auto 
+                     placeholder:text-secondary sm:placeholder-transparent"
+          style={{ height: "30px" }}
+          placeholder="Enter Email Subject"
+          onChange={handleInputChange}
+        />
+      </div>
+    </div>
+
+    {/* Email Body and Recipients Upload */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+      {/* Email Body */}
+      <div className="flex items-center">
+        <label htmlFor="emailBody" className="flex-1 text-right text-primary text-[14px] mr-4">
+          Email Body:
+        </label>
+        <div className="flex gap-4">
+          <button className="bg-black text-white px-3 py-2 rounded-md text-[12px]">
+            Search Template
+          </button>
+          <button
+            className="bg-third text-primary px-3 py-2 rounded-md text-[12px]"
+            onClick={() => htmlTemplateRef.current.click()}
+          >
+            Upload Template
+          </button>
+          {htmlTemplateName && <span className="text-primary text-sm">{htmlTemplateName}</span>}
+          <input
+            type="file"
+            accept=".html"
+            ref={htmlTemplateRef}
+            onChange={() => handleFileUpload(htmlTemplateRef, 'htmlTemplate')}
+            style={{ display: 'none' }}
+          />
         </div>
       </div>
 
-      {/* Email Body and Recipients Section */}
-      <div className="mb-6">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex">
-            <label htmlFor="fromEmail" className="block font-secondary text-[14px] mt-1 ml-8 text-primary">
-              From Email:
-            </label>
-            <input
-              type="email"
-              id="fromEmail"
-              className="border-gray-300 border p-1 rounded-md ml-3 text-secondary"
-              style={{ height: '30px' }}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="flex">
-            <label htmlFor="emailSubject" className="block font-secondary text-[14px] mt-1 text-primary ml-4">
-              Email Subject:
-            </label>
-            <input
-              type="text"
-              id="emailSubject"
-              className="border-gray-300 border p-1 rounded-md ml-3 text-secondary"
-              style={{ height: '30px' }}
-              onChange={handleInputChange}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2">
-          <div className="flex mt-6">
-            <label htmlFor="emailBody" className="block font-secondary text-[14px] mt-1 ml-8 text-primary">
-              Email Body:
-            </label>
-            <div className="mb-6">
-              <div className="flex items-center gap-4">
-                <button className="bg-black text-white px-3 py-2 rounded-md text-[12px] ml-3">
-                  Search Template
-                </button>
-                <button
-                  className="bg-third text-primary px-3 py-2 rounded-md text-[12px] text-primary"
-                  onClick={() => htmlTemplateRef.current.click()}
-                >
-                  Upload Template
-                </button>
-                {htmlTemplateName && <span className="text-primary text-sm">{htmlTemplateName}</span>}
-                <input
-                  type="file"
-                  accept=".html"
-                  ref={htmlTemplateRef}
-                  onChange={() => handleFileUpload(htmlTemplateRef, 'htmlTemplate')}
-                  style={{ display: 'none' }}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <label htmlFor="recipientList" className="block font-secondary text-[14px] text-primary">
-              Upload Recipients (.txt file):
-            </label>
-            <button
-              className="bg-secondary text-primary px-3 py-2 rounded-md text-[12px]"
-              onClick={() => recipientsFileRef.current.click()}
-            >
-              Scrap Emails
-            </button>
-            <button
-              className="bg-third text-primary px-3 py-2 rounded-md text-[12px]"
-              onClick={() => recipientsFileRef.current.click()}
-            >
-              Upload Recipient
-            </button>
-            {recipientsFileName && <span className="text-primary text-sm">{recipientsFileName}</span>}
-            <input
-              type="file"
-              accept=".txt"
-              ref={recipientsFileRef}
-              onChange={() => handleFileUpload(recipientsFileRef, 'recipientsFile')}
-              id="recipientList"
-              style={{ display: 'none' }}
-            />
-          </div>
+      {/* Upload Recipients */}
+      <div className="flex items-center">
+        <label htmlFor="recipientList" className=" flex-1 text-right text-primary text-[14px] mr-4">
+          Upload Recipients:
+        </label>
+        <div className="flex gap-4">
+          <button
+            className="bg-secondary text-primary px-3 py-2 rounded-md text-[12px]"
+            onClick={() => recipientsFileRef.current.click()}
+          >
+            Scrap Emails
+          </button>
+          <button
+            className="bg-third text-primary px-3 py-2 rounded-md text-[12px]"
+            onClick={() => recipientsFileRef.current.click()}
+          >
+            Upload Recipient
+          </button>
+          {recipientsFileName && <span className="text-primary text-sm">{recipientsFileName}</span>}
+          <input
+            type="file"
+            accept=".txt"
+            ref={recipientsFileRef}
+            onChange={() => handleFileUpload(recipientsFileRef, 'recipientsFile')}
+            id="recipientList"
+            style={{ display: 'none' }}
+          />
         </div>
       </div>
+    </div>
+  </div>
+
 
       {/* Send Mail Button */}
       <div className="text-center mt-12">

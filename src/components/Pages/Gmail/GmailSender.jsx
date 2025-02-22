@@ -1,7 +1,10 @@
-import React, { useState, useRef } from "react";
+import React, { useContext, useState, useRef } from "react";
 import axios from "axios";
+import { AuthContext } from "../Mailer/AuthContext.jsx"; // Ensure this path is correct
 
 const GmailSender = () => {
+  const { isLoggedIn } = useContext(AuthContext); // Access authentication state
+
   const [gmail, setGmail] = useState("");
   const [appPassword, setAppPassword] = useState("");
   const [from, setFrom] = useState("");
@@ -11,6 +14,7 @@ const GmailSender = () => {
   const [htmlFile, setHtmlFile] = useState(null);
   const [htmlTemplateName, setHtmlTemplateName] = useState("");
   const [recipientsFileName, setRecipientsFileName] = useState("");
+
   const htmlTemplateRef = useRef(null);
   const recipientsFileRef = useRef(null);
 
@@ -39,6 +43,13 @@ const GmailSender = () => {
   const handleSendEmail = async (e) => {
     e.preventDefault();
 
+    // Check if the user is logged in
+    if (!isLoggedIn) {
+      alert("Please log in first to send emails.");
+      window.location.href = "/login"; // Redirect to login page
+      return;
+    }
+
     // Prompt user to enter campaign name
     const campaignNameInput = prompt("Please name your campaign:");
     if (!campaignNameInput || campaignNameInput.trim() === "") {
@@ -50,17 +61,19 @@ const GmailSender = () => {
       alert("Please upload a contacts file.");
       return;
     }
+
     if (!htmlFile) {
       alert("Please upload an HTML file for the mail body.");
       return;
     }
 
-    const contacts = await contactsFile.text();
-    console.log("Contacts File Content:", contacts); // Debugging
-
     try {
+      const contacts = await contactsFile.text();
+      console.log("Contacts File Content:", contacts); // Debugging
+
+      // Make API request to send emails
       const response = await axios.post(
-        "http://localhost:3000/api/send-gmail",
+        "http://localhost:3000/api/send-gmail", // Replace with your backend endpoint
         {
           gmail,
           appPassword,
@@ -69,8 +82,15 @@ const GmailSender = () => {
           contacts: contacts.split("\n").map((email) => email.trim()),
           body,
           campaignName: campaignNameInput, // Include campaign name in the payload
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // Include JWT token
+          },
         }
       );
+
+      // Handle success
       alert(response.data.message || "Emails sent successfully!");
     } catch (error) {
       console.error("Error sending email:", error);
@@ -109,59 +129,71 @@ const GmailSender = () => {
         </h2>
         <form onSubmit={handleSendEmail}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex">
-              <label htmlFor="gmail" className="font-secondary text-[14px] text-primary mt-1">
+            {/* Gmail Account */}
+            <div className="flex items-center justify-between w-full">
+              <label htmlFor="gmail" className="hidden sm:block flex-1 text-right font-secondary text-[14px] text-primary">
                 Gmail Account:
               </label>
               <input
                 id="gmail"
                 type="email"
-                className="border-gray-300 border p-1 rounded-md ml-2 text-secondary"
+                className="ml-0 sm:ml-2 border-gray-300 border p-1 rounded-md text-secondary w-full sm:w-auto 
+                           placeholder:text-secondary sm:placeholder-transparent"
                 style={{ height: "30px" }}
+                placeholder="Enter your Gmail"
                 value={gmail}
                 onChange={(e) => setGmail(e.target.value)}
                 required
               />
             </div>
-            <div className="flex">
-              <label htmlFor="appPassword" className="font-secondary text-[14px] text-primary mt-1">
+            {/* App Password */}
+            <div className="flex items-center justify-between w-full">
+              <label htmlFor="appPassword" className="hidden sm:block flex-1 text-right font-secondary text-[14px] text-primary">
                 App Password:
               </label>
               <input
                 id="appPassword"
                 type="password"
-                value={appPassword}
-                className="border-gray-300 border p-1 rounded-md ml-2 text-secondary"
+                className="ml-0 sm:ml-2 border-gray-300 border p-1 rounded-md text-secondary w-full sm:w-auto 
+                           placeholder:text-secondary sm:placeholder-transparent"
                 style={{ height: "30px" }}
+                placeholder="Enter your App Password"
+                value={appPassword}
                 onChange={(e) => setAppPassword(e.target.value)}
                 required
               />
             </div>
-            <div className="flex">
-              <label htmlFor="from" className="font-secondary text-[14px] text-primary mt-1 ml-[60px]">
+            {/* From */}
+            <div className="flex items-center justify-between w-full">
+              <label htmlFor="from" className="hidden sm:block flex-1 text-right font-secondary text-[14px] text-primary">
                 From:
               </label>
               <input
                 id="from"
                 type="text"
+                className="ml-0 sm:ml-2 border-gray-300 border p-1 rounded-md text-secondary w-full sm:w-auto 
+                           placeholder:text-secondary sm:placeholder-transparent"
+                style={{ height: "30px" }}
+                placeholder="Enter sender email"
                 value={from}
                 onChange={(e) => setFrom(e.target.value)}
-                className="border-gray-300 border p-1 rounded-md ml-2 text-secondary"
-                style={{ height: "30px" }}
                 required
               />
             </div>
-            <div className="flex">
-              <label htmlFor="subject" className="font-secondary text-[14px] text-primary mt-1 ml-11">
+            {/* Subject */}
+            <div className="flex items-center justify-between w-full">
+              <label htmlFor="subject" className="hidden sm:block flex-1 text-right font-secondary text-[14px] text-primary">
                 Subject:
               </label>
               <input
                 id="subject"
                 type="text"
+                className="ml-0 sm:ml-2 border-gray-300 border p-1 rounded-md text-secondary w-full sm:w-auto 
+                           placeholder:text-secondary sm:placeholder-transparent"
+                style={{ height: "30px" }}
+                placeholder="Enter email subject"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                className="border-gray-300 border p-1 rounded-md ml-2 text-secondary"
-                style={{ height: "30px" }}
                 required
               />
             </div>

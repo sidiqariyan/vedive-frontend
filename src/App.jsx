@@ -18,9 +18,12 @@ import PostForm from "./components/other-pages/PostForm.jsx";
 import PostList from "./components/other-pages/PostList.jsx";
 // Protected Route Component
 import ProtectedRoute from "./components/other-pages/ProtectedRoutes.jsx";
+import { AuthProvider } from "./components/Pages/Mailer/AuthContext.jsx";
+
 
 const App = () => {
   return (
+    <AuthProvider>
     <Router>
       <div>
         <Routes>
@@ -74,6 +77,7 @@ const App = () => {
         </Routes>
       </div>
     </Router>
+    </AuthProvider>
   );
 };
 
