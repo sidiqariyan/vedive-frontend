@@ -83,7 +83,7 @@ const MainLayout = ({ children }) => {
   // Check for protected routes
   useEffect(() => {
     if (protectedRoutes.includes(location.pathname) && user && (!user.isPaidUser && currentPlan === 'Free')) {
-      navigate("/account"); 
+      navigate("/plan"); 
     }
   }, [location, user, navigate, currentPlan]);
 
