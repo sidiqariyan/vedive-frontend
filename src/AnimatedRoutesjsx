@@ -1,0 +1,49 @@
+// src/AnimatedRoutes.js
+import { Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import Layout from "./components/other-pages/Layout";
+import Dashboard from "./components/other-pages/Dashboard";
+import Account from "./components/other-pages/Account";
+
+const pageVariants = {
+  initial: { opacity: 0, scale: 0.95, y: 20 },
+  animate: { opacity: 1, scale: 1, y: 0 },
+  exit: { opacity: 0, scale: 1.02, y: -20 },
+};
+
+const transition = { duration: 0.5, ease: "easeInOut" };
+
+const AnimatedRoutes = () => {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence>
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<Hero />} />
+        <Route path="*" element={<Hero />} />
+
+        {/* Layout and Routes */}
+        <Route element={<Layout />}>
+          <Route
+            path="dashboard"
+            element={
+              <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={transition}>
+                <Dashboard />
+              </motion.div>
+            }
+          />
+          <Route
+            path="account"
+            element={
+              <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={transition}>
+                <Account />
+              </motion.div>
+            }
+          />
+        </Route>
+      </Routes>
+    </AnimatePresence>
+  );
+};
+
+export default AnimatedRoutes;

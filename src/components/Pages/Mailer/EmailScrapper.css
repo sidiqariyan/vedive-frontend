@@ -1,0 +1,15 @@
+.scrap-btn {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .scrap-btn button {
+    width: 120px !important;
+  }
+
+  .how-to-sec {
+    display: flex;
+    justify-content: end;
+    margin-top: -30px;
+    position: relative;
+    top: -26px;
+  }

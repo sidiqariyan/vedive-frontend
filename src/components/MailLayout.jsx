@@ -1,0 +1,405 @@
+import React, { useState, useEffect } from "react";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import logo from "../assets/Vedive.png";
+import Dashboard from "./other-pages/dashboard";
+import SenderBody from "./Pages/Mailer/SenderBody";
+import Account from "./other-pages/account";
+import EmailScraper from "./Pages/Mailer/EmailScrapper";
+import GmailSender from "./Pages/Gmail/GmailSender";
+import WhatsAppSender from "./Pages/Whatsapp/WhatsAppSender";
+import NumberScraper from "./Pages/Whatsapp/NumberScraper";
+import MessageForm from "./Pages/Whatsapp/WhatsAppSender";
+import Plan from "./other-pages/plan";
+
+const MainLayout = ({ children }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [user, setUser] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [currentPlan, setCurrentPlan] = useState('Free');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const protectedRoutes = ["/gmail-sender", "/number-scraper", "/email-scraper"];
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          navigate("/login");
+          return;
+        }
+
+        const response = await fetch("http://localhost:3000/api/auth/user", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            localStorage.removeItem("token");
+            navigate("/login");
+            return;
+          }
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+
+        const userData = await response.json();
+        // Add isPaidUser property to user data
+        userData.isPaidUser = userData.isPaidUser || false;
+        setUser(userData);
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+
+    // Only automatically collapse sidebar on small screens
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setSidebarOpen(false);
+      } else {
+        setSidebarOpen(true);
+      }
+    };
+
+    // Initial check
+    handleResize();
+    
+    // Add resize listener
+    window.addEventListener("resize", handleResize);
+    
+    // Cleanup
+    return () => window.removeEventListener("resize", handleResize);
+  }, [navigate]);
+
+  // Check for protected routes
+  useEffect(() => {
+    if (protectedRoutes.includes(location.pathname) && user && (!user.isPaidUser && currentPlan === 'Free')) {
+      navigate("/account"); 
+    }
+  }, [location, user, navigate, currentPlan]);
+
+  // Log current path for debugging
+  useEffect(() => {
+    console.log("Current path:", location.pathname);
+  }, [location.pathname]);
+
+  const toggleSidebar = () => {
+    setSidebarOpen((prev) => !prev);
+  };
+
+  const handleNavLinkClick = () => {
+    // Only close sidebar on mobile
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
+  };
+
+  const hasAccess = (feature) => {
+    if (feature === 'paid-tools') {
+      return user?.isPaidUser || currentPlan !== 'Free';
+    }
+    return true; 
+  };
+
+  if (loading) return <div className="flex h-screen items-center justify-center">Loading...</div>;
+  if (error) return <div className="error p-4 bg-red-600 text-white">An error occurred: {error}</div>;
+
+  // Function to render the correct component based on route
+  const renderRouteContent = () => {
+    switch (location.pathname) {
+      case "/dashboard":
+        return <Dashboard />;
+      case "/email-sender":
+        return <SenderBody />;
+      case "/email-scraper":
+        return <EmailScraper />;
+      case "/gmail-sender":
+        return <GmailSender />;
+      case "/whatsapp-sender":
+        return <MessageForm />;
+      case "/number-scraper":
+        return <NumberScraper />;
+      case "/account":
+        return <Account />;
+      case "/plan":
+        return <Plan />;
+      default:
+        // Fallback content
+        return (
+          <div className="flex items-center justify-center h-screen">
+            <div className="text-center p-8">
+              <h2 className="text-2xl font-bold mb-4">Welcome to Vedive</h2>
+              <p>Select an option from the sidebar to get started</p>
+            </div>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="flex flex-col md:flex-row h-screen bg-zinc-800 text-white relative overflow-hidden">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-20"
+          onClick={toggleSidebar}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          md:translate-x-0 fixed md:relative z-30 w-64 h-full
+          bg-gray-900 bg-opacity-50 backdrop-filter backdrop-blur-sm
+          border-r border-gray-700/50 transition-transform duration-300
+        `}
+      >
+        <div className="p-6 border-b border-gray-700/50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="relative">
+                <img src={logo} alt="Vedive Logo" className="w-[150px] mb-2" />
+              </div>
+            </div>
+            <button
+              className="md:hidden text-gray-400 hover:text-white transition-colors"
+              onClick={toggleSidebar}
+            >
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="mt-4 flex items-center">
+            <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center shadow-lg">
+              <span className="text-xs font-bold">
+                {user?.name?.split(" ").map((n) => n[0]).join("") || "U"}
+              </span>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium">{user?.name || "User"}</p>
+              <p className="text-xs text-gray-400">{user?.isPaidUser ? 'Premium User' : 'Free User'}</p>
+            </div>
+          </div>
+        </div>
+
+        <nav className="mt-6 px-4">
+          <NavLink
+            to="/dashboard"
+            className={({ isActive }) =>
+              `flex items-center px-4 py-3 text-sm font-medium rounded-lg transition duration-200 ${
+                isActive
+                  ? "bg-blue-600 text-white shadow-lg"
+                  : "text-gray-300 hover:bg-gray-800/50 hover:text-white"
+              }`
+            }
+            onClick={handleNavLinkClick}
+          >
+            <svg className="mr-3 h-5 w-5 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            Dashboard
+          </NavLink>
+
+          <NavLink
+            to="/email-sender"
+            className={({ isActive }) =>
+              `flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg transition duration-200 ${
+                isActive
+                  ? "bg-third text-white shadow-lg"
+                  : "text-gray-300 hover:bg-gray-800/50 hover:text-white"
+              }`
+            }
+            onClick={handleNavLinkClick}
+          >
+            <svg className="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Email Sender
+          </NavLink>
+          <NavLink
+            to="/whatsapp-sender"
+            className={({ isActive }) =>
+              `flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg transition duration-200 ${
+                isActive
+                  ? "bg-third text-white shadow-lg"
+                  : "text-gray-300 hover:bg-gray-800/50 hover:text-white"
+              }`
+            }
+            onClick={handleNavLinkClick}
+          >
+            <svg className="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Whatsapp Sender
+          </NavLink>
+          
+          {/* Gmail Sender - Premium Feature */}
+          <div 
+            className={`flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg transition duration-200 cursor-pointer
+              ${hasAccess('paid-tools') 
+                ? 'text-gray-300 hover:bg-gray-800/50 hover:text-white' 
+                : 'text-gray-500 relative group'
+              }`
+            }
+            onClick={() => {
+              if (hasAccess('paid-tools')) {
+                navigate('/gmail-sender');
+                handleNavLinkClick();
+              } else {
+                navigate('/plan');
+                handleNavLinkClick();
+              }
+            }}
+          >
+            <svg className="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Gmail Sender
+            {!hasAccess('paid-tools') && (
+              <>
+                <svg className="ml-2 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded hidden group-hover:block w-32">
+                  Upgrade to access
+                </div>
+              </>
+            )}
+          </div>
+          
+          {/* WhatsApp Sender - Premium Feature */}
+          <div 
+            className={`flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg transition duration-200 cursor-pointer
+              ${hasAccess('paid-tools') 
+                ? 'text-gray-300 hover:bg-gray-800/50 hover:text-white' 
+                : 'text-gray-500 relative group'
+              }`
+            }
+            onClick={() => {
+              if (hasAccess('paid-tools')) {
+                navigate('/email-scraper');
+                handleNavLinkClick();
+              } else {
+                navigate('/plan');
+                handleNavLinkClick();
+              }
+            }}
+          >
+            <svg className="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Email Scraper
+            {!hasAccess('paid-tools') && (
+              <>
+                <svg className="ml-2 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded hidden group-hover:block w-32">
+                  Upgrade to access
+                </div>
+              </>
+            )}
+          </div>
+          
+          {/* Number Scraper - Premium Feature */}
+          <div 
+            className={`flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg transition duration-200 cursor-pointer
+              ${hasAccess('paid-tools') 
+                ? 'text-gray-300 hover:bg-gray-800/50 hover:text-white' 
+                : 'text-gray-500 relative group'
+              }`
+            }
+            onClick={() => {
+              if (hasAccess('paid-tools')) {
+                navigate('/number-scraper');
+                handleNavLinkClick();
+              } else {
+                navigate('/plan');
+                handleNavLinkClick();
+              }
+            }}
+          >
+            <svg className="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Number Scraper
+            {!hasAccess('paid-tools') && (
+              <>
+                <svg className="ml-2 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded hidden group-hover:block w-32">
+                  Upgrade to access
+                </div>
+              </>
+            )}
+          </div>
+
+          <NavLink
+            to="/account"
+            className={({ isActive }) =>
+              `flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg transition duration-200 ${
+                isActive
+                  ? "bg-third text-white shadow-lg"
+                  : "text-gray-300 hover:bg-gray-800/50 hover:text-white"
+              }`
+            }
+            onClick={handleNavLinkClick}
+          >
+            <svg className="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            Account
+          </NavLink>
+          <NavLink
+            to="/plan"
+            className={({ isActive }) => 
+              `flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg transition duration-200 ${
+                isActive 
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
+                  : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
+              }`
+            }
+            onClick={() => setSidebarOpen(false)}
+          >
+            <svg className="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            Subscription Plan
+          </NavLink>
+
+        </nav>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-auto relative">
+        <button
+          className={`md:hidden fixed top-4 left-4 z-10 bg-gray-800 rounded-lg p-2 text-gray-400 hover:text-white transition-colors ${sidebarOpen ? "hidden" : "block"}`}
+          onClick={toggleSidebar}
+        >
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        {/* Content area with proper padding and structure */}
+        <div className="flex-1 min-h-screen">
+          {renderRouteContent()}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MainLayout;
