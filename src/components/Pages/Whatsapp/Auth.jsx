@@ -8,8 +8,15 @@ const QRCodeDisplay = () => {
   useEffect(() => {
     const fetchQRCode = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/whatsapp/qr");
-
+        // Added auth token from localStorage
+        const token = localStorage.getItem("token");
+        
+        const response = await axios.get("http://localhost:3000/api/whatsapp/qr", {
+          headers: {
+            Authorization: `Bearer ${token}` // Add authentication header
+          }
+        });
+        
         if (response.data.qrCode) {
           // Set the QR code if available
           setQrCode(response.data.qrCode);
@@ -25,9 +32,10 @@ const QRCodeDisplay = () => {
       } catch (err) {
         // Handle network or other errors
         setError("Failed to fetch QR code. Please try again later.");
+        console.error("QR code fetch error:", err);
       }
     };
-
+    
     const interval = setInterval(fetchQRCode, 3000); // Poll every 3 seconds
     return () => clearInterval(interval); // Cleanup interval on unmount
   }, []);
@@ -35,11 +43,11 @@ const QRCodeDisplay = () => {
   if (error) {
     return <div className="text-red-500 text-center">{error}</div>;
   }
-
+  
   if (!qrCode) {
     return <div className="text-green-500 text-center">WhatsApp is authenticated! You can now send messages.</div>;
   }
-
+  
   return (
     <div style={{ textAlign: "center" }}>
       <h2 className="text-[32px] font-semibold font-primary mb-4 -mt-4 flex justify-center text-primary">

@@ -46,19 +46,24 @@ const MessageForm = () => {
     if (media) formData.append("media", media);
 
     try {
+      // Added auth token from localStorage
+      const token = localStorage.getItem("token");
+      
       const result = await axios.post(
         "http://localhost:3000/api/whatsapp/send",
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            "Authorization": `Bearer ${token}` // Add authentication header
           },
         }
       );
       setResponse(result.data.message);
     } catch (error) {
       console.error("Error sending messages:", error);
-      setResponse(error.response?.data?.message || "Error sending messages. Please try again.");
+      setError(error.response?.data?.error || "Error sending messages. Please try again.");
+      setResponse(""); // Clear any previous response
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +76,7 @@ const MessageForm = () => {
         <div className="flex items-center justify-between p-6 border-b border-gray-300">
           <div className="flex items-center space-x-2">
             <MessageCircle className="text-third" size={40} />
-            <h1 className="text-[40px] font-semibold text-third">WhatsApp Sender</h1>
+            <h1 className="text-[40px] font-semibold text-gray-900">WhatsApp Sender</h1>
           </div>
           <div className="flex items-center space-x-4">
             <button className="text-gray-500 hover:text-gray-700">

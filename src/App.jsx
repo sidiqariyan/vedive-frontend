@@ -27,6 +27,8 @@ import GmailSender from "./components/Pages/Gmail/GmailSender.jsx";
 import WhatsAppSender from "./components/Pages/Whatsapp/WhatsAppSender.jsx"
 import NumberScraper from "./components/Pages/Whatsapp/NumberScraper.jsx";
 import MessageForm from "./components/Pages/Whatsapp/WhatsAppSender.jsx";
+import PaymentStatus from "./components/other-pages/PaymentStatus.jsx";
+import SubscriptionHistory from "./components/other-pages/SubscriptionHistory.jsx";
 
 // Scroll to top on route change
 const ScrollToTop = () => {
@@ -106,6 +108,11 @@ const App = () => {
                 </motion.div>
               }
             />
+            {/* Added the previously nested routes here */}
+            <Route path="/plans" element={<Plan />} />
+            <Route path="/payment-status" element={<PaymentStatus />} />
+            <Route path="/dashboard/subscription" element={<SubscriptionHistory/>} />
+            
             {/* Auth Routes */}
             <Route
               path="/login"
@@ -134,9 +141,9 @@ const App = () => {
             <Route
               path="/plan"
               element={
-                  <ProtectedMainLayout>
+                <ProtectedMainLayout>
                   <Plan />
-                  </ ProtectedMainLayout>
+                </ProtectedMainLayout>
               }
             />
             <Route

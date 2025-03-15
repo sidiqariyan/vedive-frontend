@@ -107,7 +107,7 @@ const NumberScraper = () => {
         <div className="flex items-center justify-between p-6 border-b border-gray-300">
           <div className="flex items-center space-x-2">
             <Search className="text-indigo-600" size={40} />
-            <h1 className="text-[40px] font-semibold text-third">Number Scraper</h1>
+            <h1 className="text-[40px] font-semibold text-gray-900">Number Scraper</h1>
           </div>
           <div className="flex items-center space-x-4">
             {downloadUrl && (

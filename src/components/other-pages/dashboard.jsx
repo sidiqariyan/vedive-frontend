@@ -9,8 +9,7 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [stats, setStats] = useState({});
   const [chartData, setChartData] = useState([]);
-  const [recentActivities, setRecentActivities] = useState([]);
-  
+  const [recentActivities, setRecentActivities] = useState([]);  
   // Fetch data from API
   useEffect(() => {
     const fetchData = async () => {
@@ -85,7 +84,7 @@ const Dashboard = () => {
               <div className="text-right">
                 <p className="text-sm font-semibold">{currentPlan} Plan</p>
               </div>
-              <Link to="/plan"><button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg transition duration-200 text-sm font-medium shadow-lg">
+              <Link to="/plan"><button className="bg-third hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg transition duration-200 text-sm font-medium shadow-lg">
                 Upgrade Plan
               </button>
               </Link>
@@ -185,52 +184,136 @@ const Dashboard = () => {
             </div>
             
             <div className="bg-gray-800/40 backdrop-filter backdrop-blur-sm rounded-xl border border-gray-700/30 p-5 shadow-lg">
-  <h3 className="text-lg font-semibold mb-4">Recent Activities</h3>
-  <div className="space-y-5">
-    {recentActivities && recentActivities.length > 0 ? (
-      recentActivities.map((activity, index) => (
-        <div key={index} className="flex items-start">
-          <div className={`flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-${activity.type === 'Email' ? 'blue' : activity.type === 'WhatsApp' ? 'green' : activity.type === 'Scraping' ? 'purple' : 'yellow'}-400 to-${activity.type === 'Email' ? 'blue' : activity.type === 'WhatsApp' ? 'green' : activity.type === 'Scraping' ? 'purple' : 'yellow'}-600 flex items-center justify-center shadow-lg`}>
-            {activity.type === 'Email' && (
-              <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
-                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
-              </svg>
-            )}
-            {activity.type === 'WhatsApp' && (
-              <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"></path>
-                <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"></path>
-              </svg>
-            )}
-            {activity.type === 'Scraping' && (
-              <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd"></path>
-              </svg>
-            )}
-            {activity.type === 'Phone' && (
-              <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
-              </svg>
+            <h3 className="text-lg font-semibold mb-4">Recent Activities</h3>
+            <div className="space-y-5">
+            {recentActivities && recentActivities.length > 0 ? (
+              recentActivities.map((activity, index) => {
+                // Define icon mapping with added gmail-sender
+                const iconMapping = {
+                  "mail-sender": (
+                    <svg
+                      className="h-5 w-5 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                    </svg>
+                  ),
+                  "gmail-sender": (
+                    <svg
+                    className="h-5 w-5 text-white"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                  </svg>
+                  ),
+                  "whatsapp-sender": (
+                    <svg
+                      className="h-5 w-5 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
+                      <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
+                    </svg>
+                  ),
+                  "email-scraper": (
+                    <svg
+                      className="h-5 w-5 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  ),
+                  "number-scraper": (
+                    <svg
+                      className="h-5 w-5 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                    </svg>
+                  )
+                };
+
+                // Function to get the correct background and text classes
+                const getBgClass = (type) => {
+                  switch(type) {
+                    case "mail-sender":
+                      return "bg-blue-400 bg-gradient-to-br from-blue-400 to-blue-600";
+                    case "gmail-sender":
+                      return "bg-red-400 bg-gradient-to-br from-red-400 to-red-600";
+                    case "whatsapp-sender":
+                      return "bg-green-400 bg-gradient-to-br from-green-400 to-green-600";
+                    case "email-scraper":
+                      return "bg-purple-400 bg-gradient-to-br from-purple-400 to-purple-600";
+                    case "number-scraper":
+                      return "bg-yellow-400 bg-gradient-to-br from-yellow-400 to-yellow-600";
+                    default:
+                      return "bg-gray-400 bg-gradient-to-br from-gray-400 to-gray-600";
+                  }
+                };
+
+                // Function to get the badge class
+                const getBadgeClass = (type) => {
+                  switch(type) {
+                    case "mail-sender":
+                      return "bg-blue-500/20 text-blue-300";
+                    case "gmail-sender":
+                      return "bg-red-500/20 text-red-300";
+                    case "whatsapp-sender":
+                      return "bg-green-500/20 text-green-300";
+                    case "email-scraper":
+                      return "bg-purple-500/20 text-purple-300";
+                    case "number-scraper":
+                      return "bg-yellow-500/20 text-yellow-300";
+                    default:
+                      return "bg-gray-500/20 text-gray-300";
+                  }
+                };
+
+                // Get icon based on activity type
+                const activityType = activity.type;
+                const icon = iconMapping[activityType];
+
+                return (
+                  <div key={index} className="flex items-start">
+                    <div
+                      className={`flex-shrink-0 h-10 w-10 rounded-full ${getBgClass(activityType)} flex items-center justify-center shadow-lg`}
+                    >
+                      {icon || null}
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium">{activity.description}</p>
+                      <div className="flex items-center mt-1">
+                        <span className="text-xs text-gray-400">{activity.time}</span>
+                        <span
+                          className={`ml-2 px-2 py-0.5 text-xs rounded-full ${getBadgeClass(activityType)}`}
+                        >
+                          {activityType}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="text-center text-gray-400">No recent activities</div>
             )}
           </div>
-          <div className="ml-4">
-            <p className="text-sm font-medium">{activity.description}</p>
-            <div className="flex items-center mt-1">
-              <span className="text-xs text-gray-400">{activity.time}</span>
-              <span className={`ml-2 px-2 py-0.5 text-xs rounded-full bg-${activity.type === 'Email' ? 'blue' : activity.type === 'WhatsApp' ? 'green' : activity.type === 'Scraping' ? 'purple' : 'yellow'}-500/20 text-${activity.type === 'Email' ? 'blue' : activity.type === 'WhatsApp' ? 'green' : activity.type === 'Scraping' ? 'purple' : 'yellow'}-300`}>{activity.type}</span>
-            </div>
+            <button className="w-full mt-5 py-2 px-4 text-xs font-medium rounded-lg text-gray-300 hover:text-white bg-gray-700/30 hover:bg-gray-700/50 transition duration-200">
+              View All Activities
+            </button>
           </div>
-        </div>
-      ))
-    ) : (
-      <div className="text-center text-gray-400">No recent activities</div>
-    )}
-  </div>
-  <button className="w-full mt-5 py-2 px-4 text-xs font-medium rounded-lg text-gray-300 hover:text-white bg-gray-700/30 hover:bg-gray-700/50 transition duration-200">
-    View All Activities
-  </button>
-</div></div>
+          </div>
           {/* Quick Actions */}
           <div className="bg-gray-800/40 backdrop-filter backdrop-blur-sm rounded-2xl border border-gray-700/30 p-6 shadow-xl mb-8 transition-all duration-300 hover:shadow-2xl">
             <h3 className="text-xl font-semibold mb-5 text-white flex items-center gap-2 group">
