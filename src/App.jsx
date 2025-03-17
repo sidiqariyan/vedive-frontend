@@ -18,13 +18,13 @@ import PostList from "./components/other-pages/PostList.jsx";
 import Plan from "./components/other-pages/plan.jsx";
 import Campaign from "./components/other-pages/campaign.jsx";
 import TemplateEditorPage from "./components/other-pages/TemplateEditor.jsx";
-import MainLayout from "./components/MailLayout.jsx"; // Import MainLayout
+import MainLayout from "./components/MailLayout.jsx";
 import { AuthProvider } from "./components/Pages/Mailer/AuthContext.jsx";
 import ProtectedRoute from "./components/other-pages/ProtectedRoutes.jsx";
 import SenderBody from "./components/Pages/Mailer/SenderBody.jsx";
 import EmailScrapper from "./components/Pages/Mailer/EmailScrapper.jsx";
 import GmailSender from "./components/Pages/Gmail/GmailSender.jsx";
-import WhatsAppSender from "./components/Pages/Whatsapp/WhatsAppSender.jsx"
+import WhatsAppSender from "./components/Pages/Whatsapp/WhatsAppSender.jsx";
 import NumberScraper from "./components/Pages/Whatsapp/NumberScraper.jsx";
 import MessageForm from "./components/Pages/Whatsapp/WhatsAppSender.jsx";
 import PaymentStatus from "./components/other-pages/PaymentStatus.jsx";
@@ -43,11 +43,11 @@ const ScrollToTop = () => {
 
 // Page Transition Animation
 const pageVariants = {
-  initial: { opacity: 0, scale: 0.95, y: 20 }, // Subtle zoom-in and down
-  animate: { opacity: 1, scale: 1, y: 0 }, // Normal state
-  exit: { opacity: 0, scale: 1.02, y: -20 }, // Slight zoom-out and up
+  initial: { opacity: 0, scale: 0.95, y: 20 },
+  animate: { opacity: 1, scale: 1, y: 0 },
+  exit: { opacity: 0, scale: 1.02, y: -20 },
 };
-const transition = { duration: 0.5, ease: "easeInOut" }; // Smooth & professional
+const transition = { duration: 0.5, ease: "easeInOut" };
 
 // Wrapper for Protected Routes with MainLayout
 const ProtectedMainLayout = ({ children }) => (
@@ -64,7 +64,7 @@ const App = () => {
   return (
     <AuthProvider>
       <Router>
-        <ScrollToTop /> {/* Ensures smooth scroll to top */}
+        <ScrollToTop />
         <AnimatePresence mode="wait">
           <Routes>
             {/* Public Routes */}
@@ -108,11 +108,10 @@ const App = () => {
                 </motion.div>
               }
             />
-            {/* Added the previously nested routes here */}
+            {/* Payment & Plan */}
+            <Route path="/plans/payment-status" element={<PaymentStatus />} />
             <Route path="/plans" element={<Plan />} />
-            <Route path="/payment-status" element={<PaymentStatus />} />
-            <Route path="/dashboard/subscription" element={<SubscriptionHistory/>} />
-            
+            <Route path="/dashboard/subscription" element={<SubscriptionHistory />} />
             {/* Auth Routes */}
             <Route
               path="/login"

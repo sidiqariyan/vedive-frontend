@@ -8,48 +8,57 @@ const PaymentStatus = () => {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState('processing'); // 'processing', 'success', 'failed'
   const [subscription, setSubscription] = useState(null);
+  const [localPlanId, setLocalPlanId] = useState('starter');
   const navigate = useNavigate();
 
   useEffect(() => {
     const verifyPayment = async () => {
       try {
         const orderId = searchParams.get('order_id');
-        const orderToken = searchParams.get('order_token');
-        const pendingOrderId = localStorage.getItem('pendingOrderId');
+        const orderToken = searchParams.get('order_token'); // if provided by your gateway
+        const pendingOrderData = localStorage.getItem('pendingOrder');
+        const pendingOrder = pendingOrderData ? JSON.parse(pendingOrderData) : null;
+        const pendingOrderId = pendingOrder?.orderId;
+        // Retrieve planId from pending order (fallback to 'starter' if missing)
+        const planId = pendingOrder?.planId || 'starter';
+        setLocalPlanId(planId);
+        // Retrieve userId from localStorage (adjust as needed from your auth context)
+        const userId = localStorage.getItem('userId') || 'user123';
 
-        if (!orderId || !orderToken) {
+        if (!orderId) {
           setStatus('failed');
-          toast.error('Payment verification failed: Missing parameters');
+          toast.error('Payment verification failed: Missing order_id parameter');
+          localStorage.removeItem('pendingOrder');
           return;
         }
 
-        // Verify this is the order we initiated
         if (pendingOrderId !== orderId) {
           console.warn('Order ID mismatch', { pendingOrderId, orderId });
         }
 
-        // Verify payment with backend
-        const response = await subscriptionService.verifyPayment(orderId, orderToken);
-        
-        if (response.success) {
+        // Call the backend API to verify payment; pass orderToken, userId, and planId.
+        const response = await subscriptionService.verifyPayment(orderId, orderToken, userId, planId);
+
+        if (response.data && response.data.success) {
           setStatus('success');
-          setSubscription(response.subscription);
+          setSubscription(response.data.subscription);
           toast.success('Payment successful! Your subscription is now active');
-          // Clear pending order
-          localStorage.removeItem('pendingOrderId');
+          localStorage.removeItem('pendingOrder');
         } else {
           setStatus('failed');
-          toast.error(`Payment failed: ${response.message || 'Please try again'}`);
+          toast.error(`Payment failed: ${response.data?.message || 'Please try again'}`);
+          localStorage.removeItem('pendingOrder');
         }
       } catch (error) {
         console.error('Payment verification error:', error);
         setStatus('failed');
         toast.error('Payment verification failed. Please contact support if payment was deducted.');
+        localStorage.removeItem('pendingOrder');
       }
     };
 
     verifyPayment();
-  }, [searchParams]);
+  }, [searchParams, navigate]);
 
   const redirectToDashboard = () => {
     navigate('/dashboard');
@@ -75,7 +84,7 @@ const PaymentStatus = () => {
             <CheckCircle className="mx-auto h-16 w-16 text-green-500 mb-6" />
             <h2 className="text-2xl font-bold mb-2">Payment Successful!</h2>
             <p className="text-gray-600 mb-6">
-              Your subscription to the {subscription?.planName} plan is now active.
+              Your subscription to the {subscription?.planName || localPlanId} plan is now active.
               {subscription?.endDate && (
                 <span className="block mt-2">
                   Valid until: {new Date(subscription.endDate).toLocaleDateString()}

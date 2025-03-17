@@ -4,7 +4,7 @@ import logo from "../assets/Vedive.png";
 import Dashboard from "./other-pages/dashboard";
 import SenderBody from "./Pages/Mailer/SenderBody";
 import Account from "./other-pages/account";
-import EmailScraper from "./Pages/Mailer/EmailScrapper";
+import EmailScrapper from "./Pages/Mailer/EmailScrapper";
 import GmailSender from "./Pages/Gmail/GmailSender";
 import WhatsAppSender from "./Pages/Whatsapp/WhatsAppSender";
 import NumberScraper from "./Pages/Whatsapp/NumberScraper";
@@ -16,28 +16,25 @@ const MainLayout = ({ children }) => {
   const location = useLocation();
   const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [currentPlan, setCurrentPlan] = useState('Free');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const protectedRoutes = ["/gmail-sender", "/number-scraper", "/email-scraper"];
+  // List of routes that require a paid plan
+  const protectedRoutes = ["/gmail-sender", "/email-scraper", "/number-scraper"];
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem("token");
-
         if (!token) {
           navigate("/login");
           return;
         }
-
         const response = await fetch("http://localhost:3000/api/auth/user", {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+            "Content-Type": "application/json"
+          }
         });
-
         if (!response.ok) {
           if (response.status === 401) {
             localStorage.removeItem("token");
@@ -46,10 +43,7 @@ const MainLayout = ({ children }) => {
           }
           throw new Error(`HTTP error: ${response.status}`);
         }
-
         const userData = await response.json();
-        // Add isPaidUser property to user data
-        userData.isPaidUser = userData.isPaidUser || false;
         setUser(userData);
       } catch (err) {
         console.error("Error fetching user data:", err);
@@ -58,10 +52,8 @@ const MainLayout = ({ children }) => {
         setLoading(false);
       }
     };
-
     fetchUserData();
 
-    // Only automatically collapse sidebar on small screens
     const handleResize = () => {
       if (window.innerWidth < 768) {
         setSidebarOpen(false);
@@ -69,25 +61,17 @@ const MainLayout = ({ children }) => {
         setSidebarOpen(true);
       }
     };
-
-    // Initial check
     handleResize();
-    
-    // Add resize listener
     window.addEventListener("resize", handleResize);
-    
-    // Cleanup
     return () => window.removeEventListener("resize", handleResize);
   }, [navigate]);
 
-  // Check for protected routes
   useEffect(() => {
-    if (protectedRoutes.includes(location.pathname) && user && (!user.isPaidUser && currentPlan === 'Free')) {
-      navigate("/plan"); 
+    if (protectedRoutes.includes(location.pathname) && user && user.currentPlan === "Free") {
+      navigate("/plan");
     }
-  }, [location, user, navigate, currentPlan]);
+  }, [location, user, navigate]);
 
-  // Log current path for debugging
   useEffect(() => {
     console.log("Current path:", location.pathname);
   }, [location.pathname]);
@@ -97,23 +81,21 @@ const MainLayout = ({ children }) => {
   };
 
   const handleNavLinkClick = () => {
-    // Only close sidebar on mobile
     if (window.innerWidth < 768) {
       setSidebarOpen(false);
     }
   };
 
   const hasAccess = (feature) => {
-    if (feature === 'paid-tools') {
-      return user?.isPaidUser || currentPlan !== 'Free';
+    if (feature === "paid-tools") {
+      return user?.currentPlan && user.currentPlan !== "Free";
     }
-    return true; 
+    return true;
   };
 
   if (loading) return <div className="flex h-screen items-center justify-center">Loading...</div>;
   if (error) return <div className="error p-4 bg-red-600 text-white">An error occurred: {error}</div>;
 
-  // Function to render the correct component based on route
   const renderRouteContent = () => {
     switch (location.pathname) {
       case "/dashboard":
@@ -121,7 +103,7 @@ const MainLayout = ({ children }) => {
       case "/email-sender":
         return <SenderBody />;
       case "/email-scraper":
-        return <EmailScraper />;
+        return <EmailScrapper />;
       case "/gmail-sender":
         return <GmailSender />;
       case "/whatsapp-sender":
@@ -133,7 +115,6 @@ const MainLayout = ({ children }) => {
       case "/plan":
         return <Plan />;
       default:
-        // Fallback content
         return (
           <div className="flex items-center justify-center h-screen">
             <div className="text-center p-8">
@@ -147,15 +128,12 @@ const MainLayout = ({ children }) => {
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-zinc-800 text-white relative overflow-hidden">
-      {/* Mobile overlay */}
       {sidebarOpen && (
         <div
           className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-20"
           onClick={toggleSidebar}
         />
       )}
-
-      {/* Sidebar */}
       <div
         className={`
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
@@ -188,19 +166,18 @@ const MainLayout = ({ children }) => {
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium">{user?.name || "User"}</p>
-              <p className="text-xs text-gray-400">{user?.isPaidUser ? 'Premium User' : 'Free User'}</p>
+              <p className="text-xs text-gray-400">
+                {user?.currentPlan && user.currentPlan !== "Free" ? `${user.currentPlan} Plan` : "Free User"}
+              </p>
             </div>
           </div>
         </div>
-
         <nav className="mt-6 px-4">
           <NavLink
             to="/dashboard"
             className={({ isActive }) =>
               `flex items-center px-4 py-3 text-sm font-medium rounded-lg transition duration-200 ${
-                isActive
-                  ? "bg-blue-600 text-white shadow-lg"
-                  : "text-gray-300 hover:bg-gray-800/50 hover:text-white"
+                isActive ? "bg-blue-600 text-white shadow-lg" : "text-gray-300 hover:bg-gray-800/50 hover:text-white"
               }`
             }
             onClick={handleNavLinkClick}
@@ -210,14 +187,11 @@ const MainLayout = ({ children }) => {
             </svg>
             Dashboard
           </NavLink>
-
           <NavLink
             to="/email-sender"
             className={({ isActive }) =>
               `flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg transition duration-200 ${
-                isActive
-                  ? "bg-third text-white shadow-lg"
-                  : "text-gray-300 hover:bg-gray-800/50 hover:text-white"
+                isActive ? "bg-third text-white shadow-lg" : "text-gray-300 hover:bg-gray-800/50 hover:text-white"
               }`
             }
             onClick={handleNavLinkClick}
@@ -231,9 +205,7 @@ const MainLayout = ({ children }) => {
             to="/whatsapp-sender"
             className={({ isActive }) =>
               `flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg transition duration-200 ${
-                isActive
-                  ? "bg-third text-white shadow-lg"
-                  : "text-gray-300 hover:bg-gray-800/50 hover:text-white"
+                isActive ? "bg-third text-white shadow-lg" : "text-gray-300 hover:bg-gray-800/50 hover:text-white"
               }`
             }
             onClick={handleNavLinkClick}
@@ -243,21 +215,18 @@ const MainLayout = ({ children }) => {
             </svg>
             Whatsapp Sender
           </NavLink>
-          
-          {/* Gmail Sender - Premium Feature */}
-          <div 
-            className={`flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg transition duration-200 cursor-pointer
-              ${hasAccess('paid-tools') 
-                ? 'text-gray-300 hover:bg-gray-800/50 hover:text-white' 
-                : 'text-gray-500 relative group'
-              }`
-            }
+          <div
+            className={`flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg transition duration-200 cursor-pointer ${
+              hasAccess("paid-tools")
+                ? "text-gray-300 hover:bg-gray-800/50 hover:text-white"
+                : "text-gray-500 relative group"
+            }`}
             onClick={() => {
-              if (hasAccess('paid-tools')) {
-                navigate('/gmail-sender');
+              if (hasAccess("paid-tools")) {
+                navigate("/gmail-sender");
                 handleNavLinkClick();
               } else {
-                navigate('/plan');
+                navigate("/plan");
                 handleNavLinkClick();
               }
             }}
@@ -266,7 +235,7 @@ const MainLayout = ({ children }) => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
             Gmail Sender
-            {!hasAccess('paid-tools') && (
+            {!hasAccess("paid-tools") && (
               <>
                 <svg className="ml-2 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -277,21 +246,18 @@ const MainLayout = ({ children }) => {
               </>
             )}
           </div>
-          
-          {/* WhatsApp Sender - Premium Feature */}
-          <div 
-            className={`flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg transition duration-200 cursor-pointer
-              ${hasAccess('paid-tools') 
-                ? 'text-gray-300 hover:bg-gray-800/50 hover:text-white' 
-                : 'text-gray-500 relative group'
-              }`
-            }
+          <div
+            className={`flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg transition duration-200 cursor-pointer ${
+              hasAccess("paid-tools")
+                ? "text-gray-300 hover:bg-gray-800/50 hover:text-white"
+                : "text-gray-500 relative group"
+            }`}
             onClick={() => {
-              if (hasAccess('paid-tools')) {
-                navigate('/email-scraper');
+              if (hasAccess("paid-tools")) {
+                navigate("/email-scraper");
                 handleNavLinkClick();
               } else {
-                navigate('/plan');
+                navigate("/plan");
                 handleNavLinkClick();
               }
             }}
@@ -300,7 +266,7 @@ const MainLayout = ({ children }) => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
             Email Scraper
-            {!hasAccess('paid-tools') && (
+            {!hasAccess("paid-tools") && (
               <>
                 <svg className="ml-2 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -311,21 +277,18 @@ const MainLayout = ({ children }) => {
               </>
             )}
           </div>
-          
-          {/* Number Scraper - Premium Feature */}
-          <div 
-            className={`flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg transition duration-200 cursor-pointer
-              ${hasAccess('paid-tools') 
-                ? 'text-gray-300 hover:bg-gray-800/50 hover:text-white' 
-                : 'text-gray-500 relative group'
-              }`
-            }
+          <div
+            className={`flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg transition duration-200 cursor-pointer ${
+              hasAccess("paid-tools")
+                ? "text-gray-300 hover:bg-gray-800/50 hover:text-white"
+                : "text-gray-500 relative group"
+            }`}
             onClick={() => {
-              if (hasAccess('paid-tools')) {
-                navigate('/number-scraper');
+              if (hasAccess("paid-tools")) {
+                navigate("/number-scraper");
                 handleNavLinkClick();
               } else {
-                navigate('/plan');
+                navigate("/plan");
                 handleNavLinkClick();
               }
             }}
@@ -334,7 +297,7 @@ const MainLayout = ({ children }) => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
             Number Scraper
-            {!hasAccess('paid-tools') && (
+            {!hasAccess("paid-tools") && (
               <>
                 <svg className="ml-2 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -345,14 +308,11 @@ const MainLayout = ({ children }) => {
               </>
             )}
           </div>
-
           <NavLink
             to="/account"
             className={({ isActive }) =>
               `flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg transition duration-200 ${
-                isActive
-                  ? "bg-third text-white shadow-lg"
-                  : "text-gray-300 hover:bg-gray-800/50 hover:text-white"
+                isActive ? "bg-third text-white shadow-lg" : "text-gray-300 hover:bg-gray-800/50 hover:text-white"
               }`
             }
             onClick={handleNavLinkClick}
@@ -364,11 +324,11 @@ const MainLayout = ({ children }) => {
           </NavLink>
           <NavLink
             to="/plan"
-            className={({ isActive }) => 
+            className={({ isActive }) =>
               `flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg transition duration-200 ${
-                isActive 
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
-                  : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
+                isActive
+                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
+                  : "text-gray-300 hover:bg-gray-800/50 hover:text-white"
               }`
             }
             onClick={() => setSidebarOpen(false)}
@@ -378,11 +338,8 @@ const MainLayout = ({ children }) => {
             </svg>
             Subscription Plan
           </NavLink>
-
         </nav>
       </div>
-
-      {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-auto relative">
         <button
           className={`md:hidden fixed top-4 left-4 z-10 bg-gray-800 rounded-lg p-2 text-gray-400 hover:text-white transition-colors ${sidebarOpen ? "hidden" : "block"}`}
@@ -392,11 +349,7 @@ const MainLayout = ({ children }) => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-
-        {/* Content area with proper padding and structure */}
-        <div className="flex-1 min-h-screen">
-          {renderRouteContent()}
-        </div>
+        <div className="flex-1 min-h-screen">{renderRouteContent()}</div>
       </div>
     </div>
   );
