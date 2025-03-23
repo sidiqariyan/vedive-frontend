@@ -42,7 +42,7 @@ const Pricing = () => {
       duration: "1-day",
       features: [
         { name: "Unlimited Mail Sending", available: true },
-        { name: "Scrap Unlimited Mails", available: true },
+        { name: "Scrap Unlimited Mails", available: false },
         { name: "Unlimited WhatsApp Message Sending", available: true },
         { name: "Scrap Unlimited Numbers", available: false },
         { name: "Unlimited Mail & WhatsApp Template", available: false },
@@ -114,17 +114,13 @@ const Pricing = () => {
         {/* About Us Sections */}
         <div className="desktop-view">
           <div
-            style={{ background: "#000000" }}
+            style={{ background: "transparent" }}
             className="about-us-container about-us-container-1"
           >
             <h1>Our Story</h1>
             <p>
-              Our mission is to provide convenience and quality service to every
-              marketing professional, so they can make their marketing efforts
-              easier and better. We are always committed to giving our customers
-              the best experience, and every day, we aim to exceed their
-              expectations in new ways. This will help make marketing even
-              easier in the future.
+            At Vedive, our goal is to simplify marketing by providing seamless messaging and data scraping services for professionals. Our platform is designed to help businesses reach their audience easily while maintaining efficiency and affordability.
+
             </p>
           </div>
           <div className="about-us-container">2</div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import jwtDecode from "jwt-decode"; // Correct import for jwt-decode
+import jwtDecode from "jwt-decode";
 import "./secondarystyles.css";
 import Vedive from "../assets/Vedive.png";
 import Google from "../assets/google-icon.svg";
@@ -15,8 +15,8 @@ const Login = () => {
   const [password, setPassword] = useState("");
 
   // State for error messages and loading
-  const [error, setError] = useState(""); // Error message state
-  const [loading, setLoading] = useState(false); // Loading state for login button
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Handle token from URL (e.g., after Google OAuth)
   useEffect(() => {
@@ -24,7 +24,7 @@ const Login = () => {
     const token = urlParams.get("token");
     if (token) {
       try {
-        const decoded = jwtDecode(token); // Decode the token
+        const decoded = jwtDecode(token);
         if (decoded.exp * 1000 < Date.now()) {
           console.error("Token has expired");
           setError("Your session has expired. Please log in again.");
@@ -48,10 +48,16 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:3000/api/auth/login", {
-        emailOrUsername,
-        password,
-      });
+      const response = await axios.post(
+        "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/auth/login",
+        { emailOrUsername, password },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
 
       localStorage.setItem("token", response.data.token);
       setEmailOrUsername("");
@@ -59,15 +65,19 @@ const Login = () => {
       navigate("/dashboard");
     } catch (err) {
       console.error("Login failed:", err);
-      setError(err.response?.data?.error || "An unexpected error occurred.");
+      if (err.code === "ERR_NETWORK") {
+        setError("Network error. Please check your connection or server status.");
+      } else {
+        setError(err.response?.data?.error || "An unexpected error occurred.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle Google Sign-In (Optional)
+  // Handle Google Sign-In
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:3000/api/auth/google";
+    window.location.href = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/auth/google";
   };
 
   return (

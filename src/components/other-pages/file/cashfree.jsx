@@ -1,8 +1,13 @@
-// frontend/file/cashfree.js
 import { load } from '@cashfreepayments/cashfree-js';
 
-const cashfree = await load({
-  mode: "sandbox" // Change to "production" when ready
-});
+let cashfree; // Declare it globally
 
-export default cashfree;
+async function initialize() {
+  cashfree = await load({
+    mode: "sandbox"
+  });
+}
+
+initialize();
+
+export { cashfree, initialize }; // Export both

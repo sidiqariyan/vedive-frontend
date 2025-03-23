@@ -47,7 +47,7 @@ const NumberScraper = () => {
         return;
       }
       
-      const response = await axios.get("http://localhost:3000/api/numberScraper", {
+      const response = await axios.get("https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/numberScraper", {
         params: { query: combinedQuery, campaignName: campaignNameInput },
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -69,7 +69,8 @@ const NumberScraper = () => {
     }
   };
 
-  const handleDownload = () => {
+  // Updated handleDownload using axios with responseType 'blob'
+  const handleDownload = async () => {
     if (!downloadUrl) {
       alert("No file available for download.");
       return;
@@ -82,13 +83,35 @@ const NumberScraper = () => {
       return;
     }
     
-    // Create a hidden anchor element to trigger download
-    const a = document.createElement("a");
-    a.href = downloadUrl;
-    a.download = "businesses.csv";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    try {
+      const response = await axios.get(downloadUrl, {
+        responseType: 'blob',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Create a blob URL and trigger the download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      
+      // Optionally, extract filename from response headers
+      const contentDisposition = response.headers["content-disposition"];
+      let filename = "businesses.csv";
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      link.href = url;
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error("Download error:", err);
+      alert("Download failed. Please try again.");
+    }
   };
 
   const handleReset = () => {
@@ -106,7 +129,7 @@ const NumberScraper = () => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-300">
           <div className="flex items-center space-x-2">
-            <Search className="text-indigo-600" size={40} />
+            <Search className="text-third" size={40} />
             <h1 className="text-[40px] font-semibold text-gray-900">Number Scraper</h1>
           </div>
           <div className="flex items-center space-x-4">
@@ -122,7 +145,7 @@ const NumberScraper = () => {
           {/* Search Configuration */}
           <div className="space-y-4 p-6 border border-gray-300 rounded-lg shadow-sm">
             <div className="flex items-center space-x-2">
-              <Search className="text-indigo-600" size={20} />
+              <Search className="text-third" size={20} />
               <h2 className="text-lg font-medium text-gray-900">Search Configuration</h2>
             </div>
             <form onSubmit={handleSearch} className="grid grid-cols-2 gap-4">
@@ -132,7 +155,7 @@ const NumberScraper = () => {
                   type="text"
                   id="keyword"
                   placeholder="Enter keyword"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg  text-secondary"
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                 />
@@ -143,7 +166,7 @@ const NumberScraper = () => {
                   type="text"
                   id="country"
                   placeholder="Enter country"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300  text-secondary"
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
                 />
@@ -154,7 +177,7 @@ const NumberScraper = () => {
                   type="text"
                   id="city"
                   placeholder="Enter city"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-secondary"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                 />
@@ -172,7 +195,7 @@ const NumberScraper = () => {
                 <button
                   type="submit"
                   className={`px-4 py-2 rounded-lg text-sm font-medium text-white ${
-                    loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
+                    loading ? "bg-gray-400 cursor-not-allowed" : "bg-third hover:bg-blue-700"
                   }`}
                   disabled={loading}
                 >
@@ -189,7 +212,7 @@ const NumberScraper = () => {
             </div>
           )}
 
-          {/* Download Button (placed at bottom if results are shown) */}
+          {/* Download Button */}
           {downloadUrl && businesses.length > 0 && (
             <div className="flex justify-end">
               <button

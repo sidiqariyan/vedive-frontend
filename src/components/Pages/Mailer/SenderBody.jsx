@@ -12,7 +12,6 @@ function SenderBody() {
   const [sendingStatus, setSendingStatus] = useState([]);
   const [isSending, setIsSending] = useState(false);
   const [completedEmails, setCompletedEmails] = useState(0);
-
   const recipientsFileRef = useRef(null);
   const htmlTemplateRef = useRef(null);
 
@@ -53,33 +52,29 @@ function SenderBody() {
       alert('Campaign name is required!');
       return;
     }
-
     setIsSending(true);
     setCompletedEmails(0);
     setError(null);
     setSuccessMessage(null);
     setSendingStatus([]); // Reset status before starting new batch
-
     const form = new FormData();
     Object.keys(formData).forEach((key) => {
       form.append(key, formData[key]);
     });
     form.append('campaignName', campaignNameInput);
-
     try {
       // Get authentication token from localStorage
       const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('Authentication token not found. Please login again.');
       }
-
       const response = await axios.post(
-        'http://localhost:3000/api/send-bulk-mail',
+        'https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/send-bulk-mail',
         form,
         {
           headers: {
             'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${token}` // Add authentication token
+            'Authorization': `Bearer ${token}`, // Add authentication token
           },
           onUploadProgress: (progressEvent) => {
             const progress = Math.round(
@@ -89,7 +84,6 @@ function SenderBody() {
           },
         }
       );
-
       if (response.data.success) {
         // Display all recipient emails with "Sent" status
         const updatedStatus = recipientsPreview.map(email => ({
@@ -103,13 +97,11 @@ function SenderBody() {
       } else {
         throw new Error(response.data.error || 'Failed to send emails');
       }
-
       setIsSending(false);
     } catch (error) {
       const errorMessage = error.response ? error.response.data.error : error.message;
       setError(`Failed to send emails: ${errorMessage}`);
       setIsSending(false);
-      
       // Mark all as failed in case of error
       const failedStatus = recipientsPreview.map(email => ({
         email,
@@ -122,7 +114,7 @@ function SenderBody() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className=" mx-auto bg-white rounded-lg shadow-md border border-gray-300">
+      <div className="mx-auto bg-white rounded-lg shadow-md border border-gray-300">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-300">
           <div className="flex items-center space-x-2">
@@ -138,7 +130,6 @@ function SenderBody() {
             </button>
           </div>
         </div>
-
         <div className="p-6 space-y-8">
           {/* SMTP Configuration */}
           <div className="space-y-4 p-6 border border-gray-300 rounded-lg shadow-sm">
@@ -153,7 +144,7 @@ function SenderBody() {
                   type="text"
                   id="smtpHost"
                   placeholder="smtp.example.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-third focus:border-transparent text-secondary"
                   onChange={handleInputChange}
                 />
               </div>
@@ -163,7 +154,7 @@ function SenderBody() {
                   type="text"
                   id="smtpPort"
                   placeholder="587"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-third focus:border-transparent text-secondary"
                   onChange={handleInputChange}
                 />
               </div>
@@ -173,7 +164,7 @@ function SenderBody() {
                   type="email"
                   id="smtpUsername"
                   placeholder="your@email.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-third focus:border-transparent text-secondary"
                   onChange={handleInputChange}
                 />
               </div>
@@ -183,13 +174,12 @@ function SenderBody() {
                   type="password"
                   id="smtpPassword"
                   placeholder="••••••••"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-third focus:border-transparent text-secondary"
                   onChange={handleInputChange}
                 />
               </div>
             </div>
           </div>
-
           {/* Email Configuration */}
           <div className="space-y-4 p-6 border border-gray-300 rounded-lg shadow-sm">
             <div className="flex items-center space-x-2">
@@ -203,7 +193,7 @@ function SenderBody() {
                   type="email"
                   id="fromEmail"
                   placeholder="sender@company.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-third focus:border-transparent text-secondary"
                   onChange={handleInputChange}
                 />
               </div>
@@ -213,18 +203,17 @@ function SenderBody() {
                   type="text"
                   id="emailSubject"
                   placeholder="Enter email subject"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-third focus:border-transparent text-secondary"
                   onChange={handleInputChange}
                 />
               </div>
             </div>
           </div>
-
           {/* Template and Recipients */}
           <div className="grid grid-cols-2 gap-8">
             <div className="space-y-4 p-6 border border-gray-300 rounded-lg shadow-sm">
               <div className="text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100 mb-2">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-third-light mb-2">
                   <Mail className="text-third" size={24} />
                 </div>
                 <h3 className="text-base font-medium text-gray-900">Email Template</h3>
@@ -232,7 +221,7 @@ function SenderBody() {
               </div>
               <button
                 onClick={() => htmlTemplateRef.current.click()}
-                className="w-full py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-third hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="w-full py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-third hover:bg-third-light focus:outline-none focus:ring-2 focus:ring-third focus:ring-offset-2"
               >
                 Choose Template
               </button>
@@ -247,10 +236,9 @@ function SenderBody() {
                 <p className="text-sm text-gray-600 text-center">{htmlTemplateName}</p>
               )}
             </div>
-
             <div className="space-y-4 p-6 border border-gray-300 rounded-lg shadow-sm">
               <div className="text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100 mb-2">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-third-light mb-2">
                   <Upload className="text-third" size={24} />
                 </div>
                 <h3 className="text-base font-medium text-gray-900">Recipients List</h3>
@@ -258,7 +246,7 @@ function SenderBody() {
               </div>
               <button
                 onClick={() => recipientsFileRef.current.click()}
-                className="w-full py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-third hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="w-full py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-third hover:bg-third-light focus:outline-none focus:ring-2 focus:ring-third focus:ring-offset-2"
               >
                 Choose File
               </button>
@@ -274,7 +262,6 @@ function SenderBody() {
               )}
             </div>
           </div>
-
           {/* Action Buttons */}
           <div className="flex justify-end space-x-4 pt-4">
             <button
@@ -294,8 +281,8 @@ function SenderBody() {
             <button
               className={`px-4 py-2 rounded-lg text-sm font-medium text-white ${
                 isSending
-                  ? 'bg-indigo-400 cursor-not-allowed'
-                  : 'bg-third hover:bg-indigo-700'
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-third hover:bg-third-dark'
               }`}
               onClick={handleSendMail}
               disabled={isSending}
@@ -303,7 +290,6 @@ function SenderBody() {
               {isSending ? 'Sending Emails...' : 'Send Emails'}
             </button>
           </div>
-
           {/* Status Messages */}
           {error && (
             <div className="mt-4 p-4 bg-red-50 border border-red-300 rounded-lg">

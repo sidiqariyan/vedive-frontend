@@ -29,21 +29,41 @@ const MainLayout = ({ children }) => {
           navigate("/login");
           return;
         }
-        const response = await fetch("http://localhost:3000/api/auth/user", {
+        
+        // Fetch user authentication data
+        const userResponse = await fetch("https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/auth/user", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json"
           }
         });
-        if (!response.ok) {
-          if (response.status === 401) {
+        
+        if (!userResponse.ok) {
+          if (userResponse.status === 401) {
             localStorage.removeItem("token");
             navigate("/login");
             return;
           }
-          throw new Error(`HTTP error: ${response.status}`);
+          throw new Error(`HTTP error: ${userResponse.status}`);
         }
-        const userData = await response.json();
+        
+        const userData = await userResponse.json();
+        
+        // Fetch subscription status
+        const subscriptionResponse = await fetch("https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/subscription/status", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+        
+        if (subscriptionResponse.ok) {
+          const subscriptionData = await subscriptionResponse.json();
+          // Combine user data with subscription data
+          userData.currentPlan = subscriptionData.currentPlan.charAt(0).toUpperCase() + 
+                                 subscriptionData.currentPlan.slice(1); // Capitalize first letter
+        }
+        
         setUser(userData);
       } catch (err) {
         console.error("Error fetching user data:", err);
@@ -67,11 +87,14 @@ const MainLayout = ({ children }) => {
   }, [navigate]);
 
   useEffect(() => {
-    if (protectedRoutes.includes(location.pathname) && user && user.currentPlan === "Free") {
+    if (protectedRoutes.includes(location.pathname) && 
+        user && 
+        user.currentPlan && 
+        user.currentPlan.toLowerCase() === "free") {
       navigate("/plan");
     }
   }, [location, user, navigate]);
-
+  
   useEffect(() => {
     console.log("Current path:", location.pathname);
   }, [location.pathname]);
@@ -88,7 +111,7 @@ const MainLayout = ({ children }) => {
 
   const hasAccess = (feature) => {
     if (feature === "paid-tools") {
-      return user?.currentPlan && user.currentPlan !== "Free";
+      return user?.currentPlan && user.currentPlan.toLowerCase() !== "free";
     }
     return true;
   };

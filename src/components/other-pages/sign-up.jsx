@@ -4,7 +4,7 @@ import "./secondarystyles.css";
 import Vedive from "../assets/Vedive.png";
 import Google from "../assets/google-icon.svg";
 
-const API_URL = "http://localhost:3000";
+const API_URL = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -40,7 +40,7 @@ const Signup = () => {
     setError(null);
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:3000/api/auth/register`, {
+      const response = await fetch(`https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

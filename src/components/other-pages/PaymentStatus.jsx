@@ -1,117 +1,74 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { CheckCircle, XCircle, Loader } from 'lucide-react';
-import subscriptionService from './subscriptionService';
-import { toast } from 'react-toastify';
+// Example of what your PaymentStatus.jsx might need
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import subscriptionService from "./subscriptionService";
+import { toast } from "react-toastify";
 
 const PaymentStatus = () => {
-  const [searchParams] = useSearchParams();
-  const [status, setStatus] = useState('processing'); // 'processing', 'success', 'failed'
-  const [subscription, setSubscription] = useState(null);
-  const [localPlanId, setLocalPlanId] = useState('starter');
+  const [status, setStatus] = useState("processing");
+  const location = useLocation();
   const navigate = useNavigate();
-
+  
   useEffect(() => {
     const verifyPayment = async () => {
+      const params = new URLSearchParams(location.search);
+      const orderId = params.get("order_id");
+      
+      if (!orderId) {
+        setStatus("error");
+        toast.error("No order ID found");
+        return;
+      }
+      
       try {
-        const orderId = searchParams.get('order_id');
-        const orderToken = searchParams.get('order_token'); // if provided by your gateway
-        const pendingOrderData = localStorage.getItem('pendingOrder');
-        const pendingOrder = pendingOrderData ? JSON.parse(pendingOrderData) : null;
-        const pendingOrderId = pendingOrder?.orderId;
-        // Retrieve planId from pending order (fallback to 'starter' if missing)
-        const planId = pendingOrder?.planId || 'starter';
-        setLocalPlanId(planId);
-        // Retrieve userId from localStorage (adjust as needed from your auth context)
-        const userId = localStorage.getItem('userId') || 'user123';
-
-        if (!orderId) {
-          setStatus('failed');
-          toast.error('Payment verification failed: Missing order_id parameter');
-          localStorage.removeItem('pendingOrder');
-          return;
-        }
-
-        if (pendingOrderId !== orderId) {
-          console.warn('Order ID mismatch', { pendingOrderId, orderId });
-        }
-
-        // Call the backend API to verify payment; pass orderToken, userId, and planId.
-        const response = await subscriptionService.verifyPayment(orderId, orderToken, userId, planId);
-
-        if (response.data && response.data.success) {
-          setStatus('success');
-          setSubscription(response.data.subscription);
-          toast.success('Payment successful! Your subscription is now active');
-          localStorage.removeItem('pendingOrder');
+        const response = await subscriptionService.verifyPayment(orderId);
+        if (response.data.success) {
+          setStatus("success");
+          toast.success("Payment successful! Subscription activated.");
+          localStorage.removeItem("pendingOrder");
+          // Redirect after a short delay
+          setTimeout(() => {
+            navigate("/dashboard", { replace: true });
+          }, 3000);
         } else {
-          setStatus('failed');
-          toast.error(`Payment failed: ${response.data?.message || 'Please try again'}`);
-          localStorage.removeItem('pendingOrder');
+          setStatus("error");
+          toast.error("Payment verification failed");
         }
       } catch (error) {
-        console.error('Payment verification error:', error);
-        setStatus('failed');
-        toast.error('Payment verification failed. Please contact support if payment was deducted.');
-        localStorage.removeItem('pendingOrder');
+        console.error("Payment Error:", error);
+        setStatus("error");
+        toast.error(error.response?.data?.error || "Payment verification failed");
       }
     };
-
+    
     verifyPayment();
-  }, [searchParams, navigate]);
-
-  const redirectToDashboard = () => {
-    navigate('/dashboard');
-  };
-
-  const tryAgain = () => {
-    navigate('/plans');
-  };
-
+  }, [location.search, navigate]);
+  
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full">
-        {status === 'processing' && (
-          <div className="text-center">
-            <Loader className="mx-auto h-16 w-16 text-blue-500 animate-spin mb-6" />
-            <h2 className="text-2xl font-bold mb-2">Verifying your payment</h2>
-            <p className="text-gray-600 mb-6">Please wait while we confirm your payment status...</p>
+    <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="text-center p-8 max-w-md">
+        <h1 className="text-2xl font-bold mb-4">Payment Status</h1>
+        {status === "processing" && (
+          <div>
+            <p>Processing your payment...</p>
+            {/* Add a loading spinner here */}
           </div>
         )}
-
-        {status === 'success' && (
-          <div className="text-center">
-            <CheckCircle className="mx-auto h-16 w-16 text-green-500 mb-6" />
-            <h2 className="text-2xl font-bold mb-2">Payment Successful!</h2>
-            <p className="text-gray-600 mb-6">
-              Your subscription to the {subscription?.planName || localPlanId} plan is now active.
-              {subscription?.endDate && (
-                <span className="block mt-2">
-                  Valid until: {new Date(subscription.endDate).toLocaleDateString()}
-                </span>
-              )}
-            </p>
-            <button
-              onClick={redirectToDashboard}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition-colors duration-300"
-            >
-              Go to Dashboard
-            </button>
+        {status === "success" && (
+          <div>
+            <p className="text-green-600">Payment successful!</p>
+            <p>Your subscription has been activated.</p>
+            <p>Redirecting to dashboard...</p>
           </div>
         )}
-
-        {status === 'failed' && (
-          <div className="text-center">
-            <XCircle className="mx-auto h-16 w-16 text-red-500 mb-6" />
-            <h2 className="text-2xl font-bold mb-2">Payment Failed</h2>
-            <p className="text-gray-600 mb-6">
-              We couldn't verify your payment. If you believe this is an error or your payment was deducted, please contact our support team.
-            </p>
-            <button
-              onClick={tryAgain}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition-colors duration-300"
+        {status === "error" && (
+          <div>
+            <p className="text-red-600">Payment verification failed</p>
+            <button 
+              onClick={() => navigate("/plans")}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg"
             >
-              Try Again
+              Return to Plans
             </button>
           </div>
         )}

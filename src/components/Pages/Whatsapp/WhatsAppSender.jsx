@@ -48,14 +48,14 @@ const MessageForm = () => {
     try {
       // Added auth token from localStorage
       const token = localStorage.getItem("token");
-      
+
       const result = await axios.post(
-        "http://localhost:3000/api/whatsapp/send",
+        "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/whatsapp/send",
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            "Authorization": `Bearer ${token}` // Add authentication header
+            "Authorization": `Bearer ${token}`, // Add authentication header
           },
         }
       );
@@ -117,7 +117,7 @@ const MessageForm = () => {
                   id="users"
                   value={users}
                   onChange={(e) => setUsers(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-third focus:border-transparent text-secondary"
                   rows="4"
                   placeholder="Example: +1234567890"
                 />
@@ -130,7 +130,7 @@ const MessageForm = () => {
                   id="message"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-third focus:border-transparent text-secondary"
                   rows="4"
                   placeholder="Type your message here..."
                 />
@@ -147,7 +147,7 @@ const MessageForm = () => {
                   id="media"
                   type="file"
                   onChange={(e) => setMedia(e.target.files[0])}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-third focus:border-transparent text-secondary"
                 />
               </div>
               <div className="flex items-end justify-end">
@@ -155,7 +155,7 @@ const MessageForm = () => {
                   type="submit"
                   disabled={isLoading}
                   className={`px-4 py-2 rounded-lg text-sm font-medium text-white ${
-                    isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-third hover:bg-indigo-700"
+                    isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-third hover:bg-third-dark"
                   }`}
                 >
                   {isLoading ? "Sending..." : "Send Messages"}

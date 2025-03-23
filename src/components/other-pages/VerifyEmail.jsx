@@ -19,7 +19,7 @@ const VerifyEmail = () => {
 
       try {
         const response = await fetch(
-          `http://localhost:3000/api/auth/verify-email?token=${token}`
+          `https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/auth/verify-email?token=${token}`
         );
         const data = await response.json();
 

@@ -74,7 +74,7 @@ const GmailSender = () => {
 
       // Make API request to send emails
       const response = await axios.post(
-        "http://localhost:3000/api/send-gmail", // Replace with your backend endpoint
+        "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/send-gmail", // Replace with your backend endpoint
         {
           gmail,
           appPassword,
@@ -129,7 +129,7 @@ const GmailSender = () => {
                   type="email"
                   id="gmail"
                   placeholder="your@gmail.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-secondary"
                   value={gmail}
                   onChange={(e) => setGmail(e.target.value)}
                   required
@@ -141,7 +141,7 @@ const GmailSender = () => {
                   type="password"
                   id="appPassword"
                   placeholder="••••••••"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-secondary"
                   value={appPassword}
                   onChange={(e) => setAppPassword(e.target.value)}
                   required
@@ -163,7 +163,7 @@ const GmailSender = () => {
                   type="email"
                   id="from"
                   placeholder="sender@company.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-secondary"
                   value={from}
                   onChange={(e) => setFrom(e.target.value)}
                   required
@@ -175,7 +175,7 @@ const GmailSender = () => {
                   type="text"
                   id="subject"
                   placeholder="Enter email subject"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-secondary"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   required

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { Link } from "react-router-dom";
+import {useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [currentPlan, setCurrentPlan] = useState("Free");
@@ -9,11 +10,66 @@ const Dashboard = () => {
   const [stats, setStats] = useState({});
   const [chartData, setChartData] = useState([]);
   const [recentActivities, setRecentActivities] = useState([]);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+ useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          navigate("/login");
+          return;
+        }
+        
+        // Fetch user authentication data
+        const userResponse = await fetch("https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/auth/user", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+        
+        if (!userResponse.ok) {
+          if (userResponse.status === 401) {
+            localStorage.removeItem("token");
+            navigate("/login");
+            return;
+          }
+          throw new Error(`HTTP error: ${userResponse.status}`);
+        }
+        
+        const userData = await userResponse.json();
+        
+        // Fetch subscription status
+        const subscriptionResponse = await fetch("https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/subscription/status", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+        
+        if (subscriptionResponse.ok) {
+          const subscriptionData = await subscriptionResponse.json();
+          // Combine user data with subscription data
+          userData.currentPlan = subscriptionData.currentPlan.charAt(0).toUpperCase() + 
+                                 subscriptionData.currentPlan.slice(1); // Capitalize first letter
+        }
+        
+        setUser(userData);
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUserData();
 
+  }, [navigate]);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/dashboard", {
+        const response = await fetch("https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/dashboard", {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         if (!response.ok) throw new Error("Failed to fetch data");
@@ -52,17 +108,24 @@ const Dashboard = () => {
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-third">
             Dashboard Overview
           </h2>
-          <p className="text-gray-400 text-sm">Analytics and quick actions for your marketing campaigns</p>
+          <p className="text-gray-400 text-sm">
+            Analytics and quick actions for your marketing campaigns
+          </p>
         </div>
         <div className="flex items-center space-x-4 mt-4 sm:mt-0">
           <div className="text-right">
-            <p className="text-sm font-semibold">{currentPlan} Plan</p>
+          <p className="text-sm font-medium">{user?.name || "User"}</p>
+              <p className="text-xs text-gray-400">
+                {user?.currentPlan && user.currentPlan !== "Free" ? `${user.currentPlan} Plan` : "Free User"}
+              </p>
           </div>
-          <Link to="/plan">
-            <button className="bg-third hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg transition duration-200 text-sm font-medium shadow-lg">
-              Upgrade Plan
-            </button>
-          </Link>
+          {currentPlan.toLowerCase() === "free" && (
+            <Link to="/plan">
+              <button className="bg-third hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg transition duration-200 text-sm font-medium shadow-lg">
+                Upgrade Plan
+              </button>
+            </Link>
+          )}
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">

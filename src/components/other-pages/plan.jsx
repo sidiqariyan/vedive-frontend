@@ -3,7 +3,7 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Check, Sparkles, Rocket, Building2, X, Loader } from "lucide-react";
 import subscriptionService from "./subscriptionService";
 import { toast } from "react-toastify";
-import cashfree from "./file/cashfree";
+import {cashfree} from "./file/cashfree";
 
 const Plan = () => {
   const [loading, setLoading] = useState(false);
@@ -87,7 +87,7 @@ const Plan = () => {
   const initializePayment = useCallback((paymentSessionId, orderId) => {
     const checkoutOptions = {
       paymentSessionId,
-      returnUrl: `${window.location.origin}/plans/payment-status?order_id=${orderId}`,
+      returnUrl: `https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/plans/payment-status?order_id=${orderId}`,
       redirectTarget: "_self",
       theme: {
         navbarColor: "#2563eb",
@@ -114,7 +114,7 @@ const Plan = () => {
       toast.info("Verifying your payment...");
       if (!localStorage.getItem("token")) {
         navigate("/login", {
-          state: { redirectTo: `/plans/payment-status?order_id=${orderId}` },
+          state: { redirectTo: `https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/plans/payment-status?order_id=${orderId}` },
         });
         return;
       }

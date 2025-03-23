@@ -18,7 +18,7 @@ const AboutUs = () => {
       {/* Desktop View */}
       <div className="desktop-view">
         <div
-          style={{ background: "#000000", color: "#ffffff" }}
+          style={{ background: "transparent", color: "#ffffff" }}
           className="about-us-container about-us-container-1"
         >
           <h1>Our Story</h1>
@@ -66,7 +66,7 @@ const AboutUs = () => {
 
       {/* Grid Container */}
       <div className="grid-container">
-        <div className="grid-item">
+        <div className="grid-item" style={{ backgroundColor: "#1E90FF", color: "white" }}>
           <h2>Our Value:</h2>
           <p>
             Our mission is to provide convenience and quality service to every

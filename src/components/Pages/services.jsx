@@ -66,7 +66,7 @@ const Services = () => {
       <div className="desktop-view">
         {/* Our Story Section */}
         <div
-          style={{ background: "#000000", color: "#ffffff" }}
+          style={{ background: "transparent", color: "#ffffff" }}
           className="about-us-container about-us-container-1"
         >
           <h1>Our Story</h1>
@@ -93,7 +93,7 @@ const Services = () => {
 
         {/* Grid Layout for "What We Want" */}
         <div className="grid-container" style={{ marginBottom: "5vw" }}>
-          <div className="grid-item">
+          <div className="grid-item"  style={{ backgroundColor: "#1E90FF", color: "white" }}>
             <h2>Our Value:</h2>
             <p>
               Our mission is to provide convenience and quality service to every
