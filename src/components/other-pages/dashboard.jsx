@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import {useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
+  const API_URL = "http://localhost:3000";
+  // const API_URL = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
   const [currentPlan, setCurrentPlan] = useState("Free");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,7 +24,7 @@ const Dashboard = () => {
         }
         
         // Fetch user authentication data
-        const userResponse = await fetch("https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/auth/user", {
+        const userResponse = await fetch(`${API_URL}/api/auth/user`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json"
@@ -41,7 +43,7 @@ const Dashboard = () => {
         const userData = await userResponse.json();
         
         // Fetch subscription status
-        const subscriptionResponse = await fetch("https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/subscription/status", {
+        const subscriptionResponse = await fetch(`${API_URL}/api/subscription/status`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json"
@@ -69,7 +71,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/dashboard", {
+        const response = await fetch(`${API_URL}/api/dashboard`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         if (!response.ok) throw new Error("Failed to fetch data");

@@ -5,6 +5,35 @@ import { AuthProvider } from "./components/Pages/Mailer/AuthContext.jsx";
 import ProtectedRoute from "./components/other-pages/ProtectedRoutes.jsx";
 import MainLayout from "./components/MailLayout.jsx";
 import "tailwindcss/tailwind.css";
+import ResetPassword from "./components/other-pages/ResetPassword.jsx";
+
+// Lazy-loaded pages
+const CreateBlogPostPage = lazy(() => import("./components/other-pages/CreateBlogPostPage.jsx"));
+const BlogPostListPage  = lazy(() => import("./components/other-pages/BlogPostListPage.jsx"));
+const PostDetail = lazy(() => import("./components/other-pages/PostDetails.jsx")); // New route for single post details
+const Hero = lazy(() => import("./components/Pages/Hero/Hero"));
+const ContactUs = lazy(() => import("./components/Pages/contact.jsx"));
+const AboutUs = lazy(() => import("./components/Pages/about.jsx"));
+const Pricing = lazy(() => import("./components/Pages/pricing.jsx"));
+const Services = lazy(() => import("./components/Pages/services.jsx"));
+const Login = lazy(() => import("./components/other-pages/login.jsx"));
+const Signup = lazy(() => import("./components/other-pages/sign-up.jsx"));
+const Passreset = lazy(() => import("./components/other-pages/pass-reset.jsx"));
+const VerifyEmail = lazy(() => import("./components/other-pages/VerifyEmail"));
+const Dashboard = lazy(() => import("./components/other-pages/dashboard.jsx"));
+const Account = lazy(() => import("./components/other-pages/account.jsx"));
+const PostForm = lazy(() => import("./components/other-pages/PostForm.jsx"));
+const PostList = lazy(() => import("./components/other-pages/PostList.jsx"));
+const Plan = lazy(() => import("./components/other-pages/plan.jsx"));
+const Campaign = lazy(() => import("./components/other-pages/campaign.jsx"));
+const TemplateEditorPage = lazy(() => import("./components/other-pages/TemplateEditor.jsx"));
+const SenderBody = lazy(() => import("./components/Pages/Mailer/SenderBody.jsx"));
+const EmailScrapper = lazy(() => import("./components/Pages/Mailer/EmailScrapper.jsx"));
+const GmailSender = lazy(() => import("./components/Pages/Gmail/GmailSender.jsx"));
+const MessageForm = lazy(() => import("./components/Pages/Whatsapp/WhatsAppSender.jsx"));
+const NumberScraper = lazy(() => import("./components/Pages/Whatsapp/NumberScraper.jsx"));
+const PaymentStatus = lazy(() => import("./components/other-pages/PaymentStatus.jsx"));
+const SubscriptionHistory = lazy(() => import("./components/other-pages/SubscriptionHistory.jsx"));
 
 // Enhanced Page Transition Component
 const EnhancedPageTransition = ({ children }) => {
@@ -51,11 +80,9 @@ const EnhancedPageTransition = ({ children }) => {
 // Custom Loader Component
 const ElegantLoader = ({ onComplete }) => {
   useEffect(() => {
-    // Force the loader to show for at least 3 seconds (animation duration)
     const timer = setTimeout(() => {
       if (onComplete) onComplete();
-    }, 3000); // Adjust time based on animation duration
-    
+    }, 3000);
     return () => clearTimeout(timer);
   }, [onComplete]);
 
@@ -104,13 +131,11 @@ const ElegantLoader = ({ onComplete }) => {
             font-weight: 700;
             text-transform: uppercase;
             transition: all 0.3s ease-in-out;
-            /* Remove fill by keeping text color transparent */
             color: transparent;
             -webkit-text-stroke: 2px rgba(30, 144, 255, 1);
             text-stroke: 2px rgba(30, 144, 255, 1);
             position: relative;
           }
-          /* Pseudo-element that animates a gradient along the stroke */
           .elegant-text::before {
             content: attr(data-text);
             position: absolute;
@@ -121,12 +146,10 @@ const ElegantLoader = ({ onComplete }) => {
             color: transparent;
             -webkit-text-stroke: 2px rgba(30, 144, 255, 1);
             text-stroke: 2px rgba(30, 144, 255, 1);
-            /* Gradient for a moving highlight without any fill */
             background: linear-gradient(90deg, transparent, rgba(30,144,255,1), transparent);
             background-size: 200%;
             -webkit-background-clip: text;
             background-clip: text;
-            /* Animate from left to right */
             animation: borderLight 3s ease-in-out infinite normal;
           }
           .animate-slide {
@@ -220,17 +243,14 @@ const globalStyles = `
     height: 100%;
   }
   
-  /* Hide scrollbar during transitions */
   body.transitioning {
     overflow: hidden;
   }
   
-  /* Add smooth scrolling to all elements */
   html {
     scroll-behavior: smooth;
   }
   
-  /* Animate content elements */
   .content-element {
     opacity: 0;
     transform: translateY(20px);
@@ -242,7 +262,6 @@ const globalStyles = `
     transform: translateY(0);
   }
   
-  /* Stagger animation for multiple elements */
   .content-element:nth-child(1) { transition-delay: 0.1s; }
   .content-element:nth-child(2) { transition-delay: 0.2s; }
   .content-element:nth-child(3) { transition-delay: 0.3s; }
@@ -250,46 +269,13 @@ const globalStyles = `
   .content-element:nth-child(5) { transition-delay: 0.5s; }
 `;
 
-// Lazy loaded pages
-const Hero = lazy(() => import("./components/Pages/Hero/Hero"));
-const ContactUs = lazy(() => import("./components/Pages/contact.jsx"));
-const AboutUs = lazy(() => import("./components/Pages/about.jsx"));
-const Pricing = lazy(() => import("./components/Pages/pricing.jsx"));
-const Services = lazy(() => import("./components/Pages/services.jsx"));
-const Login = lazy(() => import("./components/other-pages/login.jsx"));
-const Signup = lazy(() => import("./components/other-pages/sign-up.jsx"));
-const Passreset = lazy(() => import("./components/other-pages/pass-reset.jsx"));
-const VerifyEmail = lazy(() => import("./components/other-pages/VerifyEmail"));
-const Dashboard = lazy(() => import("./components/other-pages/dashboard.jsx"));
-const Account = lazy(() => import("./components/other-pages/account.jsx"));
-const PostForm = lazy(() => import("./components/other-pages/PostForm.jsx"));
-const PostList = lazy(() => import("./components/other-pages/PostList.jsx"));
-const Plan = lazy(() => import("./components/other-pages/plan.jsx"));
-const Campaign = lazy(() => import("./components/other-pages/campaign.jsx"));
-const TemplateEditorPage = lazy(() => import("./components/other-pages/TemplateEditor.jsx"));
-const SenderBody = lazy(() => import("./components/Pages/Mailer/SenderBody.jsx"));
-const EmailScrapper = lazy(() => import("./components/Pages/Mailer/EmailScrapper.jsx"));
-const GmailSender = lazy(() => import("./components/Pages/Gmail/GmailSender.jsx"));
-const MessageForm = lazy(() => import("./components/Pages/Whatsapp/WhatsAppSender.jsx"));
-const NumberScraper = lazy(() => import("./components/Pages/Whatsapp/NumberScraper.jsx"));
-const PaymentStatus = lazy(() => import("./components/other-pages/PaymentStatus.jsx"));
-const SubscriptionHistory = lazy(() => import("./components/other-pages/SubscriptionHistory.jsx"));
-
 // ScrollToTop component with smooth scrolling
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   
   useEffect(() => {
-    // Add transition class to body
     document.body.classList.add('transitioning');
-    
-    // Smooth scroll to top
-    window.scrollTo({ 
-      top: 0, 
-      behavior: "smooth" 
-    });
-    
-    // Remove transition class after animation
+    window.scrollTo({ top: 0, behavior: "smooth" });
     const timeout = setTimeout(() => {
       document.body.classList.remove('transitioning');
       document.body.classList.add('page-loaded');
@@ -404,10 +390,18 @@ const AnimatedRoutes = () => {
           }
         />
         <Route
-          path="/reset"
+          path="/pass-reset"
           element={
             <EnhancedPageTransition>
               <Passreset />
+            </EnhancedPageTransition>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <EnhancedPageTransition>
+              <ResetPassword />
             </EnhancedPageTransition>
           }
         />
@@ -450,6 +444,31 @@ const AnimatedRoutes = () => {
             <ProtectedMainLayout>
               <SenderBody />
             </ProtectedMainLayout>
+          }
+        />
+        <Route
+          path="/blog/create"
+          element={
+            <EnhancedPageTransition>
+              <CreateBlogPostPage />
+            </EnhancedPageTransition>
+          }
+        />
+        <Route
+          path="/blog"
+          element={
+            <EnhancedPageTransition>
+              <BlogPostListPage />
+            </EnhancedPageTransition>
+          }
+        />
+        {/* New Route for Single Blog Post Details */}
+        <Route
+          path="/blog-posts/:id"
+          element={
+            <EnhancedPageTransition>
+              <PostDetail />
+            </EnhancedPageTransition>
           }
         />
         <Route

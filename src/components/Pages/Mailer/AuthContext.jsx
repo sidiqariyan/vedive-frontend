@@ -1,4 +1,5 @@
-import React, { createContext, useState, useEffect } from "react";
+// File: src/components/Pages/Mailer/AuthContext.jsx
+import React, { createContext, useState, useEffect, useContext } from "react";
 
 export const AuthContext = createContext();
 
@@ -13,6 +14,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = () => {
     setIsLoggedIn(true);
+    // Optionally, set token in localStorage
+    localStorage.setItem("token", "your-jwt-token-here");
   };
 
   const logout = () => {
@@ -25,4 +28,9 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
+};
+
+// Custom hook to use the auth context
+export const useAuth = () => {
+  return useContext(AuthContext);
 };

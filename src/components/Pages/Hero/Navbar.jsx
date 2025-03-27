@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./styles.css"; // Ensure your CSS is imported
 import Vedive from "../assets/Vedive.png";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import svg1 from "../assets/svg1.svg";
 import svg2 from "../assets/svg2.svg";
 import svg3 from "../assets/svg3.svg";
 import svg4 from "../assets/svg4.svg";
 import svg5 from "../assets/svg5.svg";
-import user from "../assets/user.svg";
 
 const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -65,32 +64,70 @@ const Navbar = () => {
   return (
     <div className="navbar">
       {/* Logo */}
+      <Link to="/">
       <div className="logo-main">
+        
         <img src={Vedive} alt="Logo" />
+       
       </div>
-
+      </Link>
       {/* Desktop Navigation Links */}
       <ul className="nav-links">
         <li>
-          <Link to="/">Home</Link>
+          <NavLink
+            to="/"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            Home
+          </NavLink>
         </li>
         <li>
-          <Link to="/about">About Us</Link>
+          <NavLink
+            to="/about"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            About Us
+          </NavLink>
         </li>
         <li>
-          <Link to="/services">Services</Link>
+          <NavLink
+            to="/services"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            Services
+          </NavLink>
         </li>
         <li>
-          <Link to="/templates">Templates</Link>
+          <NavLink
+            to="/templates"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            Templates
+          </NavLink>
         </li>
         <li>
-          <Link to="/pricing">Pricing</Link>
+          <NavLink
+            to="/pricing"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            Pricing
+          </NavLink>
         </li>
         <li>
-          <Link to="/blogs">Blogs</Link>
+          <NavLink
+            to="/blogs"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            Blogs
+          </NavLink>
         </li>
         <li>
-          <Link to="/contact">Contact Us</Link>
+          <NavLink
+            to="/contact"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            Contact Us
+          </NavLink>
         </li>
       </ul>
 
@@ -98,8 +135,11 @@ const Navbar = () => {
       <div className="buttons">
         {isLoggedIn ? (
           <>
-            <Link
+            <NavLink
               to="/dashboard"
+              className={({ isActive }) =>
+                isActive ? "active button" : "button"
+              }
               style={{
                 backgroundColor: "#1E90FF",
                 border: "solid #1E90FF 1px",
@@ -107,7 +147,7 @@ const Navbar = () => {
               }}
             >
               My Account
-            </Link>
+            </NavLink>
             <button
               onClick={handleLogout}
               style={{
@@ -121,19 +161,25 @@ const Navbar = () => {
           </>
         ) : (
           <>
-            <Link to="/login" style={{ padding: "" }}>
+            <NavLink
+              to="/login"
+              className={({ isActive }) => (isActive ? "active" : "")}
+            >
               Log in
-            </Link>
-            <Link
+            </NavLink>
+            <NavLink
               to="/signup"
+              className={({ isActive }) =>
+                isActive ? "active button" : "button"
+              }
               style={{
                 backgroundColor: "#1E90FF",
                 border: "solid #1E90FF 1px",
-                padding: "",
+                padding: "5px 25px",
               }}
             >
               Get Started For Free
-            </Link>
+            </NavLink>
           </>
         )}
       </div>
@@ -160,40 +206,84 @@ const Navbar = () => {
         <img src={svg4} className="menu-svg svg-4" alt="SVG 4" />
         <img src={svg5} className="menu-svg svg-5" alt="SVG 5" />
 
-        <Link to="/">Home</Link>
-        <Link to="/about">About Us</Link>
-        <Link to="/services">Services</Link>
-        <Link to="/templates">Templates</Link>
-        <Link to="/pricing">Pricing</Link>
-        <Link to="/blogs">Blogs</Link>
-        <Link to="/contact">Contact Us</Link>
+        <NavLink
+          to="/"
+          className={({ isActive }) => (isActive ? "active" : "")}
+          onClick={() => setIsMenuOpen(false)}
+        >
+          Home
+        </NavLink>
+        <NavLink
+          to="/about"
+          className={({ isActive }) => (isActive ? "active" : "")}
+          onClick={() => setIsMenuOpen(false)}
+        >
+          About Us
+        </NavLink>
+        <NavLink
+          to="/services"
+          className={({ isActive }) => (isActive ? "active" : "")}
+          onClick={() => setIsMenuOpen(false)}
+        >
+          Services
+        </NavLink>
+        <NavLink
+          to="/templates"
+          className={({ isActive }) => (isActive ? "active" : "")}
+          onClick={() => setIsMenuOpen(false)}
+        >
+          Templates
+        </NavLink>
+        <NavLink
+          to="/pricing"
+          className={({ isActive }) => (isActive ? "active" : "")}
+          onClick={() => setIsMenuOpen(false)}
+        >
+          Pricing
+        </NavLink>
+        <NavLink
+          to="/blogs"
+          className={({ isActive }) => (isActive ? "active" : "")}
+          onClick={() => setIsMenuOpen(false)}
+        >
+          Blogs
+        </NavLink>
+        <NavLink
+          to="/contact"
+          className={({ isActive }) => (isActive ? "active" : "")}
+          onClick={() => setIsMenuOpen(false)}
+        >
+          Contact Us
+        </NavLink>
 
         {/* Mobile Buttons */}
         {isLoggedIn ? (
           <>
-            <Link
+            <NavLink
               to="/dashboard"
+              className={({ isActive }) => (isActive ? "active" : "")}
+              onClick={() => setIsMenuOpen(false)}
             >
               My Account
-            </Link>
-            <button
-              onClick={handleLogout}
-            >
-              Logout
-            </button>
+            </NavLink>
+            <button onClick={handleLogout}>Logout</button>
           </>
         ) : (
           <>
-            <Link
+            <NavLink
               to="/login"
+              className={({ isActive }) => (isActive ? "active" : "")}
+              onClick={() => setIsMenuOpen(false)}
             >
               Log in
-            </Link>
-            <Link
+            </NavLink>
+            <NavLink
               to="/signup"
+              className={({ isActive }) => (isActive ? "active" : "")}
+              onClick={() => setIsMenuOpen(false)}
             >
               Get Started For Free
-            </Link>
+            </NavLink>
           </>
         )}
       </div>

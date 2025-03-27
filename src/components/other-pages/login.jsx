@@ -18,6 +18,31 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const checkAuthAndRedirect = (navigate) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        if (decoded.exp * 1000 > Date.now()) {
+          navigate("/dashboard");
+          return true;
+        } else {
+          localStorage.removeItem("token");
+        }
+      } catch (error) {
+        console.error("Invalid token:", error);
+        localStorage.removeItem("token");
+      }
+    }
+    return false;
+  };
+  useEffect(() => {
+    if (checkAuthAndRedirect(navigate)) return;
+  }, [navigate]);
+
+  const API_URL = "http://localhost:3000";
+  // const API_URL = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
+  
   // Handle token from URL (e.g., after Google OAuth)
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -49,7 +74,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/auth/login",
+        `${API_URL}/api/auth/login`,
         { emailOrUsername, password },
         {
           headers: {
@@ -77,7 +102,7 @@ const Login = () => {
 
   // Handle Google Sign-In
   const handleGoogleLogin = () => {
-    window.location.href = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/auth/google";
+    window.location.href = `${API_URL}/api/auth/google`;
   };
 
   return (

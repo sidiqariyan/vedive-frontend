@@ -3,10 +3,32 @@ import { Link, useNavigate } from "react-router-dom";
 import "./secondarystyles.css";
 import Vedive from "../assets/Vedive.png";
 import Google from "../assets/google-icon.svg";
+import jwtDecode from "jwt-decode";
 
-const API_URL = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/";
+const API_URL = "http://localhost:3000";
 
-const Signup = () => {
+const checkAuthAndRedirect = (navigate) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    try {
+      const decoded = jwtDecode(token);
+      if (decoded.exp * 1000 > Date.now()) {
+        navigate("/dashboard");
+        return true;
+      } else {
+        localStorage.removeItem("token");
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+      localStorage.removeItem("token");
+    }
+  }
+  return false;
+};
+
+export const Signup = () => {
+  // State to delay rendering until auth check is complete
+  const [initialized, setInitialized] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     username: "",
@@ -18,6 +40,11 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (checkAuthAndRedirect(navigate)) return;
+    setInitialized(true);
+  }, [navigate]);
 
   const handleChange = useCallback((e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -40,7 +67,7 @@ const Signup = () => {
     setError(null);
     setLoading(true);
     try {
-      const response = await fetch(`https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/auth/register`, {
+      const response = await fetch(`${API_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -57,6 +84,9 @@ const Signup = () => {
       setLoading(false);
     }
   };
+
+  // Do not render until initialization is complete (auth check done)
+  if (!initialized) return null;
 
   return (
     <div>

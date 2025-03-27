@@ -12,6 +12,8 @@ import MessageForm from "./Pages/Whatsapp/WhatsAppSender";
 import Plan from "./other-pages/plan";
 
 const MainLayout = ({ children }) => {
+  const API_URL = "http://localhost:3000";
+  // const API_URL = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
   const navigate = useNavigate();
   const location = useLocation();
   const [user, setUser] = useState(null);
@@ -31,7 +33,7 @@ const MainLayout = ({ children }) => {
         }
         
         // Fetch user authentication data
-        const userResponse = await fetch("https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/auth/user", {
+        const userResponse = await fetch(`${API_URL}/api/auth/user`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json"
@@ -50,7 +52,7 @@ const MainLayout = ({ children }) => {
         const userData = await userResponse.json();
         
         // Fetch subscription status
-        const subscriptionResponse = await fetch("https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/subscription/status", {
+        const subscriptionResponse = await fetch(`${API_URL}/api/subscription/status`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json"

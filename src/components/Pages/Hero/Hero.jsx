@@ -94,7 +94,7 @@ const Hero = () => {
       id: "whatsAppSender",
       name: "WhatsApp Bulk Sender",
       description: "Automated WhatsApp messaging for efficient customer outreach",
-      icon: <MessageSquare size={24} strokeWidth={2} className="text-white" />, // Changed to MessageSquare for WhatsApp
+      icon: <MessageSquare size={24} strokeWidth={2} className="text-white" />,
       color: "from-green-600 to-emerald-400",
       hoverColor: "from-green-500 to-emerald-300",
     },
@@ -116,14 +116,14 @@ const Hero = () => {
   ];
 
   return (
-    <div className="w-full min-h-screen text-white bg-slate-950 flex flex-col relative overflow-hidden">
+    <div className="w-full h-screen text-white bg-slate-950 flex flex-col relative overflow-hidden">
       {/* Enhanced background with deeper gradients and noise texture */}
       <div 
         className="absolute inset-0 bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950 z-0"
       />
       
       {/* Improved grid overlay with animation */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMyMDIwMjAiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0aDR2MWgtNHYtMXptMC0yfDR2MWgtNHYtMXptMC0yaDR2MWgtNHYtMXptMC0yaDR2MWgtNHYtMXptMC0yaDR2MWgtNHYtMXptMC0yaDR2MWgtNHYtMXpNMzQgMzRoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xek0zMiAzNGgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6TTMwIDM0aDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXpNMjggMzRoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xek0yNiAzNGgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6TTI0IDM0aDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXoiLz48L2c+PC9nPjwvc3ZnPg==')]" />
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMyMDIwMjAiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0aDR2MWgtNHYtMXptMC0yfDR2MWgtNHYtMXptMC0yaDR2MWgtNHYtMXptMC0yaDR2MWgtNHYtMXptMC0yaDR2MWgtNHYtMXptMC0yaDR2MWgtNHYtMXpNMzQgMzRoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xek0zMiAzNGgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6TTMwIDM0aDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXpNMjggMzRoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xem0wLTJoMXYxaC0xdi0xek0yNiAzNGgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6bTAtMmgxdjFoLTF2LTF6TTI0IDM0aDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXptMC0yaDF2MWgtMXYtMXoiLz48L2c+PC9nPjwvc3ZnPg==')]" />
       
       {/* Animated noise texture overlay for grain effect */}
       <div className="absolute inset-0 opacity-20 mix-blend-soft-light z-10 noise-texture"></div>
@@ -142,7 +142,6 @@ const Hero = () => {
       {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/80 backdrop-blur-md animate-fadeIn">
           <div className="bg-slate-900/90 backdrop-blur-xl p-8 rounded-xl max-w-2xl mx-4 border border-slate-800/50 shadow-2xl animate-scaleIn relative overflow-hidden">
-            {/* Background glow effect */}
             <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-blue-600/20 blur-3xl"></div>
             <div className="absolute -bottom-20 -left-20 w-40 h-40 rounded-full bg-indigo-600/20 blur-3xl"></div>
             
@@ -169,9 +168,7 @@ const Hero = () => {
                 onClick={() => handleConsent("accepted")}
                 className="rounded-lg bg-gradient-to-r from-blue-600 to-indigo-500 px-6 py-3.5 text-white font-medium hover:shadow-lg hover:shadow-blue-600/20 transition-all duration-300 transform hover:-translate-y-1 hover:from-blue-500 hover:to-indigo-400 group relative overflow-hidden"
               >
-                {/* Button hover animation effect */}
                 <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-blue-500/0 via-white/20 to-blue-500/0 -translate-x-full group-hover:animate-shimmer"></span>
-                
                 <span className="flex items-center justify-center gap-2 relative z-10">
                   Accept All
                   <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
@@ -195,32 +192,29 @@ const Hero = () => {
         <Navbar />
       </div>
 
-      {/* Main content area with enhanced animations */}
-      <main className="relative z-20 flex-1 flex flex-col items-center px-4 py-16 max-w-6xl mx-auto w-full">
-        {/* Hero headline section with improved staggered animations */}
-        <section className="w-full mb-20 text-center">
+      {/* Main content area with adjusted padding to fit within the screen */}
+      <main className="relative z-20 flex-1 flex flex-col items-center px-4 py-8 max-w-6xl mx-auto w-full">
+        <section className="w-full text-center">
           <div className="overflow-hidden mb-2">
             <h1 className="text-6xl md:text-7xl font-bold mb-2 leading-tight font-raleway animate-slideUpFade relative inline-block">
               Where Messages
-              <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-blue-600/0 via-blue-400 to-blue-600/0 transform animate-scaleWidthDelay"></div>
             </h1>
           </div>
           
           <div className="overflow-hidden mb-6">
-            <h1 className="text-6xl md:text-7xl font-bold leading-tight font-raleway animate-slideUpFadeDelay relative inline-block">
+            <h1 className="text-6xl md:text-7xl font-bold leading-tight font-raleway animate-slideUpFadeDelay relative inline-block" style={{ lineHeight: "90px" }}>
               <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-blue-600 bg-clip-text text-transparent">Find Meaning</span>
               <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-blue-600/0 via-indigo-400 to-blue-600/0 transform animate-scaleWidthDelay2"></div>
             </h1>
           </div>
           
-          <p className="text-xl text-white/70 mb-10 max-w-3xl mx-auto animate-fadeInDelay">
+          <p className="text-xl text-white/70 mb-8 max-w-3xl mx-auto animate-fadeInDelay">
             Trusted for 99.9% Delivery Success. Spam-Free Messaging for Modern Businesses
           </p>
           
-          {/* Benefits bar with improved layout and animation */}
-          <div className="flex flex-wrap justify-center gap-8 mb-12 animate-fadeInDelay2">
+          <div className="flex flex-wrap justify-center gap-8 mb-8 animate-fadeInDelay2">
             {benefits.map((benefit, idx) => (
-              <div key={benefit.id} className="flex items-center gap-2 group" style={{animationDelay: `${0.6 + idx * 0.1}s`}}>
+              <div key={benefit.id} className="flex items-center gap-2 group" style={{ animationDelay: `${0.6 + idx * 0.1}s` }}>
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600/20 to-indigo-600/10 flex items-center justify-center text-blue-400 transition-all duration-500 ease-in-out group-hover:bg-gradient-to-br group-hover:from-blue-500/30 group-hover:to-indigo-500/20 group-hover:text-blue-300 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-md group-hover:shadow-blue-500/20">
                   {benefit.icon}
                 </div>
@@ -229,15 +223,12 @@ const Hero = () => {
             ))}
           </div>
           
-          {/* CTAs with improved hover effects */}
-          <div className="flex flex-wrap justify-center gap-4 mb-20 animate-fadeInDelay3">
+          <div className="flex flex-wrap justify-center gap-4 mb-8 animate-fadeInDelay3">
             <button
               onClick={() => navigate('/dashboard')}
               className="group rounded-lg bg-gradient-to-r from-blue-600 to-indigo-500 px-8 py-4 text-white font-medium transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-600/20 hover:from-blue-500 hover:to-indigo-400 relative overflow-hidden"
             >
-              {/* Button hover animation with shimmer effect */}
               <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-blue-500/0 via-white/20 to-blue-500/0 -translate-x-full group-hover:animate-shimmer"></span>
-              
               <span className="flex items-center gap-2 relative z-10">
                 Start Now 
                 <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
@@ -254,8 +245,7 @@ const Hero = () => {
           </div>
         </section>
         
-        {/* Services grid with enhanced hover effects and animations */}
-        <section className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <section className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {services.map((service, index) => (
             <div
               key={service.id}
@@ -264,31 +254,20 @@ const Hero = () => {
               onClick={() => navigateToService(service.id)}
               className={`bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-6 transition-all duration-500 cursor-pointer flex flex-col items-center text-center group hover:shadow-xl hover:shadow-${service.color.split('-')[1]}-500/10 transform ${hoverIndex === index ? 'scale-105' : 'scale-100'} overflow-hidden relative`}
             >
-              {/* Animated gradient background on hover with pulse effect */}
               <div className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500 group-hover:animate-gradientPulse`}></div>
-              
-              {/* Border glow effect on hover */}
               <div className="absolute inset-0 rounded-xl border border-transparent group-hover:border-white/10 group-hover:shadow-inner group-hover:shadow-white/5 transition-all duration-500"></div>
-              
-              {/* Animated icon container with 3D perspective hover */}
               <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${service.color} bg-opacity-20 flex items-center justify-center mb-5 transform transition-all duration-500 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-${service.color.split('-')[1]}-500/30 group-hover:rotate-6 relative`}>
-                {/* Icon glow effect */}
                 <div className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 blur-sm transform scale-110 transition-opacity duration-500"></div>
-                
                 <div className="text-blue-400 group-hover:text-white transition-colors duration-500 relative z-10 animate-float">
                   {service.icon}
                 </div>
               </div>
-              
               <h3 className="text-xl font-bold mb-3 font-raleway group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-indigo-300 transition-colors duration-500">
                 {service.name}
               </h3>
-              
               <p className="text-white/60 text-sm group-hover:text-white/80 transition-colors duration-500">
                 {service.description}
               </p>
-              
-              {/* Enhanced animated arrow that appears on hover with trail effect */}
               <div className="mt-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0 relative">
                 <div className="absolute inset-0 bg-blue-400/20 rounded-full blur-lg scale-0 group-hover:scale-100 transition-transform duration-500"></div>
                 <ArrowRight size={18} className={`text-gradient-to-r ${service.color} transition-all duration-500`} />
@@ -297,9 +276,8 @@ const Hero = () => {
           ))}
         </section>
       </main>
-      </div>
- );
+    </div>
+  );
 };
 
 export default Hero;
-      

@@ -55,7 +55,6 @@
   .buttons a,
   .buttons button {
     padding: 5px 15px;
-    background-color: #000000;
     border: solid white 1px;
     color: white;
     text-decoration: none;
@@ -404,4 +403,10 @@
     }
   
   }
-  
+
+  .nav-links li .active,
+.buttons .active,
+.mobile-menu .active {
+  color: #1E90FF; /* Active link color */
+  /* Add any additional active styling here */
+}

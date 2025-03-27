@@ -3,7 +3,7 @@ import React from "react";
 import { motion } from "framer-motion";
 
 const pageVariants = {
-  initial: { opacity: 0, scale: 0.95, y: 20 },
+  // initial: { opacity: 0, scale: 0.95, y: 20 },
   animate: { opacity: 1, scale: 1, y: 0 },
   exit: { opacity: 0, scale: 1.02, y: -20 },
 };
