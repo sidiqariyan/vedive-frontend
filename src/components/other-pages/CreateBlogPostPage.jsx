@@ -4,7 +4,13 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '../../components/ui/select';
 import { Button } from '../../components/ui/button';
 import { Textarea } from '../../components/ui/textarea';
 
@@ -14,7 +20,7 @@ const CreateBlogPostPage = () => {
   const [category, setCategory] = useState('Other');
   const [tags, setTags] = useState('');
   const [coverImage, setCoverImage] = useState(null);
-  const [status, setStatus] = useState('draft');
+  const [status, setStatus] = useState('publish');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -35,8 +41,7 @@ const CreateBlogPostPage = () => {
 
     try {
       const token = localStorage.getItem('token');
-      // Let Axios automatically set the Content-Type header with correct boundary.
-      const response = await axios.post('http://localhost:3000/api/blog/create-blog-post', formData, {
+      const response = await axios.post('https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/blog/create-blog-post', formData, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -76,27 +81,45 @@ const CreateBlogPostPage = () => {
             />
 
             <div className="grid grid-cols-2 gap-4">
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Technology">Technology</SelectItem>
-                  <SelectItem value="Business">Business</SelectItem>
-                  <SelectItem value="Lifestyle">Lifestyle</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
-                </SelectContent>
-              </Select>
+              <div>
+                <label className="block mb-2 text-sm font-medium">Category</label>
+                <Select 
+                  value={category} 
+                  onValueChange={(value) => {
+                    console.log('Category selected:', value);
+                    setCategory(value);
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Technology">Technology</SelectItem>
+                    <SelectItem value="Business">Business</SelectItem>
+                    <SelectItem value="Lifestyle">Lifestyle</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="published">Publish</SelectItem>
-                </SelectContent>
-              </Select>
+              <div>
+                <label className="block mb-2 text-sm font-medium">Status</label>
+                <Select 
+                  value={status} 
+                  onValueChange={(value) => {
+                    console.log('Status selected:', value);
+                    setStatus(value);
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="published">Publish</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <Input 

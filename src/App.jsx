@@ -446,6 +446,14 @@ const AnimatedRoutes = () => {
             </ProtectedMainLayout>
           }
         />
+         <Route
+          path="/blog-posts/:identifier"
+          element={
+            <EnhancedPageTransition>
+              <PostDetail />
+            </EnhancedPageTransition>
+          }
+        />
         <Route
           path="/blog/create"
           element={
@@ -455,7 +463,7 @@ const AnimatedRoutes = () => {
           }
         />
         <Route
-          path="/blog"
+          path="/blogs"
           element={
             <EnhancedPageTransition>
               <BlogPostListPage />

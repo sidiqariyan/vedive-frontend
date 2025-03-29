@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
 import jwtDecode from "jwt-decode";
 import "./secondarystyles.css";
 import Vedive from "../assets/Vedive.png";
-import Google from "../assets/google-icon.svg";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,36 +12,39 @@ const Login = () => {
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  // State for error messages and loading
+  // State for error messages and loading state
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const checkAuthAndRedirect = (navigate) => {
+  // Use HTTPS for API_URL
+  const API_URL = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
+
+  // Check if the user is already authenticated and redirect them to the dashboard
+  const checkAuthAndRedirect = () => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
         const decoded = jwtDecode(token);
+        // decoded.exp is in seconds; compare with current time in milliseconds
         if (decoded.exp * 1000 > Date.now()) {
           navigate("/dashboard");
           return true;
         } else {
           localStorage.removeItem("token");
         }
-      } catch (error) {
-        console.error("Invalid token:", error);
+      } catch (err) {
+        console.error("Invalid token:", err);
         localStorage.removeItem("token");
       }
     }
     return false;
   };
+
   useEffect(() => {
-    if (checkAuthAndRedirect(navigate)) return;
+    if (checkAuthAndRedirect()) return;
   }, [navigate]);
 
-  const API_URL = "http://localhost:3000";
-  // const API_URL = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
-  
-  // Handle token from URL (e.g., after Google OAuth)
+  // Handle token from URL (if any)
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const token = urlParams.get("token");
@@ -51,58 +52,55 @@ const Login = () => {
       try {
         const decoded = jwtDecode(token);
         if (decoded.exp * 1000 < Date.now()) {
-          console.error("Token has expired");
           setError("Your session has expired. Please log in again.");
           navigate("/login");
           return;
         }
         localStorage.setItem("token", token);
         navigate("/dashboard");
-      } catch (error) {
-        console.error("Invalid token:", error);
+      } catch (err) {
+        console.error("Invalid token:", err);
         setError("Invalid session. Please log in again.");
         navigate("/login");
       }
     }
   }, [location, navigate]);
 
-  // Handle Email/Password Login
+  // Handle email/password login using the Fetch API
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
-      const response = await axios.post(
-        `${API_URL}/api/auth/login`,
-        { emailOrUsername, password },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: "POST",
+        credentials: "include", // to send cookies with the request
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ emailOrUsername, password }),
+      });
 
-      localStorage.setItem("token", response.data.token);
+      // If the response is not ok, throw an error
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Login failed");
+      }
+
+      const data = await response.json();
+      localStorage.setItem("token", data.token);
       setEmailOrUsername("");
       setPassword("");
       navigate("/dashboard");
     } catch (err) {
       console.error("Login failed:", err);
-      if (err.code === "ERR_NETWORK") {
-        setError("Network error. Please check your connection or server status.");
-      } else {
-        setError(err.response?.data?.error || "An unexpected error occurred.");
-      }
+      setError(
+        err.message ||
+          "An unexpected error occurred. Please check your connection or server status."
+      );
     } finally {
       setLoading(false);
     }
-  };
-
-  // Handle Google Sign-In
-  const handleGoogleLogin = () => {
-    window.location.href = `${API_URL}/api/auth/google`;
   };
 
   return (
@@ -117,18 +115,8 @@ const Login = () => {
         <h2>Login to Vedive</h2>
         <hr className="login-hr" />
 
-        {/* Form */}
+        {/* Login Form */}
         <form onSubmit={handleLogin}>
-          {/* Google Sign-In Button */}
-          <button
-            type="button"
-            className="google-btn"
-            onClick={handleGoogleLogin}
-            aria-label="Continue with Google"
-          >
-            <img src={Google} alt="Google Icon" /> Continue with Google
-          </button>
-
           {/* Email/Username Input */}
           <div className="input-login-group">
             <input
@@ -157,7 +145,7 @@ const Login = () => {
             <label className="input-login-label">Password</label>
           </div>
 
-          {/* Error Message */}
+          {/* Display error messages */}
           {error && <p className="error-message">{error}</p>}
 
           {/* Submit Button */}
@@ -171,7 +159,7 @@ const Login = () => {
           </button>
         </form>
 
-        {/* Links */}
+        {/* Additional Links */}
         <div className="links">
           <Link
             to="/pass-reset"
