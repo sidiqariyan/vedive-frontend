@@ -25,7 +25,6 @@ const Account = lazy(() => import("./components/other-pages/account.jsx"));
 const PostForm = lazy(() => import("./components/other-pages/PostForm.jsx"));
 const PostList = lazy(() => import("./components/other-pages/PostList.jsx"));
 const Plan = lazy(() => import("./components/other-pages/plan.jsx"));
-const Campaign = lazy(() => import("./components/other-pages/campaign.jsx"));
 const TemplateEditorPage = lazy(() => import("./components/other-pages/TemplateEditor.jsx"));
 const SenderBody = lazy(() => import("./components/Pages/Mailer/SenderBody.jsx"));
 const EmailScrapper = lazy(() => import("./components/Pages/Mailer/EmailScrapper.jsx"));
