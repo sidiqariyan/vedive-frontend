@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const VerifyEmail = () => {
-  const API_URL = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
+  const API_URL = "http://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
   // const API_URL = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");

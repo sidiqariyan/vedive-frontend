@@ -46,7 +46,7 @@ const PostList = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get("https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/posts");
+        const response = await axios.get("http://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/posts");
         setPosts(response.data);
       } catch (error) {
         console.error("Error fetching posts:", error);
