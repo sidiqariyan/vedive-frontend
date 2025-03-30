@@ -34,7 +34,7 @@ const Footer = () => {
             </div>
             <p>
               Our mission is to provide convenience and quality service to every
-              marketing (address)
+              marketing.
             </p>
             <br />
             <br />
