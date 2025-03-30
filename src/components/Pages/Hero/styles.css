@@ -401,6 +401,12 @@
         font-weight: 400;
         line-height: 13.62px;
     }
+    .social-icons{
+      gap: 8px !important;
+    }
+    .social-icons img {
+    width: 22px !important;
+    }
   
   }
 

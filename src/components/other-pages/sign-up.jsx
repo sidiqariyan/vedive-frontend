@@ -91,7 +91,10 @@ export const Signup = () => {
   return (
     <div>
       <header className="login-header">
+        <Link to="/">
         <img src={Vedive} alt="logo" />
+        </Link>
+
       </header>
       <div className="login-container">
         <h2>Sign Up to Vedive</h2>

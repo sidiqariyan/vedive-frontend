@@ -116,7 +116,7 @@ const Hero = () => {
   ];
 
   return (
-    <div className="w-full h-screen text-white bg-slate-950 flex flex-col relative overflow-hidden">
+    <div className="w-full min-h-screen text-white bg-slate-950 flex flex-col relative overflow-auto">
       {/* Enhanced background with deeper gradients and noise texture */}
       <div 
         className="absolute inset-0 bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950 z-0"

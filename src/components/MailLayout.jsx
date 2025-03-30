@@ -171,7 +171,9 @@ const MainLayout = ({ children }) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="relative">
-                <img src={logo} alt="Vedive Logo" className="w-[150px] mb-2" />
+                <NavLink to="/">
+                <img src={logo} alt="Vedive Logo" className="w-[150px] mb-2" />     
+                </NavLink>
               </div>
             </div>
             <button

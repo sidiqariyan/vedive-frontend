@@ -18,6 +18,7 @@ const Login = () => {
 
   // Use HTTPS for API_URL
   const API_URL = "http://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
+  // const API_URL = "http://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
 
   // Check if the user is already authenticated and redirect them to the dashboard
   const checkAuthAndRedirect = () => {
@@ -107,7 +108,9 @@ const Login = () => {
     <div>
       {/* Header Section */}
       <header className="login-header">
+        <Link to="/">
         <img src={Vedive} alt="Vedive Logo" />
+        </Link>
       </header>
 
       {/* Login Container */}

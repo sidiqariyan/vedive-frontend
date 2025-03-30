@@ -3,6 +3,10 @@ import "./mainstyles.css"; // Make sure you create a separate CSS file for styli
 import Navbar from "./Hero/Navbar";
 import Footer from "./Hero/Footer";
 import CoreValues from "./Hero/Values";
+import bgImage1 from "./assets/pricing-image-1.png";
+import bgImage2 from "./assets/pricing-image-2.png";
+import bgImage3 from "./assets/pricing-image-3.png";
+
 
 const PricingCard = ({ title, price, duration, features, highlight }) => {
   return (
@@ -123,14 +127,14 @@ const Pricing = () => {
 
             </p>
           </div>
-          <div className="about-us-container">2</div>
-          <div className="about-us-container">3</div>
-          <div className="about-us-container">4</div>
+        <div className="about-us-container"><img src={bgImage1} alt="" /></div>
+        <div className="about-us-container"><img src={bgImage2} alt="" /></div>
+        <div className="about-us-container"><img src={bgImage3} alt="" /></div>
         </div>
 
         <div className="mobile-tablet-view">
           <div
-            style={{ background: "#000000" }}
+            style={{ background: "#04081D" }}
             className="about-us-container about-us-container-1"
           >
             <h1>Our Story</h1>
@@ -144,9 +148,9 @@ const Pricing = () => {
             </p>
           </div>
           <div className="scroll-row">
-            <div className="about-us-container">2</div>
-            <div className="about-us-container">3</div>
-            <div className="about-us-container">4</div>
+        <div className="about-us-container"><img src={bgImage1} alt="" /></div>
+        <div className="about-us-container"><img src={bgImage2} alt="" /></div>
+        <div className="about-us-container"><img src={bgImage3} alt="" /></div>
           </div>
         </div>
 

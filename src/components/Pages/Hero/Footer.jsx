@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from "react-router-dom";
 import './styles.css'; 
+import address from '../assets/address.png'
 import Vedive from '../assets/Vedive.png';
 import emailIcon from '../assets/email.svg';
 import phoneIcon from '../assets/phone.svg';
@@ -94,6 +95,11 @@ const Footer = () => {
             <span>
               <img src={phoneIcon} alt="Phone" /> +91 8920593970
             </span>
+            <span>
+            <img src={address} alt="Address" />
+            Wazirabad, New Delhi, Delhi 110084, Near Mcd School
+            </span>
+
           </div>
         </div>
 
