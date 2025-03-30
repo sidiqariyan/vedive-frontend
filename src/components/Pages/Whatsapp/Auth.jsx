@@ -11,7 +11,7 @@ const QRCodeDisplay = () => {
         // Added auth token from localStorage
         const token = localStorage.getItem("token");
         
-        const response = await axios.get("https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/whatsapp/qr", {
+        const response = await axios.get("http://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/whatsapp/qr", {
           headers: {
             Authorization: `Bearer ${token}` // Add authentication header
           }

@@ -47,7 +47,7 @@ const NumberScraper = () => {
         return;
       }
       
-      const response = await axios.get("https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/numberScraper", {
+      const response = await axios.get("http://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/numberScraper", {
         params: { query: combinedQuery, campaignName: campaignNameInput },
         headers: { Authorization: `Bearer ${token}` }
       });
