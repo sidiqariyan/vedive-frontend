@@ -50,7 +50,7 @@ const MessageForm = () => {
       const token = localStorage.getItem("token");
 
       const result = await axios.post(
-        "http://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/whatsapp/send",
+        "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/whatsapp/send",
         formData,
         {
           headers: {

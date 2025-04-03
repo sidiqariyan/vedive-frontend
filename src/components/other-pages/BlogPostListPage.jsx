@@ -106,7 +106,7 @@ const BlogPostListPage = () => {
                 className="bg-gray-900 rounded-lg overflow-hidden"
               >
                 <img
-                  src={post.coverImage ? `http://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000${post.coverImage}` : "https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
+                  src={post.coverImage ? `https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000${post.coverImage}` : "https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
                   alt={post.title}
                   className="w-full h-48 object-cover"
                 />

@@ -12,7 +12,7 @@ import MessageForm from "./Pages/Whatsapp/WhatsAppSender";
 import Plan from "./other-pages/plan";
 
 const MainLayout = ({ children }) => {
-  const API_URL = "http://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
+  const API_URL = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
   // const API_URL = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
   const navigate = useNavigate();
   const location = useLocation();

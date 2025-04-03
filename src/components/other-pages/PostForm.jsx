@@ -25,7 +25,7 @@ const PostForm = () => {
     setMessage({ text: "", type: "" });
     
     try {
-      await axios.post("http://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/posts", post);
+      await axios.post("https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/posts", post);
       setMessage({ text: "Post created successfully!", type: "success" });
       // Optional: Clear form after success
       // setPost({ name: "", description: "", tags: "", category: "", htmlContent: "<div>Edit your template here</div>" });

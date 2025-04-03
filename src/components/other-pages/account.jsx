@@ -87,7 +87,7 @@ const Account = () => {
     // Check if the user is updating the password
     if (formData.newPassword) {
       try {
-        const response = await fetch("http://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/auth/update-password", {
+        const response = await fetch("https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/auth/update-password", {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -114,7 +114,7 @@ const Account = () => {
     // Check if the user is updating other fields
     if (formData.currentPassword && !formData.newPassword) {
       try {
-        const response = await fetch("http://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/update-user", {
+        const response = await fetch("https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/update-user", {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
