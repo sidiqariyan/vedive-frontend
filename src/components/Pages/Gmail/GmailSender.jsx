@@ -74,7 +74,7 @@ const GmailSender = () => {
 
       // Make API request to send emails
       const response = await axios.post(
-        "http://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/send-gmail", // Replace with your backend endpoint
+        "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/send-gmail", // Replace with your backend endpoint
         {
           gmail,
           appPassword,

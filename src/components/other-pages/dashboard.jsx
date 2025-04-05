@@ -4,7 +4,8 @@ import { Link } from "react-router-dom";
 import {useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
-  const API_URL = "http://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
+  const API_URL = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
+  // const API_URL = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
   const [currentPlan, setCurrentPlan] = useState("Free");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
