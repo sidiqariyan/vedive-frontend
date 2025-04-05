@@ -16,9 +16,8 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Use HTTPS for API_URL
-  const API_URL = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
-  // const API_URL = "http://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
+  // Use HTTPS for API_URL to avoid mixed content errors
+  const API_URL = "http://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
 
   // Check if the user is already authenticated and redirect them to the dashboard
   const checkAuthAndRedirect = () => {
@@ -75,14 +74,14 @@ const Login = () => {
     try {
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
-        credentials: "include", // to send cookies with the request
+        credentials: "include", // Send cookies with the request
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ emailOrUsername, password }),
       });
 
-      // If the response is not ok, throw an error
+      // If the response is not ok, extract the error message and throw an error
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Login failed");
@@ -95,10 +94,7 @@ const Login = () => {
       navigate("/dashboard");
     } catch (err) {
       console.error("Login failed:", err);
-      setError(
-        err.message ||
-          "An unexpected error occurred. Please check your connection or server status."
-      );
+      setError(err.message || "An unexpected error occurred. Please check your connection or server status.");
     } finally {
       setLoading(false);
     }
@@ -109,7 +105,7 @@ const Login = () => {
       {/* Header Section */}
       <header className="login-header">
         <Link to="/">
-        <img src={Vedive} alt="Vedive Logo" />
+          <img src={Vedive} alt="Vedive Logo" />
         </Link>
       </header>
 
@@ -152,23 +148,14 @@ const Login = () => {
           {error && <p className="error-message">{error}</p>}
 
           {/* Submit Button */}
-          <button
-            type="submit"
-            className="login-btn"
-            disabled={loading}
-            aria-label="Login"
-          >
+          <button type="submit" className="login-btn" disabled={loading} aria-label="Login">
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
         {/* Additional Links */}
         <div className="links">
-          <Link
-            to="/pass-reset"
-            style={{ borderBottom: "solid 1px #0059FF" }}
-            aria-label="Forgot Password"
-          >
+          <Link to="/pass-reset" style={{ borderBottom: "solid 1px #0059FF" }} aria-label="Forgot Password">
             Forgot Password?
           </Link>
           <p>

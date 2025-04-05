@@ -41,7 +41,7 @@ const CreateBlogPostPage = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/blog/create-blog-post', formData, {
+      const response = await axios.post('http://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/blog/create-blog-post', formData, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
