@@ -17,7 +17,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   // Use HTTPS for API_URL to avoid mixed content errors
-  const API_URL = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
+  const API_URL = "https://vedive.com:3000";
 
   // Check if the user is already authenticated and redirect them to the dashboard
   const checkAuthAndRedirect = () => {
