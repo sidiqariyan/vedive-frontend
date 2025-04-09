@@ -106,7 +106,7 @@ const Signup = () => {
 >
       {/* Header Section */}
       <header className="p-2 ml-2.5">
-        <Link to="/">
+      <Link to="/">
           <img
             src={logoImg}
             alt="Vedive Logo"
