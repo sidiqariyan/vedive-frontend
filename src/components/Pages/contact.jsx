@@ -30,6 +30,7 @@ const ContactUs = () => {
           today!
         </h2>
       </div>
+      <div className="parent-container">
       <div className="main-container-contact">
         {/* Contact Info Section */}
         <div className="info-container-contact">
@@ -118,6 +119,7 @@ const ContactUs = () => {
             </button>
           </div>
         </div>
+      </div>
       </div>
       <Footer />
     </div>

@@ -380,7 +380,7 @@
     .column:nth-child(2) { order: 3; }
     .column:nth-child(3) { order: 4; }
     .contact-info span {
-        flex-wrap: wrap;
+        flex-wrap: no-wrap;
     }
     .logo-footer img{
         width: 80px;

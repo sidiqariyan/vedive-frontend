@@ -39,8 +39,8 @@ const Services = () => {
       {" "}
       {/* Wrap everything inside this div */}
       <TopSection />
-      <div className="container">
-        <div className="grids">
+      <div className="parent-container">
+      <div style={{ paddingBottom: '6%' }} className="desktop-view">
           <ServiceSection
             number="01"
             title="Mail Scraper"
@@ -107,9 +107,11 @@ const Services = () => {
         </div>
       {/* Separate "What We Want" Section */}
       <div className="what-we-want-container">
+      <div className="parent-container">
         <div className="main-heading-text">
           <h1>Benefits Of Working With Us</h1>
-        </div>
+          </div>
+          </div>
 
         {/* Grid Layout for "What We Want" */}
       <div className="grid-container">
@@ -167,6 +169,7 @@ const Services = () => {
         </div>
       </div>
       </div>
+      
       {/* Footer Component */}
       <Footer />
     </div>

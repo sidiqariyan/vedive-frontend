@@ -10,7 +10,7 @@ import ResetPassword from "./components/other-pages/ResetPassword.jsx";
 // Lazy-loaded pages
 const CreateBlogPostPage = lazy(() => import("./components/other-pages/CreateBlogPostPage.jsx"));
 const BlogPostListPage  = lazy(() => import("./components/other-pages/BlogPostListPage.jsx"));
-const PostDetail = lazy(() => import("./components/other-pages/PostDetails.jsx")); // New route for single post details
+const PostDetail = lazy(() => import("./components/other-pages/PostDetails.jsx"));
 const Hero = lazy(() => import("./components/Pages/Hero/Hero"));
 const ContactUs = lazy(() => import("./components/Pages/contact.jsx"));
 const AboutUs = lazy(() => import("./components/Pages/about.jsx"));
@@ -25,7 +25,6 @@ const Account = lazy(() => import("./components/other-pages/account.jsx"));
 const PostForm = lazy(() => import("./components/other-pages/PostForm.jsx"));
 const PostList = lazy(() => import("./components/other-pages/PostList.jsx"));
 const Plan = lazy(() => import("./components/other-pages/plan.jsx"));
-// const Campaign = lazy(() => import("./components/other-pages/campaign.jsx"));
 const TemplateEditorPage = lazy(() => import("./components/other-pages/TemplateEditor.jsx"));
 const SenderBody = lazy(() => import("./components/Pages/Mailer/SenderBody.jsx"));
 const EmailScrapper = lazy(() => import("./components/Pages/Mailer/EmailScrapper.jsx"));
@@ -35,31 +34,34 @@ const NumberScraper = lazy(() => import("./components/Pages/Whatsapp/NumberScrap
 const PaymentStatus = lazy(() => import("./components/other-pages/PaymentStatus.jsx"));
 const SubscriptionHistory = lazy(() => import("./components/other-pages/SubscriptionHistory.jsx"));
 
-// Enhanced Page Transition Component
-const EnhancedPageTransition = ({ children }) => {
+// Loading fallback for lazy-loaded components
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
+
+// Optimized Page Transition Component
+const PageTransition = ({ children }) => {
   const pageVariants = {
     initial: {
       opacity: 0,
-      y: 20,
-      scale: 0.98,
+      x: -10,
     },
     animate: {
       opacity: 1,
-      y: 0,
-      scale: 1,
+      x: 0,
       transition: {
-        duration: 0.5,
-        ease: [0.22, 1, 0.36, 1],
-        staggerChildren: 0.1,
+        duration: 0.25,
+        ease: "easeOut",
       },
     },
     exit: {
       opacity: 0,
-      y: -20,
-      scale: 0.98,
+      x: 10,
       transition: {
-        duration: 0.4,
-        ease: [0.22, 1, 0.36, 1],
+        duration: 0.15,
+        ease: "easeIn",
       },
     },
   };
@@ -70,15 +72,15 @@ const EnhancedPageTransition = ({ children }) => {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="page-transition-wrapper"
+      className="page-transition w-full"
     >
       {children}
     </motion.div>
   );
 };
 
-// Custom Loader Component
-const ElegantLoader = ({ onComplete }) => {
+// Vedive Loader Component (simplified)
+const VediveLoader = ({ onComplete }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (onComplete) onComplete();
@@ -88,7 +90,7 @@ const ElegantLoader = ({ onComplete }) => {
 
   return (
     <div className="h-screen bg-black flex items-center justify-center overflow-hidden relative">
-      <style>
+            <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@200;300;400;700&display=swap');
           @keyframes slideIn {
@@ -214,92 +216,26 @@ const ElegantLoader = ({ onComplete }) => {
   );
 };
 
-// Animated loading fallback component
-const LoadingFallback = () => (
-  <div className="h-screen w-full flex items-center justify-center bg-gradient-to-r from-gray-900 to-black">
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ 
-        opacity: 1, 
-        scale: 1,
-        transition: { 
-          duration: 0.5,
-          repeat: Infinity,
-          repeatType: "reverse"
-        }
-      }}
-      className="text-blue-500 text-2xl font-light tracking-wider"
-    >
-      Loading...
-    </motion.div>
-  </div>
-);
-
-// Global transition styles
-const globalStyles = `
-  .page-content {
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
-  
-  body.transitioning {
-    overflow: hidden;
-  }
-  
-  html {
-    scroll-behavior: smooth;
-  }
-  
-  .content-element {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-  }
-  
-  .page-loaded .content-element {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  
-  .content-element:nth-child(1) { transition-delay: 0.1s; }
-  .content-element:nth-child(2) { transition-delay: 0.2s; }
-  .content-element:nth-child(3) { transition-delay: 0.3s; }
-  .content-element:nth-child(4) { transition-delay: 0.4s; }
-  .content-element:nth-child(5) { transition-delay: 0.5s; }
-`;
-
-// ScrollToTop component with smooth scrolling
+// Simplified ScrollToTop component
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   
   useEffect(() => {
-    document.body.classList.add('transitioning');
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    const timeout = setTimeout(() => {
-      document.body.classList.remove('transitioning');
-      document.body.classList.add('page-loaded');
-    }, 600);
-    
-    return () => {
-      clearTimeout(timeout);
-      document.body.classList.remove('page-loaded');
-    };
+    window.scrollTo(0, 0);
   }, [pathname]);
   
   return null;
 };
 
-// Wrapper for protected routes using MainLayout and PageTransition
-const ProtectedMainLayout = ({ children }) => (
-  <ProtectedRoute>
-    <MainLayout>
-      <EnhancedPageTransition>{children}</EnhancedPageTransition>
-    </MainLayout>
-  </ProtectedRoute>
-);
+// Global styles for transitions
+const globalStyles = `
+  .page-transition {
+    will-change: opacity, transform;
+    width: 100%;
+  }
+`;
 
-// AnimatedRoutes component to handle route transitions
+// AnimatedRoutes component with optimized transitions
 const AnimatedRoutes = () => {
   const location = useLocation();
   
@@ -310,246 +246,331 @@ const AnimatedRoutes = () => {
         <Route
           path="/"
           element={
-            <EnhancedPageTransition>
-              <Hero />
-            </EnhancedPageTransition>
+              <PageTransition>
+                <Hero />
+              </PageTransition>
           }
         />
         <Route
           path="/contact"
           element={
-            <EnhancedPageTransition>
-              <ContactUs />
-            </EnhancedPageTransition>
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <ContactUs />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="/about"
           element={
-            <EnhancedPageTransition>
-              <AboutUs />
-            </EnhancedPageTransition>
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <AboutUs />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="/pricing"
           element={
-            <EnhancedPageTransition>
-              <Pricing />
-            </EnhancedPageTransition>
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <Pricing />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="/services"
           element={
-            <EnhancedPageTransition>
-              <Services />
-            </EnhancedPageTransition>
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <Services />
+              </PageTransition>
+            </Suspense>
           }
         />
-        {/* Payment & Plan */}
+        
+        {/* Payment & Plan Routes */}
         <Route
           path="/plans/payment-status"
           element={
-            <EnhancedPageTransition>
-              <PaymentStatus />
-            </EnhancedPageTransition>
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <PaymentStatus />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="/plans"
           element={
-            <EnhancedPageTransition>
-              <Plan />
-            </EnhancedPageTransition>
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <Plan />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="/dashboard/subscription"
           element={
-            <EnhancedPageTransition>
-              <SubscriptionHistory />
-            </EnhancedPageTransition>
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <SubscriptionHistory />
+              </PageTransition>
+            </Suspense>
           }
         />
+        
         {/* Auth Routes */}
         <Route
           path="/login"
           element={
-            <EnhancedPageTransition>
-              <Login />
-            </EnhancedPageTransition>
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <Login />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="/signup"
           element={
-            <EnhancedPageTransition>
-              <Signup />
-            </EnhancedPageTransition>
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <Signup />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="/pass-reset"
           element={
-            <EnhancedPageTransition>
-              <Passreset />
-            </EnhancedPageTransition>
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <Passreset />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="/reset-password"
           element={
-            <EnhancedPageTransition>
-              <ResetPassword />
-            </EnhancedPageTransition>
-          }
-        />
-        <Route
-          path="/plan"
-          element={
-            <ProtectedMainLayout>
-              <Plan />
-            </ProtectedMainLayout>
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <ResetPassword />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="/verify-email"
           element={
-            <EnhancedPageTransition>
-              <VerifyEmail />
-            </EnhancedPageTransition>
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <VerifyEmail />
+              </PageTransition>
+            </Suspense>
           }
         />
+        
         {/* Protected Routes */}
+        <Route
+          path="/plan"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Suspense fallback={<PageLoader />}>
+                  <PageTransition>
+                    <Plan />
+                  </PageTransition>
+                </Suspense>
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/dashboard"
           element={
-            <ProtectedMainLayout>
-              <Dashboard />
-            </ProtectedMainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <Suspense fallback={<PageLoader />}>
+                  <PageTransition>
+                    <Dashboard />
+                  </PageTransition>
+                </Suspense>
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/account"
           element={
-            <ProtectedMainLayout>
-              <Account />
-            </ProtectedMainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <Suspense fallback={<PageLoader />}>
+                  <PageTransition>
+                    <Account />
+                  </PageTransition>
+                </Suspense>
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
+        
+        {/* Email & Communication Routes */}
         <Route
           path="/email-sender"
           element={
-            <ProtectedMainLayout>
-              <SenderBody />
-            </ProtectedMainLayout>
-          }
-        />
-         <Route
-          path="/blog-posts/:identifier"
-          element={
-            <EnhancedPageTransition>
-              <PostDetail />
-            </EnhancedPageTransition>
-          }
-        />
-        <Route
-          path="/blog/create"
-          element={
-            <EnhancedPageTransition>
-              <CreateBlogPostPage />
-            </EnhancedPageTransition>
-          }
-        />
-        <Route
-          path="/blogs"
-          element={
-            <EnhancedPageTransition>
-              <BlogPostListPage />
-            </EnhancedPageTransition>
-          }
-        />
-        {/* New Route for Single Blog Post Details */}
-        <Route
-          path="/blog-posts/:id"
-          element={
-            <EnhancedPageTransition>
-              <PostDetail />
-            </EnhancedPageTransition>
+            <ProtectedRoute>
+              <MainLayout>
+                <Suspense fallback={<PageLoader />}>
+                  <PageTransition>
+                    <SenderBody />
+                  </PageTransition>
+                </Suspense>
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/email-scraper"
           element={
-            <ProtectedMainLayout>
-              <EmailScrapper />
-            </ProtectedMainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <Suspense fallback={<PageLoader />}>
+                  <PageTransition>
+                    <EmailScrapper />
+                  </PageTransition>
+                </Suspense>
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/gmail-sender"
           element={
-            <ProtectedMainLayout>
-              <GmailSender />
-            </ProtectedMainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <Suspense fallback={<PageLoader />}>
+                  <PageTransition>
+                    <GmailSender />
+                  </PageTransition>
+                </Suspense>
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/whatsapp-sender"
           element={
-            <ProtectedMainLayout>
-              <MessageForm />
-            </ProtectedMainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <Suspense fallback={<PageLoader />}>
+                  <PageTransition>
+                    <MessageForm />
+                  </PageTransition>
+                </Suspense>
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/number-scraper"
           element={
-            <ProtectedMainLayout>
-              <NumberScraper />
-            </ProtectedMainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <Suspense fallback={<PageLoader />}>
+                  <PageTransition>
+                    <NumberScraper />
+                  </PageTransition>
+                </Suspense>
+              </MainLayout>
+            </ProtectedRoute>
           }
         />
-        {/* <Route
-          path="/campaigns"
+        
+        {/* Blog & Content Routes */}
+        <Route
+          path="/blog-posts/:identifier"
           element={
-            <ProtectedMainLayout>
-              <Campaign />
-            </ProtectedMainLayout>
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <PostDetail />
+              </PageTransition>
+            </Suspense>
           }
-        /> */}
+        />
+        <Route
+          path="/blog/create"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <CreateBlogPostPage />
+              </PageTransition>
+            </Suspense>
+          }
+        />
+        <Route
+          path="/blogs"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <BlogPostListPage />
+              </PageTransition>
+            </Suspense>
+          }
+        />
+        <Route
+          path="/blog-posts/:id"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <PostDetail />
+              </PageTransition>
+            </Suspense>
+          }
+        />
         <Route
           path="/post-form"
           element={
-            <EnhancedPageTransition>
-              <PostForm />
-            </EnhancedPageTransition>
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <PostForm />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="/templates"
           element={
-            <ProtectedMainLayout>
-              <PostList />
-            </ProtectedMainLayout>
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <PostList />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
           path="/editor/:id"
           element={
-            <EnhancedPageTransition>
-              <TemplateEditorPage />
-            </EnhancedPageTransition>
+            <Suspense fallback={<PageLoader />}>
+              <PageTransition>
+                <TemplateEditorPage />
+              </PageTransition>
+            </Suspense>
           }
         />
+        
         {/* Fallback Route */}
         <Route
           path="*"
           element={
-            <EnhancedPageTransition>
+            <PageTransition>
               <h1 className="text-4xl font-bold text-center mt-10">404 - Page Not Found</h1>
-            </EnhancedPageTransition>
+            </PageTransition>
           }
         />
       </Routes>
@@ -559,26 +580,22 @@ const AnimatedRoutes = () => {
 
 const App = () => {
   const [showLoader, setShowLoader] = useState(true);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   const handleLoaderComplete = () => {
     setShowLoader(false);
-    setInitialLoadComplete(true);
   };
 
   return (
     <AuthProvider>
       <style>{globalStyles}</style>
-      <Router>
-        <ScrollToTop />
-        {showLoader ? (
-          <ElegantLoader onComplete={handleLoaderComplete} />
-        ) : (
-          <Suspense fallback={<LoadingFallback />}>
-            <AnimatedRoutes />
-          </Suspense>
-        )}
-      </Router>
+      {showLoader ? (
+        <VediveLoader onComplete={handleLoaderComplete} />
+      ) : (
+        <Router>
+          <ScrollToTop />
+          <AnimatedRoutes />
+        </Router>
+      )}
     </AuthProvider>
   );
 };

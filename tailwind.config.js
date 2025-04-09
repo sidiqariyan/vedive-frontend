@@ -18,6 +18,8 @@ export default {
       fontFamily: {
         primary: ['Raleway', 'sans-serif'],
         secondary: ['Open Sans', 'sans-serif'],
+        poppins: ['Poppins', 'sans-serif'],
+        dmsans: ['DM Sans', 'sans-serif'],
       },
       colors: {
         primary: '#ffffff', 

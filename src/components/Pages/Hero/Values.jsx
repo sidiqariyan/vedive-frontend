@@ -3,6 +3,7 @@ import React from 'react';
 
 const CoreValues = () => {
   return (
+    <div className="parent-container">
     <div className="main-heading-text">
       <h1>Our Core Values</h1>
       <p>
@@ -17,6 +18,7 @@ const CoreValues = () => {
         We are always committed to giving our customers the best experience, and every day, we aim to 
         exceed their expectations in new ways. This will help make marketing even easier in the future.
       </p>
+    </div>
     </div>
   );
 };

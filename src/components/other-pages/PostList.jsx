@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import TemplateEditor from "./TemplateEditor";
 import Navbar from "../Pages/Hero/Navbar";
+import { useAuth } from "../Pages/Mailer/AuthContext"; // Import the useAuth hook
+import { NavLink } from "react-router-dom";
 
 const PostList = () => {
   const [posts, setPosts] = useState([]);
@@ -12,6 +14,63 @@ const PostList = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [currentEditedHtml, setCurrentEditedHtml] = useState(null);
   const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false); // Add this line
+  const { isLoggedIn, login, logout } = useAuth();
+
+  const LoginPromptModal = ({ isOpen, onClose }) => {
+    if (!isOpen) return null;
+  
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div 
+          className="fixed inset-0 bg-black opacity-50"
+          onClick={onClose}
+        />
+        <div className="relative bg-white p-6 rounded-lg max-w-md w-full mx-4">
+          <h2 className="text-xl font-bold mb-4">Login Required</h2>
+          <p className="mb-6">Please log in to edit templates.</p>
+          
+          <div className="flex justify-end space-x-2">
+            <button 
+              onClick={onClose}
+              className="px-4 py-2 border rounded-md hover:bg-gray-100"
+            >
+              Close
+            </button>
+            <NavLink to="/login">
+            <button 
+              onClick={() => {
+                // Add your login navigation logic here
+                // For example:
+                // router.push('/login');
+                onClose();
+              }}
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+            >
+              Go to Login
+            </button>
+            </NavLink>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const toggleEditor = () => {
+    // Check if user is logged in
+    if (!isLoggedIn) {
+      // Show login prompt modal
+      setIsLoginModalVisible(true);
+      return;
+    }
+  
+    if (editingPost?._id === selectedTemplate._id) {
+      setEditingPost(null); // Close editor
+      setCurrentEditedHtml(null);
+    } else {
+      setEditingPost(selectedTemplate); // Open editor
+    }
+  };
   
   // Add a ref to store the editor instance
   const editorInstanceRef = useRef(null);
@@ -119,14 +178,6 @@ const PostList = () => {
     setCurrentEditedHtml(null);
   };
 
-  const toggleEditor = () => {
-    if (editingPost?._id === selectedTemplate._id) {
-      setEditingPost(null); // Close editor
-      setCurrentEditedHtml(null);
-    } else {
-      setEditingPost(selectedTemplate); // Open editor
-    }
-  };
 
   const filteredPosts = activeCategory === "All" 
     ? posts 
@@ -136,7 +187,11 @@ const PostList = () => {
     <>
     {/* Only show Navbar in grid view */}
     {viewMode === "grid" && <Navbar />}
-    
+    <LoginPromptModal 
+        isOpen={isLoginModalVisible} 
+        onClose={() => setIsLoginModalVisible(false)} 
+      />
+
     <div className="email-templates-container" style={{ 
       fontFamily: 'Arial, sans-serif',
       padding: "1vw",
@@ -449,6 +504,7 @@ const PostList = () => {
                     )}
                     
                     <button
+                      id="edit-button"
                       onClick={toggleEditor}
                       style={{
                         backgroundColor: "#7c3aed",
@@ -647,7 +703,16 @@ const PostList = () => {
                 </div>
               )}
             </div>
-            
+            <style>
+    {`
+      @media (max-width: 480px) {
+        #edit-button {
+          display: none;
+        }
+      }
+    `}
+  </style>
+
             {/* Right/Bottom area - Template preview or editor taking full space */}
             <div style={{ 
               flex: 1, 

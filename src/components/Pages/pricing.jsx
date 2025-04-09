@@ -1,5 +1,6 @@
 import React from "react";
-import "./mainstyles.css"; // Make sure you create a separate CSS file for styling
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import "./mainstyles.css"; 
 import Navbar from "./Hero/Navbar";
 import Footer from "./Hero/Footer";
 import CoreValues from "./Hero/Values";
@@ -14,18 +15,17 @@ const PricingCard = ({ title, price, duration, features, highlight }) => {
       <div className="card-header">
         <h3>{title}</h3>
         <div className="price">
-          {price}
-          <span className="span2">₹</span>
+        <span>₹</span>{price}
           <span className="span1">/{duration}</span>
         </div>
         <p className="para1">Simple & Powerful</p>
-        <a
-          href="#"
+        <NavLink
+          to="/plans"
           className="btn"
           style={highlight ? { backgroundColor: "#1E90FF" } : {}}
         >
           Start for free now
-        </a>
+          </NavLink>
       </div>
       <ul className="features">
         {features.map((feature, index) => (
@@ -105,7 +105,7 @@ const Pricing = () => {
             Services.
           </h2>
         </div>
-
+        
         {/* Pricing Cards Section */}
         <div className="pricing-container">
           <div className="pricing-grid">
