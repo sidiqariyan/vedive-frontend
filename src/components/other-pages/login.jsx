@@ -117,9 +117,13 @@ const Login = () => {
   style={{ backgroundImage: `url(${backgroundImage})` }}
 >
          {/* Header Section */}
-          <header className="p-4">
+          <header className="p-2 ml-2.5">
             <Link to="/">
-              <img src={logoImg} alt="Vedive Logo" className="h-10" />
+              <img
+                src={logoImg}
+                alt="Vedive Logo"
+                className="w-[98px] h-[23px] sm:w-[98px] sm:h-[23px] lg:w-[140px] lg:h-[35.5px]"
+              />
             </Link>
           </header>
           <style jsx>{`

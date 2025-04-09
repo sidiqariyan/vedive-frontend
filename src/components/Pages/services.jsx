@@ -114,8 +114,8 @@ const Services = () => {
           </div>
 
         {/* Grid Layout for "What We Want" */}
-      <div className="grid-container">
-        <div className="grid-item" style={{ backgroundColor: "#1E90FF", color: "white" }}>
+      <div className="grid-container" style={{marginBottom:"4%" }}>
+        <div className="grid-item" style={{ backgroundColor: "#1E90FF", color: "white"}}>
           <h2>Our Value:</h2>
           <p>
             Our mission is to provide convenience and quality service to every
