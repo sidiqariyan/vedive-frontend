@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Create an Axios instance
 const apiClient = axios.create({
-  baseURL: "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api", // Replace with your backend base URL
+  baseURL: "https://vedive.com:3000/api", // Replace with your backend base URL
 });
 
 // Add interceptor to include the Authorization header

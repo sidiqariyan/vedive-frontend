@@ -87,7 +87,7 @@ const Plan = () => {
   const initializePayment = useCallback((paymentSessionId, orderId) => {
     const checkoutOptions = {
       paymentSessionId,
-      returnUrl: `https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/plans/payment-status?order_id=${orderId}`,
+      returnUrl: `https://vedive.com:3000/plans/payment-status?order_id=${orderId}`,
       redirectTarget: "_self",
       theme: {
         navbarColor: "#2563eb",
@@ -114,7 +114,7 @@ const Plan = () => {
       toast.info("Verifying your payment...");
       if (!localStorage.getItem("token")) {
         navigate("/login", {
-          state: { redirectTo: `https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/plans/payment-status?order_id=${orderId}` },
+          state: { redirectTo: `https://vedive.com:3000/plans/payment-status?order_id=${orderId}` },
         });
         return;
       }

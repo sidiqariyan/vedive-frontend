@@ -5,7 +5,7 @@ import Vedive from "../assets/Vedive.png";
 import Google from "../assets/google-icon.svg";
 import jwtDecode from "jwt-decode";
 
-const API_URL = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
+const API_URL = "https://vedive.com:3000";
 
 const checkAuthAndRedirect = (navigate) => {
   const token = localStorage.getItem("token");

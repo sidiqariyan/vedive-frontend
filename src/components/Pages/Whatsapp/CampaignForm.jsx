@@ -13,7 +13,7 @@ const CampaignForm = ({ onSave, onClose }) => {
 
     try {
       // Save campaign data to the backend
-      const response = await axios.post("https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/campaign", {
+      const response = await axios.post("https://vedive.com:3000/api/campaign", {
         campaignName,
         toolType: "whatsapp-bulk-sender",
       });

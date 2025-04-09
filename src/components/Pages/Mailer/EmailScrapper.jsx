@@ -41,11 +41,11 @@ const EmailScraper = () => {
     setIsLoading(true);
     try {
       const combinedQuery = [keyword, country, city].filter(Boolean).join(" ");
-      console.log("Sending request to:", `https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/scrape-emails`);
+      console.log("Sending request to:", `https://vedive.com:3000/api/scrape-emails`);
       console.log("Query:", combinedQuery);
       console.log("Campaign name:", campaignName);
 
-      const res = await fetch(`https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/scrape-emails`, {
+      const res = await fetch(`https://vedive.com:3000/api/scrape-emails`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json"

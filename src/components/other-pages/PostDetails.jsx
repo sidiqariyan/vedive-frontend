@@ -13,7 +13,7 @@ const PostDetail = () => {
     const fetchPost = async () => {
       try {
         // Note the adjusted URL: it's under /api/blog/blog-posts
-        const response = await axios.get(`https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000/api/blog/blog-posts/${identifier}`);
+        const response = await axios.get(`https://vedive.com:3000/api/blog/blog-posts/${identifier}`);
         setPost(response.data);
       } catch (err) {
         setError(err.response?.data?.message || 'Error fetching post');
