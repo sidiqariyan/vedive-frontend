@@ -34,13 +34,6 @@ const NumberScraper = lazy(() => import("./components/Pages/Whatsapp/NumberScrap
 const PaymentStatus = lazy(() => import("./components/other-pages/PaymentStatus.jsx"));
 const SubscriptionHistory = lazy(() => import("./components/other-pages/SubscriptionHistory.jsx"));
 
-// Loading fallback for lazy-loaded components
-const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-screen bg-gray-100">
-    <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-  </div>
-);
-
 // Optimized Page Transition Component
 const PageTransition = ({ children }) => {
   const pageVariants = {
@@ -90,7 +83,7 @@ const VediveLoader = ({ onComplete }) => {
 
   return (
     <div className="h-screen bg-black flex items-center justify-center overflow-hidden relative">
-            <style>
+      <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@200;300;400;700&display=swap');
           @keyframes slideIn {
@@ -246,15 +239,15 @@ const AnimatedRoutes = () => {
         <Route
           path="/"
           element={
-              <PageTransition>
-                <Hero />
-              </PageTransition>
+            <PageTransition>
+              <Hero />
+            </PageTransition>
           }
         />
         <Route
           path="/contact"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <ContactUs />
               </PageTransition>
@@ -264,7 +257,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/about"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <AboutUs />
               </PageTransition>
@@ -274,7 +267,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/pricing"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <Pricing />
               </PageTransition>
@@ -284,7 +277,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/services"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <Services />
               </PageTransition>
@@ -296,7 +289,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/plans/payment-status"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <PaymentStatus />
               </PageTransition>
@@ -306,7 +299,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/plans"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <Plan />
               </PageTransition>
@@ -316,7 +309,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/dashboard/subscription"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <SubscriptionHistory />
               </PageTransition>
@@ -328,7 +321,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/login"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <Login />
               </PageTransition>
@@ -338,7 +331,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/signup"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <Signup />
               </PageTransition>
@@ -348,7 +341,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/pass-reset"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <Passreset />
               </PageTransition>
@@ -358,7 +351,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/reset-password"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <ResetPassword />
               </PageTransition>
@@ -368,7 +361,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/verify-email"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <VerifyEmail />
               </PageTransition>
@@ -382,7 +375,7 @@ const AnimatedRoutes = () => {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <Suspense fallback={<PageLoader />}>
+                <Suspense fallback={null}>
                   <PageTransition>
                     <Plan />
                   </PageTransition>
@@ -396,7 +389,7 @@ const AnimatedRoutes = () => {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <Suspense fallback={<PageLoader />}>
+                <Suspense fallback={null}>
                   <PageTransition>
                     <Dashboard />
                   </PageTransition>
@@ -410,7 +403,7 @@ const AnimatedRoutes = () => {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <Suspense fallback={<PageLoader />}>
+                <Suspense fallback={null}>
                   <PageTransition>
                     <Account />
                   </PageTransition>
@@ -426,7 +419,7 @@ const AnimatedRoutes = () => {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <Suspense fallback={<PageLoader />}>
+                <Suspense fallback={null}>
                   <PageTransition>
                     <SenderBody />
                   </PageTransition>
@@ -440,7 +433,7 @@ const AnimatedRoutes = () => {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <Suspense fallback={<PageLoader />}>
+                <Suspense fallback={null}>
                   <PageTransition>
                     <EmailScrapper />
                   </PageTransition>
@@ -454,7 +447,7 @@ const AnimatedRoutes = () => {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <Suspense fallback={<PageLoader />}>
+                <Suspense fallback={null}>
                   <PageTransition>
                     <GmailSender />
                   </PageTransition>
@@ -468,7 +461,7 @@ const AnimatedRoutes = () => {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <Suspense fallback={<PageLoader />}>
+                <Suspense fallback={null}>
                   <PageTransition>
                     <MessageForm />
                   </PageTransition>
@@ -482,7 +475,7 @@ const AnimatedRoutes = () => {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <Suspense fallback={<PageLoader />}>
+                <Suspense fallback={null}>
                   <PageTransition>
                     <NumberScraper />
                   </PageTransition>
@@ -496,7 +489,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/blog-posts/:identifier"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <PostDetail />
               </PageTransition>
@@ -506,7 +499,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/blog/create"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <CreateBlogPostPage />
               </PageTransition>
@@ -516,7 +509,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/blogs"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <BlogPostListPage />
               </PageTransition>
@@ -526,7 +519,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/blog-posts/:id"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <PostDetail />
               </PageTransition>
@@ -536,7 +529,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/post-form"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <PostForm />
               </PageTransition>
@@ -546,7 +539,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/templates"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <PostList />
               </PageTransition>
@@ -556,7 +549,7 @@ const AnimatedRoutes = () => {
         <Route
           path="/editor/:id"
           element={
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={null}>
               <PageTransition>
                 <TemplateEditorPage />
               </PageTransition>

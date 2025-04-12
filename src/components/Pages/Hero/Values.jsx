@@ -5,18 +5,13 @@ const CoreValues = () => {
   return (
     <div className="parent-container">
     <div className="main-heading-text">
-      <h1>Our Core Values</h1>
+      <h1>Why Choose Us</h1>
       <p>
-        Our mission is to provide convenience and quality service to every marketing professional, 
-        so they can make their marketing efforts easier and better. We are always committed to giving 
-        our customers the best experience, and every day, we aim to exceed their expectations in new 
-        ways. This will help make marketing even easier in the future. Our mission is to provide 
-        convenience and quality service to every marketing professional, so they can make their 
-        marketing efforts easier and better. We are always committed to giving our customers the best 
-        experience, and every day, we aim to exceed their expectations in new ways. This will help make
-        marketing even easier in the future. So they can make their marketing efforts easier and better.
-        We are always committed to giving our customers the best experience, and every day, we aim to 
-        exceed their expectations in new ways. This will help make marketing even easier in the future.
+      At Vedive, we’re not just another communication tool — we’re your partner in growth. Businesses choose us because we combine cutting-edge technology with a deep understanding of what truly drives engagement and results. Our AI-powered platform is built to ensure that your messages aren’t just sent — they’re seen. With unmatched deliverability, lightning-fast speed, and enterprise-grade security, Vedive guarantees your communication reaches the right people at the right time.
+
+What sets us apart is our commitment to reliability, transparency, and performance. From secure infrastructure to detailed analytics, every part of Vedive is designed with your business success in mind. We don’t just provide tools — we provide confidence. Whether you're launching high-volume campaigns or scaling lead generation efforts, Vedive is engineered to grow with you.
+
+Our clients trust us because we deliver results — not promises. With dedicated support, consistent uptime, and constant innovation, we help you stay ahead of the curve. Choosing Vedive means choosing a smarter, faster, and safer way to connect with your audience.
       </p>
     </div>
     </div>

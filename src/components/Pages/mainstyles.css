@@ -131,7 +131,6 @@ text-decoration-skip-ink: none;
 }
 .about-us-container p{
   margin: 2% 0% 0% 0%;
-  max-width: 507px;
   font-family: Open Sans;
   font-size: 18px;
   font-weight: 400;
@@ -887,6 +886,7 @@ font-size: 28px;
 
     /* Number Styling */
     .section-number {
+      
         font-family: Raleway;
         font-size: 80px;
         font-weight: 500;

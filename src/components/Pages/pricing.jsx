@@ -121,9 +121,9 @@ const Pricing = () => {
             style={{ background: "transparent" }}
             className="about-us-container about-us-container-1"
           >
-            <h1>Our Story</h1>
+            <h1>What’s Included & Benefits</h1>
             <p>
-            At Vedive, our goal is to simplify marketing by providing seamless messaging and data scraping services for professionals. Our platform is designed to help businesses reach their audience easily while maintaining efficiency and affordability.
+            Every Vedive plan comes packed with powerful features designed to help you scale faster and communicate smarter. Enjoy AI-powered email deliverability, bulk WhatsApp messaging, and real-time tracking — all from one intuitive dashboard. Whether you're on a starter or premium plan, you’ll benefit from enterprise-grade security, responsive customer support, and access to our email and mobile scraping tools. No hidden fees, no confusing limits — just reliable, high-performance tools built for growth. From marketers to large-scale teams, Vedive gives you everything you need to run successful campaigns and drive real results.
 
             </p>
           </div>

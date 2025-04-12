@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import jwtDecode from "jwt-decode";
 import logoImg from "../assets/Vedive.png"; // Make sure your logo is in this path
 import Google from "../assets/google-icon.svg";
-import backgroundImage from "../assets/background-login.png";
+import backgroundImage from "../assets/loginbackground.png";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -113,7 +113,7 @@ const Login = () => {
 
   return (
 <div 
-  className="min-h-screen flex flex-col text-white bg-[rgb(3,10,24)] bg-cover bg-center bg-no-repeat bg-blend-overlay"
+  className="min-h-screen flex flex-col text-white bg-cover bg-center bg-no-repeat bg-blend-overlay"
   style={{ backgroundImage: `url(${backgroundImage})` }}
 >
          {/* Header Section */}
@@ -126,7 +126,7 @@ const Login = () => {
               />
             </Link>
           </header>
-          <style jsx>{`
+          <style>{`
             /* Override autofill background and text color */
             input:-webkit-autofill,
             input:-webkit-autofill:hover, 
@@ -142,22 +142,22 @@ const Login = () => {
           <div className="flex-grow flex items-center justify-center">
     
       {/* Login Container */}
-      <div className="max-w-lg w-full mx-4 md:mx-auto p-0 md:p-8 rounded-lg">
-      <h2 className="font-[400] text-[30px] sm:text-[30px] md:text-[32px] lg:text-[34px] leading-[100%] tracking-[0] text-center mb-4 font-dmsans">
+      <div className="max-w-lg w-full mx-4 md:mx-auto p-0 md:p-8 rounded-lg mb-[163px]">
+      <h2 className="font-[400] text-[30px] sm:text-[30px] md:text-[32px] lg:text-[34px] leading-[100%] tracking-[0] text-center mb-4 font-primary ">
           Welcome to Vedive
         </h2>
-        <div className="flex items-center my-6">
+        <div className="flex items-center my-6 ">
           <hr className="flex-grow border-t-[3px] border-third" />
         </div>
         
         {/* Google Sign In Button */}
-        <button className="flex items-center justify-center w-full py-3 h-[55px] px-4 mb-6 border-2 border-white rounded-md bg-transparent text-white hover:bg-blue-900/20 transition-colors">
+        {/* <button className="flex items-center justify-center w-full py-3 h-[55px] px-4 mb-6 border-2 border-white rounded-md bg-transparent text-white hover:bg-blue-900/20 transition-colors">
           <img src={Google} alt="Google logo" className="h-16 w-16 " />
           <span className="font-poppins font-medium leading-[100%] tracking-[0] 
                           sm:text-[20px] md:text-[20px] lg:text-[20px]">
             Continue with Google
           </span>
-        </button>
+        </button> */}
 
         {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-6">

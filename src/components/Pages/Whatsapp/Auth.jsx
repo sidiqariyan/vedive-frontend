@@ -11,7 +11,7 @@ const QRCodeDisplay = () => {
         // Added auth token from localStorage
         const token = localStorage.getItem("token");
         
-        const response = await axios.get("https://vedive.com/api/whatsapp/qr", {
+        const response = await axios.get("https://vedive.com:3000/api/whatsapp/qr", {
           headers: {
             Authorization: `Bearer ${token}` // Add authentication header
           }

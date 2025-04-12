@@ -77,7 +77,7 @@ const Hero = () => {
     {
       id: "bulkMailer",
       name: "Email Sender",
-      description: "Powerful bulk email distribution with analytics and tracking",
+      description: "Scale Your Business With Reliable Email Communication",
       icon: <Mail size={24} strokeWidth={2} className="text-white" />,
       color: "from-blue-600 to-indigo-400",
       hoverColor: "from-blue-500 to-indigo-300",
@@ -111,7 +111,7 @@ const Hero = () => {
   const benefits = [
     { id: 1, icon: <Zap size={20} strokeWidth={2} />, text: "Lightning Fast Delivery" },
     { id: 2, icon: <ShieldCheck size={20} strokeWidth={2} />, text: "99.9% Deliverability" },
-    { id: 3, icon: <TrendingUp size={20} strokeWidth={2} />, text: "Real-time Analytics" },
+    { id: 3, icon: <TrendingUp size={20} strokeWidth={2} />, text: "High Success Rate" },
     { id: 4, icon: <Globe size={20} strokeWidth={2} />, text: "Global Reach" },
   ];
 
@@ -208,17 +208,17 @@ const Hero = () => {
             </h1>
           </div>
           
-          <p className="text-xl text-white/70 mb-8 max-w-3xl mx-auto animate-fadeInDelay">
+          <p className="text-xl text-white/70 mb-8 max-w-3xl mx-auto animate-fadeInDelay font-secondary">
             Trusted for 99.9% Delivery Success. Spam-Free Messaging for Modern Businesses
           </p>
           
           <div className="flex flex-wrap justify-center gap-8 mb-8 animate-fadeInDelay2">
             {benefits.map((benefit, idx) => (
-              <div key={benefit.id} className="flex items-center gap-2 group" style={{ animationDelay: `${0.6 + idx * 0.1}s` }}>
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600/20 to-indigo-600/10 flex items-center justify-center text-blue-400 transition-all duration-500 ease-in-out group-hover:bg-gradient-to-br group-hover:from-blue-500/30 group-hover:to-indigo-500/20 group-hover:text-blue-300 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-md group-hover:shadow-blue-500/20">
+              <div key={benefit.id} className="flex items-center gap-2 group font-secondary" style={{ animationDelay: `${0.6 + idx * 0.1}s` }}>
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600/20 to-indigo-600/10 flex items-center justify-center text-blue-400 transition-all duration-500 ease-in-out group-hover:bg-gradient-to-br group-hover:from-blue-500/30 group-hover:to-indigo-500/20 group-hover:text-blue-300 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-md group-hover:shadow-blue-500/20  font-secondary">
                   {benefit.icon}
                 </div>
-                <span className="text-white/80 font-medium transition-colors duration-300 group-hover:text-white">{benefit.text}</span>
+                <span className="text-white/80 font-medium transition-colors duration-300 group-hover:text-white font-secondary">{benefit.text}</span>
               </div>
             ))}
           </div>
@@ -265,7 +265,7 @@ const Hero = () => {
               <h3 className="text-xl font-bold mb-3 font-raleway group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-indigo-300 transition-colors duration-500">
                 {service.name}
               </h3>
-              <p className="text-white/60 text-sm group-hover:text-white/80 transition-colors duration-500">
+              <p className="font-secondary text-white/60 text-sm group-hover:text-white/80 transition-colors duration-500">
                 {service.description}
               </p>
               <div className="mt-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0 relative">
