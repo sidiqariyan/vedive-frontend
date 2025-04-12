@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { NavLink, useNavigate, useLocation, Outlet } from "react-router-dom";
 import logo from "../assets/Vedive.png";
-import Dashboard from "./other-pages/dashboard";
-import SenderBody from "./Pages/Mailer/SenderBody";
-import Account from "./other-pages/account";
-import EmailScrapper from "./Pages/Mailer/EmailScrapper";
-import GmailSender from "./Pages/Gmail/GmailSender";
-import WhatsAppSender from "./Pages/Whatsapp/WhatsAppSender";
-import NumberScraper from "./Pages/Whatsapp/NumberScraper";
-import MessageForm from "./Pages/Whatsapp/WhatsAppSender";
-import Plan from "./other-pages/plan";
+import mailIcon from "./assets/mail.svg";
+import whatsappIcon from "./assets/whatsapp.svg";
+import numberIcon from "./assets/number.svg";
+import gmailIcon from "./assets/gmail.svg";
+import mailScraperIcon from "./assets/mail-scraper.svg";
 
-const MainLayout = ({ children }) => {
+const MainLayout = () => {
   const API_URL = "https://vedive.com:3000";
   // const API_URL = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
   const navigate = useNavigate();
@@ -77,7 +73,7 @@ const MainLayout = ({ children }) => {
     fetchUserData();
 
     const handleResize = () => {
-      if (window.innerWidth < 768) {
+      if (window.innerWidth < 1024) {
         setSidebarOpen(false);
       } else {
         setSidebarOpen(true);
@@ -96,17 +92,13 @@ const MainLayout = ({ children }) => {
       navigate("/plan");
     }
   }, [location, user, navigate]);
-  
-  useEffect(() => {
-    console.log("Current path:", location.pathname);
-  }, [location.pathname]);
 
   const toggleSidebar = () => {
     setSidebarOpen((prev) => !prev);
   };
 
   const handleNavLinkClick = () => {
-    if (window.innerWidth < 768) {
+    if (window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
   };
@@ -121,48 +113,18 @@ const MainLayout = ({ children }) => {
   if (loading) return <div className="flex h-screen items-center justify-center">Loading...</div>;
   if (error) return <div className="error p-4 bg-red-600 text-white">An error occurred: {error}</div>;
 
-  const renderRouteContent = () => {
-    switch (location.pathname) {
-      case "/dashboard":
-        return <Dashboard />;
-      case "/email-sender":
-        return <SenderBody />;
-      case "/email-scraper":
-        return <EmailScrapper />;
-      case "/gmail-sender":
-        return <GmailSender />;
-      case "/whatsapp-sender":
-        return <MessageForm />;
-      case "/number-scraper":
-        return <NumberScraper />;
-      case "/account":
-        return <Account />;
-      case "/plan":
-        return <Plan />;
-      default:
-        return (
-          <div className="flex items-center justify-center h-screen">
-            <div className="text-center p-8">
-              <h2 className="text-2xl font-bold mb-4">Welcome to Vedive</h2>
-              <p>Select an option from the sidebar to get started</p>
-            </div>
-          </div>
-        );
-    }
-  };
-
   return (
     <div className="flex flex-col md:flex-row h-screen bg-zinc-800 text-white relative overflow-hidden">
       {sidebarOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-20"
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-20"
           onClick={toggleSidebar}
         />
       )}
       <div
         className={`
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-          md:translate-x-0 fixed md:relative z-30 w-64 h-full
+          lg:translate-x-0 fixed lg:relative z-30 w-64 h-full
           bg-gray-900 bg-opacity-50 backdrop-filter backdrop-blur-sm
           border-r border-gray-700/50 transition-transform duration-300
         `}
@@ -177,7 +139,7 @@ const MainLayout = ({ children }) => {
               </div>
             </div>
             <button
-              className="md:hidden text-gray-400 hover:text-white transition-colors"
+              className="lg:hidden text-gray-400 hover:text-white transition-colors"
               onClick={toggleSidebar}
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -223,9 +185,7 @@ const MainLayout = ({ children }) => {
             }
             onClick={handleNavLinkClick}
           >
-            <svg className="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
+            <img src={mailIcon} alt="Email" className="mr-3 h-5 w-5 text-gray-400" />
             Email Sender
           </NavLink>
           <NavLink
@@ -237,9 +197,7 @@ const MainLayout = ({ children }) => {
             }
             onClick={handleNavLinkClick}
           >
-            <svg className="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
+            <img src={whatsappIcon} alt="WhatsApp" className="mr-3 h-5 w-5 text-gray-400" />
             Whatsapp Sender
           </NavLink>
           <div
@@ -258,9 +216,7 @@ const MainLayout = ({ children }) => {
               }
             }}
           >
-            <svg className="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
+            <img src={gmailIcon} alt="Gmail" className="mr-3 h-5 w-5 text-gray-400" />
             Gmail Sender
             {!hasAccess("paid-tools") && (
               <>
@@ -289,9 +245,7 @@ const MainLayout = ({ children }) => {
               }
             }}
           >
-            <svg className="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
+            <img src={mailScraperIcon} alt="Email Scraper" className="mr-3 h-5 w-5 text-gray-400" />
             Email Scraper
             {!hasAccess("paid-tools") && (
               <>
@@ -320,9 +274,7 @@ const MainLayout = ({ children }) => {
               }
             }}
           >
-            <svg className="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
+            <img src={numberIcon} alt="Number Scraper" className="mr-3 h-5 w-5 text-gray-400" />
             Number Scraper
             {!hasAccess("paid-tools") && (
               <>
@@ -358,7 +310,7 @@ const MainLayout = ({ children }) => {
                   : "text-gray-300 hover:bg-gray-800/50 hover:text-white"
               }`
             }
-            onClick={() => setSidebarOpen(false)}
+            onClick={handleNavLinkClick}
           >
             <svg className="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -369,14 +321,21 @@ const MainLayout = ({ children }) => {
       </div>
       <div className="flex-1 flex flex-col overflow-auto relative">
         <button
-          className={`md:hidden fixed top-4 left-4 z-10 bg-gray-800 rounded-lg p-2 text-gray-400 hover:text-white transition-colors ${sidebarOpen ? "hidden" : "block"}`}
+          className={`lg:hidden fixed top-2 left-2 z-10  rounded-lg p-2 text-gray-400 hover:text-white transition-colors ${sidebarOpen ? "hidden" : "block"}`}
           onClick={toggleSidebar}
         >
-          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-        <div className="flex-1 min-h-screen">{renderRouteContent()}</div>
+<svg 
+  className="h-8 w-8" 
+  fill="none" 
+  viewBox="0 0 24 24" 
+  style={{ stroke: "black" }}
+>
+  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+</svg>        </button>
+        <div className="flex-1 min-h-screen">
+          {/* This is the key change - using Outlet to render nested routes */}
+          <Outlet />
+        </div>
       </div>
     </div>
   );

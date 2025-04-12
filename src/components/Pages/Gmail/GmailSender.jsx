@@ -1,6 +1,6 @@
 import React, { useContext, useState, useRef } from "react";
 import axios from "axios";
-import { Mail, Upload } from "lucide-react"; // Import icons for consistency
+import { Mail, Upload, HelpCircle } from "lucide-react"; // Import icons for consistency
 import { AuthContext } from "../Mailer/AuthContext.jsx"; // Ensure this path is correct
 
 const GmailSender = () => {
@@ -100,29 +100,31 @@ const GmailSender = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 p-0 sm:p-4 md:p-8">
       <div className="mx-auto bg-white rounded-lg shadow-md border border-gray-300">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-300">
-          <div className="flex items-center space-x-2">
-            <Mail className="text-third" size={40} />
-            <h1 className="text-[40px] font-semibold text-gray-900">Gmail Sender</h1>
+        <div className="flex flex-col sm:flex-row items-center justify-between p-4 sm:p-6 border-b border-gray-300">
+          <div className="flex items-center space-x-2 mb-4 sm:mb-0">
+            <Mail className="text-third" size={30} sm:size={40} />
+            <h1 className="text-2xl sm:text-3xl md:text-[40px] font-semibold text-gray-900">Gmail Sender</h1>
           </div>
-          <div className="flex items-center space-x-4">
-            <button className="text-gray-500 hover:text-gray-700">
-              <Upload size={20} />
-            </button>
+          <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600">
+            <HelpCircle size={16} className="text-third" />
+            <span>Need help?</span>
+            <a href="#" className="text-third underline">
+              Watch tutorial
+            </a>
           </div>
         </div>
-
-        <div className="p-6 space-y-8">
+  
+        <div className="p-4 sm:p-6 space-y-6 sm:space-y-8">
           {/* SMTP Configuration */}
-          <div className="space-y-4 p-6 border border-gray-300 rounded-lg shadow-sm">
+          <div className="space-y-4 p-4 sm:p-6 border border-gray-300 rounded-lg shadow-sm">
             <div className="flex items-center space-x-2">
               <Mail className="text-third" size={20} />
               <h2 className="text-lg font-medium text-gray-900">SMTP Configuration</h2>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Gmail Account</label>
                 <input
@@ -149,14 +151,14 @@ const GmailSender = () => {
               </div>
             </div>
           </div>
-
+  
           {/* Email Configuration */}
-          <div className="space-y-4 p-6 border border-gray-300 rounded-lg shadow-sm">
+          <div className="space-y-4 p-4 sm:p-6 border border-gray-300 rounded-lg shadow-sm">
             <div className="flex items-center space-x-2">
               <Mail className="text-third" size={20} />
               <h2 className="text-lg font-medium text-gray-900">Email Configuration</h2>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">From Email</label>
                 <input
@@ -183,10 +185,10 @@ const GmailSender = () => {
               </div>
             </div>
           </div>
-
+  
           {/* Template and Recipients */}
-          <div className="grid grid-cols-2 gap-8">
-            <div className="space-y-4 p-6 border border-gray-300 rounded-lg shadow-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+            <div className="space-y-4 p-4 sm:p-6 border border-gray-300 rounded-lg shadow-sm">
               <div className="text-center">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100 mb-2">
                   <Mail className="text-third" size={24} />
@@ -208,11 +210,11 @@ const GmailSender = () => {
                 className="hidden"
               />
               {htmlTemplateName && (
-                <p className="text-sm text-gray-600 text-center">{htmlTemplateName}</p>
+                <p className="text-sm text-gray-600 text-center truncate">{htmlTemplateName}</p>
               )}
             </div>
-
-            <div className="space-y-4 p-6 border border-gray-300 rounded-lg shadow-sm">
+  
+            <div className="space-y-4 p-4 sm:p-6 border border-gray-300 rounded-lg shadow-sm">
               <div className="text-center">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100 mb-2">
                   <Upload className="text-third" size={24} />
@@ -234,15 +236,15 @@ const GmailSender = () => {
                 className="hidden"
               />
               {recipientsFileName && (
-                <p className="text-sm text-gray-600 text-center">{recipientsFileName}</p>
+                <p className="text-sm text-gray-600 text-center truncate">{recipientsFileName}</p>
               )}
             </div>
           </div>
-
+  
           {/* Action Buttons */}
-          <div className="flex justify-end space-x-4 pt-4">
+          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 pt-4">
             <button
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 w-full sm:w-auto"
               onClick={() => {
                 setGmail("");
                 setAppPassword("");
@@ -257,7 +259,7 @@ const GmailSender = () => {
               Reset
             </button>
             <button
-              className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-third hover:bg-indigo-700"
+              className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-third hover:bg-indigo-700 w-full sm:w-auto"
               onClick={handleSendEmail}
             >
               Send Emails

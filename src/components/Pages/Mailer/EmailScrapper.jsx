@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { Mail, HelpCircle, Search, Download } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
 import countries from "./countries.json";
+import { Mail, Search, Download, HelpCircle, ChevronDown } from 'lucide-react';
 
 const EmailScraper = () => {
   const [keyword, setKeyword] = useState("");
@@ -11,6 +11,30 @@ const EmailScraper = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [campaignName, setCampaignName] = useState("");
   const [showCampaignNameInput, setShowCampaignNameInput] = useState(false);
+  const [countrySearch, setCountrySearch] = useState('');
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  
+  // Create ref for dropdown
+  const dropdownRef = useRef(null);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowCountryDropdown(false);
+      }
+    }
+
+    // Add event listener when dropdown is shown
+    if (showCountryDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    
+    // Cleanup event listener
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showCountryDropdown]);
 
   const validateForm = () => {
     if (!keyword.trim()) {
@@ -102,15 +126,16 @@ const EmailScraper = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="mx-auto bg-white rounded-lg shadow-md border border-gray-300">
+    <div className="min-h-screen bg-gray-50 p-0 sm:p-6 md:p-8">
+      <div className="mx-auto max-w-6xl bg-white rounded-lg shadow-md border border-gray-300">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-300">
-          <div className="flex items-center space-x-2">
-            <Mail className="text-third" size={40} />
-            <h1 className="text-4xl font-semibold text-gray-900">Email Scraper</h1>
+        <div className="flex flex-col sm:flex-row items-center justify-between p-4 sm:p-6 border-b border-gray-300">
+          <div className="flex items-center space-x-2 mb-4 sm:mb-0">
+            <Mail className="text-third hidden sm:block" size={40} />
+            <Mail className="text-third sm:hidden" size={32} />
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-900">Email Scraper</h1>
           </div>
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
+          <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600">
             <HelpCircle size={16} className="text-third" />
             <span>Need help?</span>
             <a href="#" className="text-third underline">
@@ -118,12 +143,12 @@ const EmailScraper = () => {
             </a>
           </div>
         </div>
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <form onSubmit={handlePrepareSearch} className="space-y-6">
-            <div className="space-y-4 p-6 border border-gray-400 rounded-lg shadow-sm">
-              <div className="grid grid-cols-1 gap-6">
+            <div className="space-y-4 p-4 sm:p-6 border border-gray-400 rounded-lg shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {/* Keyword Input */}
-                <div className="space-y-2">
+                <div className="space-y-2 md:col-span-2">
                   <label htmlFor="keyword" className="block text-sm font-medium text-gray-700">
                     Enter Keyword
                   </label>
@@ -142,24 +167,62 @@ const EmailScraper = () => {
                     Enter keywords to find business emails (job title, industry, location)
                   </p>
                 </div>
-                {/* Country Dropdown */}
-                <div className="space-y-2">
+                {/* Enhanced Country Dropdown with Click Outside Detection */}
+                <div className="space-y-2" ref={dropdownRef}>
                   <label htmlFor="country" className="block text-sm font-medium text-gray-700">
                     Country (Optional)
                   </label>
-                  <select
-                    id="country"
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                    className="py-2 px-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-third text-secondary"
-                  >
-                    <option value="">Select Country</option>
-                    {countries.map((country) => (
-                      <option key={country.code} value={country.name}>
-                        {country.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      id="countrySearch"
+                      value={countrySearch}
+                      onChange={(e) => {
+                        setCountrySearch(e.target.value);
+                        setShowCountryDropdown(true);
+                      }}
+                      onFocus={() => setShowCountryDropdown(true)}
+                      className="py-2 px-3 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-third text-secondary"
+                      placeholder="Search countries..."
+                    />
+                    <ChevronDown 
+                      className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 cursor-pointer" 
+                      onClick={() => setShowCountryDropdown(!showCountryDropdown)} 
+                    />
+                    {showCountryDropdown && (
+                      <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        <div className="sticky top-0 bg-white p-2 border-b border-gray-200">
+                          <input
+                            type="text"
+                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-third text-secondary"
+                            placeholder="Type to filter..."
+                            value={countrySearch}
+                            onChange={(e) => setCountrySearch(e.target.value)}
+                            // Stop propagation to prevent closing when clicking this input
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                        <ul className="py-1">
+                          {countries
+                            .filter(c => c.name.toLowerCase().includes(countrySearch.toLowerCase()))
+                            .map((countryItem) => (
+                              <li 
+                                key={countryItem.code} 
+                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-secondary"
+                                onClick={() => {
+                                  setCountry(countryItem.name);
+                                  setCountrySearch(countryItem.name);
+                                  setShowCountryDropdown(false);
+                                }}
+                              >
+                                {countryItem.name}
+                              </li>
+                            ))
+                          }
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 {/* City Input */}
                 <div className="space-y-2">
@@ -179,7 +242,7 @@ const EmailScraper = () => {
             </div>
             {/* Campaign Name Input */}
             {showCampaignNameInput && (
-              <div className="p-6 border border-gray-400 rounded-lg shadow-sm space-y-4">
+              <div className="p-4 sm:p-6 border border-gray-400 rounded-lg shadow-sm space-y-4">
                 <div className="space-y-2">
                   <label htmlFor="campaignName" className="block text-sm font-medium text-gray-700">
                     Campaign Name
@@ -216,7 +279,7 @@ const EmailScraper = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`px-6 py-3 rounded-lg text-white font-medium flex items-center ${
+                className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-white font-medium flex items-center ${
                   isLoading ? "bg-gray-500" : "bg-third hover:bg-third-dark"
                 }`}
               >
@@ -244,33 +307,33 @@ const EmailScraper = () => {
             </div>
           </form>
           {/* Features Description Section */}
-          <div className="mt-12 space-y-6">
-            <h2 className="text-2xl font-medium text-gray-800">How It Works</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="mt-8 sm:mt-12 space-y-6">
+            <h2 className="text-xl sm:text-2xl font-medium text-gray-800">How It Works</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               <div className="p-4 border border-gray-300 rounded-lg text-center">
-                <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-third-light text-third mb-4">
-                  <Search className="h-6 w-6" />
+                <div className="inline-flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-third-light text-third mb-3 sm:mb-4">
+                  <Search className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
-                <h3 className="text-lg font-medium mb-2">Find Relevant Contacts</h3>
-                <p className="text-gray-600 text-sm">
+                <h3 className="text-base sm:text-lg text-black font-medium mb-1 sm:mb-2">Find Relevant Contacts</h3>
+                <p className="text-gray-600 text-xs sm:text-sm">
                   Search by industry, job title, and location to find targeted business emails.
                 </p>
               </div>
               <div className="p-4 border border-gray-300 rounded-lg text-center">
-                <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-third-light text-third mb-4">
-                  <Mail className="h-6 w-6" />
+                <div className="inline-flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-third-light text-third mb-3 sm:mb-4">
+                  <Mail className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
-                <h3 className="text-lg font-medium mb-2">Automated Email Collection</h3>
-                <p className="text-gray-600 text-sm">
+                <h3 className="text-base sm:text-lg text-black font-medium mb-1 sm:mb-2">Automated Email Collection</h3>
+                <p className="text-gray-600 text-xs sm:text-sm">
                   Our system intelligently searches across multiple sources to find valid email addresses.
                 </p>
               </div>
               <div className="p-4 border border-gray-300 rounded-lg text-center">
-                <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-third-light text-third mb-4">
-                  <Download className="h-6 w-6" />
+                <div className="inline-flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-third-light text-third mb-3 sm:mb-4">
+                  <Download className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
-                <h3 className="text-lg font-medium mb-2">Export to CSV</h3>
-                <p className="text-gray-600 text-sm">
+                <h3 className="text-base sm:text-lg text-black font-medium mb-1 sm:mb-2">Export to CSV</h3>
+                <p className="text-gray-600 text-xs sm:text-sm">
                   Download your results as a CSV file for easy import into your email marketing platform.
                 </p>
               </div>

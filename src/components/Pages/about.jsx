@@ -36,22 +36,6 @@ const AboutUs = () => {
       </div>
 
       {/* Mobile/Tablet View */}
-      <div className="mobile-tablet-view">
-        <div
-          style={{ background: "#04081D", color: "#ffffff" }}
-          className="about-us-container about-us-container-1"
-        >
-          <h1>Why do businesses trust Vedive?</h1>
-         <p>Vedive was founded with a clear vision — to transform the way businesses communicate through whatsapp messages and email. After facing constant challenges with low deliverability, security concerns, and messages landing in spam folders, we knew there had to be a better way. That’s when we built Vedive — an AI-powered platform designed to ensure emails are fast, secure, and always delivered. What started as a frustration turned into our mission: to empower businesses with seamless, reliable, and intelligent email infrastructure that scales effortlessly.
-         </p>
-        </div>
-        <div className="scroll-row">
-        <div className="about-us-container"><img src={bgImage1} alt="" /></div>
-        <div className="about-us-container"><img src={bgImage2} alt="" /></div>
-        <div className="about-us-container"><img src={bgImage3} alt="" /></div>
-        </div>
-      </div>
-
       {/* Main Heading Text */}
       <div className="main-heading-text">
         <h1>What We Want</h1>
@@ -59,23 +43,23 @@ const AboutUs = () => {
 
       {/* Grid Container */}
       <div className="grid-container">
-        <div className="grid-item" style={{ backgroundColor: "#1E90FF", color: "white" }}>
+        <div className="grid-item item1" style={{ backgroundColor: "#1E90FF", color: "white" }}>
           <h2>What We Do</h2>
           <p>
           At Vedive, we help businesses streamline and amplify their communication efforts through a unified platform that integrates advanced messaging and lead generation tools. Our mission is to eliminate the friction between businesses and their customers by offering solutions that are fast, intelligent, and scalable. Whether you're launching an email campaign, running bulk WhatsApp messages, or collecting verified leads, Vedive gives you the ability to reach your audience efficiently and effectively. We understand the importance of real-time engagement and deliverability, which is why our platform is designed with performance and reliability in mind. From startups to enterprise clients, businesses choose Vedive because we simplify outreach and make communication more strategic. With powerful tracking tools, secure infrastructure, and automation-ready workflows, we ensure you stay connected to your audience without compromising speed or quality. Vedive empowers you to grow, connect, and convert — all from one powerful communication hub.
           </p>
         </div>
 
-        <div className="grid-item" style={{  padding: '0'}}>
+        <div className="grid-item item2" style={{  padding: '0'}}>
         <img src={bgImage4} alt="" />
         </div>
 
-        <div className="grid-item" style={{  padding: '0'}}>
+        <div className="grid-item item3" style={{  padding: '0'}}>
         <img src={bgImage5} alt="" />
         </div>
 
         <div
-          className="grid-item"
+          className="grid-item item4"
           style={{ backgroundColor: "#1E90FF", color: "white" }}
         >
           <h2>Our Solution</h2>

@@ -7,9 +7,9 @@ import MainLayout from "./components/MailLayout.jsx";
 import "tailwindcss/tailwind.css";
 import ResetPassword from "./components/other-pages/ResetPassword.jsx";
 
-// Lazy-loaded pages
+// Lazy-loaded pages - Public
 const CreateBlogPostPage = lazy(() => import("./components/other-pages/CreateBlogPostPage.jsx"));
-const BlogPostListPage  = lazy(() => import("./components/other-pages/BlogPostListPage.jsx"));
+const BlogPostListPage = lazy(() => import("./components/other-pages/BlogPostListPage.jsx"));
 const PostDetail = lazy(() => import("./components/other-pages/PostDetails.jsx"));
 const Hero = lazy(() => import("./components/Pages/Hero/Hero"));
 const ContactUs = lazy(() => import("./components/Pages/contact.jsx"));
@@ -20,19 +20,21 @@ const Login = lazy(() => import("./components/other-pages/login.jsx"));
 const Signup = lazy(() => import("./components/other-pages/sign-up.jsx"));
 const Passreset = lazy(() => import("./components/other-pages/pass-reset.jsx"));
 const VerifyEmail = lazy(() => import("./components/other-pages/VerifyEmail"));
+const PaymentStatus = lazy(() => import("./components/other-pages/PaymentStatus.jsx"));
+
+// Lazy-loaded pages - Dashboard/Protected
 const Dashboard = lazy(() => import("./components/other-pages/dashboard.jsx"));
 const Account = lazy(() => import("./components/other-pages/account.jsx"));
-const PostForm = lazy(() => import("./components/other-pages/PostForm.jsx"));
-const PostList = lazy(() => import("./components/other-pages/PostList.jsx"));
 const Plan = lazy(() => import("./components/other-pages/plan.jsx"));
-const TemplateEditorPage = lazy(() => import("./components/other-pages/TemplateEditor.jsx"));
 const SenderBody = lazy(() => import("./components/Pages/Mailer/SenderBody.jsx"));
 const EmailScrapper = lazy(() => import("./components/Pages/Mailer/EmailScrapper.jsx"));
 const GmailSender = lazy(() => import("./components/Pages/Gmail/GmailSender.jsx"));
 const MessageForm = lazy(() => import("./components/Pages/Whatsapp/WhatsAppSender.jsx"));
 const NumberScraper = lazy(() => import("./components/Pages/Whatsapp/NumberScraper.jsx"));
-const PaymentStatus = lazy(() => import("./components/other-pages/PaymentStatus.jsx"));
 const SubscriptionHistory = lazy(() => import("./components/other-pages/SubscriptionHistory.jsx"));
+const PostForm = lazy(() => import("./components/other-pages/PostForm.jsx"));
+const PostList = lazy(() => import("./components/other-pages/PostList.jsx"));
+const TemplateEditorPage = lazy(() => import("./components/other-pages/TemplateEditor.jsx"));
 
 // Optimized Page Transition Component
 const PageTransition = ({ children }) => {
@@ -196,7 +198,7 @@ const VediveLoader = ({ onComplete }) => {
       <div className="relative text-center">
         <h1 
           data-text="Vedive"
-          className="elegant-text animate-slide text-[10rem] opacity-0 tracking-wider drop-shadow-xl hover:scale-105 transition-transform duration-500"
+          className="elegant-text animate-slide text-[10rem] md:text-[10rem] text-[6rem] opacity-0 tracking-wider drop-shadow-xl hover:scale-105 transition-transform duration-500"
           style={{ fontFamily: 'Raleway, sans-serif' }}
         >
           Vedive
@@ -228,7 +230,7 @@ const globalStyles = `
   }
 `;
 
-// AnimatedRoutes component with optimized transitions
+// Modified AnimatedRoutes component with properly nested routes
 const AnimatedRoutes = () => {
   const location = useLocation();
   
@@ -285,7 +287,7 @@ const AnimatedRoutes = () => {
           }
         />
         
-        {/* Payment & Plan Routes */}
+        {/* Payment & Plan Routes - Public */}
         <Route
           path="/plans/payment-status"
           element={
@@ -302,16 +304,6 @@ const AnimatedRoutes = () => {
             <Suspense fallback={null}>
               <PageTransition>
                 <Plan />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/dashboard/subscription"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <SubscriptionHistory />
               </PageTransition>
             </Suspense>
           }
@@ -369,121 +361,141 @@ const AnimatedRoutes = () => {
           }
         />
         
-        {/* Protected Routes */}
+        {/* Protected Routes with MainLayout */}
         <Route
-          path="/plan"
+          path="/"
           element={
             <ProtectedRoute>
-              <MainLayout>
-                <Suspense fallback={null}>
-                  <PageTransition>
-                    <Plan />
-                  </PageTransition>
-                </Suspense>
-              </MainLayout>
+              <MainLayout />
             </ProtectedRoute>
           }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <Suspense fallback={null}>
-                  <PageTransition>
-                    <Dashboard />
-                  </PageTransition>
-                </Suspense>
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/account"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <Suspense fallback={null}>
-                  <PageTransition>
-                    <Account />
-                  </PageTransition>
-                </Suspense>
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        
-        {/* Email & Communication Routes */}
-        <Route
-          path="/email-sender"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <Suspense fallback={null}>
-                  <PageTransition>
-                    <SenderBody />
-                  </PageTransition>
-                </Suspense>
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/email-scraper"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <Suspense fallback={null}>
-                  <PageTransition>
-                    <EmailScrapper />
-                  </PageTransition>
-                </Suspense>
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/gmail-sender"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <Suspense fallback={null}>
-                  <PageTransition>
-                    <GmailSender />
-                  </PageTransition>
-                </Suspense>
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/whatsapp-sender"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <Suspense fallback={null}>
-                  <PageTransition>
-                    <MessageForm />
-                  </PageTransition>
-                </Suspense>
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/number-scraper"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <Suspense fallback={null}>
-                  <PageTransition>
-                    <NumberScraper />
-                  </PageTransition>
-                </Suspense>
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
+        >
+          {/* Dashboard Routes */}
+          <Route
+            path="dashboard"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <Dashboard />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="account"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <Account />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="plan"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <Plan />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="dashboard/subscription"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <SubscriptionHistory />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          
+          {/* Email & Communication Routes */}
+          <Route
+            path="gmail-sender"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <SenderBody />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="email-scraper"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <EmailScrapper />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="email-sender"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <GmailSender />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="whatsapp-sender"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <MessageForm />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="number-scraper"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <NumberScraper />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          
+          {/* Template Routes */}
+          <Route
+            path="post-form"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <PostForm />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="templates"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <PostList />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="editor/:id"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <TemplateEditorPage />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+        </Route>
         
         {/* Blog & Content Routes */}
         <Route
@@ -522,36 +534,6 @@ const AnimatedRoutes = () => {
             <Suspense fallback={null}>
               <PageTransition>
                 <PostDetail />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/post-form"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <PostForm />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/templates"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <PostList />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/editor/:id"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <TemplateEditorPage />
               </PageTransition>
             </Suspense>
           }

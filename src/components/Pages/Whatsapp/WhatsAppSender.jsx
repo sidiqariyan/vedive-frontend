@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import QRCodeDisplay from "./Auth";
-import { MessageCircle, UploadCloud } from "lucide-react"; // Import icons for consistency
+import { MessageCircle, UploadCloud, HelpCircle } from "lucide-react"; // Import icons for consistency
 
 const MessageForm = () => {
   const [users, setUsers] = useState("");
@@ -70,47 +70,49 @@ const MessageForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 p-0 sm:p-4 md:p-8">
       <div className="mx-auto bg-white rounded-lg shadow-md border border-gray-300">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-300">
-          <div className="flex items-center space-x-2">
-            <MessageCircle className="text-third" size={40} />
-            <h1 className="text-[40px] font-semibold text-gray-900">WhatsApp Sender</h1>
+        <div className="flex flex-col sm:flex-row items-center justify-between p-4 sm:p-6 border-b border-gray-300">
+          <div className="flex items-center space-x-2 mb-4 sm:mb-0">
+            <MessageCircle className="text-third" size={30} sm:size={40} />
+            <h1 className="text-2xl sm:text-3xl md:text-[40px] font-semibold text-gray-900">WhatsApp Sender</h1>
           </div>
-          <div className="flex items-center space-x-4">
-            <button className="text-gray-500 hover:text-gray-700">
-              <UploadCloud size={20} />
-            </button>
+          <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600">
+            <HelpCircle size={16} className="text-third" />
+            <span>Need help?</span>
+            <a href="#" className="text-third underline">
+              Watch tutorial
+            </a>
           </div>
         </div>
-
-        <div className="p-6 space-y-8">
+  
+        <div className="p-4 sm:p-6 space-y-6 sm:space-y-8">
           {/* QR Code Display Section */}
-          <div className="mb-6 text-center">
+          <div className="mb-4 sm:mb-6 text-center">
             <QRCodeDisplay />
           </div>
-
+  
           {/* Campaign Name Display */}
           {campaignName && (
             <div className="mb-4 text-center">
-              <p className="text-primary font-semibold">Selected Campaign: {campaignName}</p>
+              <p className="text-primary font-semibold text-sm sm:text-base">Selected Campaign: {campaignName}</p>
             </div>
           )}
-
+  
           {/* Error message display */}
           {error && (
-            <div className="mt-4 p-4 bg-red-50 border border-red-300 rounded-lg">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="mt-4 p-3 sm:p-4 bg-red-50 border border-red-300 rounded-lg">
+              <p className="text-xs sm:text-sm text-red-600">{error}</p>
             </div>
           )}
-
+  
           {/* Message Form Section */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {/* Users and Message Inputs */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Users (One phone number per line):
                 </label>
                 <textarea
@@ -123,7 +125,7 @@ const MessageForm = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Message:
                 </label>
                 <textarea
@@ -136,25 +138,25 @@ const MessageForm = () => {
                 />
               </div>
             </div>
-
+  
             {/* Media Input and Submit Button */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Media (Optional):
                 </label>
                 <input
                   id="media"
                   type="file"
                   onChange={(e) => setMedia(e.target.files[0])}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-third focus:border-transparent text-secondary"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-third focus:border-transparent text-secondary text-xs sm:text-sm"
                 />
               </div>
-              <div className="flex items-end justify-end">
+              <div className="flex items-end justify-end mt-4 md:mt-0">
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium text-white ${
+                  className={`w-full md:w-auto px-4 py-2 rounded-lg text-xs sm:text-sm font-medium text-white ${
                     isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-third hover:bg-third-dark"
                   }`}
                 >
@@ -163,15 +165,15 @@ const MessageForm = () => {
               </div>
             </div>
           </form>
-
+  
           {/* Response Message */}
           {response && (
             <div
-              className={`mt-4 p-4 rounded-lg ${
+              className={`mt-4 p-3 sm:p-4 rounded-lg ${
                 response.includes("Error") ? "bg-red-50 border border-red-300" : "bg-green-50 border border-green-300"
               }`}
             >
-              <p className={`text-sm ${response.includes("Error") ? "text-red-600" : "text-green-600"}`}>
+              <p className={`text-xs sm:text-sm ${response.includes("Error") ? "text-red-600" : "text-green-600"}`}>
                 {response}
               </p>
             </div>

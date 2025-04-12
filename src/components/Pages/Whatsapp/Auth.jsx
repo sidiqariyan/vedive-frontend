@@ -49,11 +49,11 @@ const QRCodeDisplay = () => {
   }
   
   return (
-    <div style={{ textAlign: "center" }}>
-      <h2 className="text-[32px] font-semibold font-primary mb-4 -mt-4 flex justify-center text-primary">
+    <div style={{ textAlign: "center",color: 'black' }}>
+      <h2 className="text-[32px] text-secondary font-semibold font-primary mb-4 -mt-4 flex justify-center text-primary">
         WhatsApp Sender
       </h2>
-      <p>Scan the QR code with your WhatsApp mobile app:</p>
+      <p style={{color: 'black'}}>Scan the QR code with your WhatsApp mobile app:</p>
       <img src={qrCode} alt="QR Code" style={{ maxWidth: "200px", maxHeight: "200px" }} />
     </div>
   );

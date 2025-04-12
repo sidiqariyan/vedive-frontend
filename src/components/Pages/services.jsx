@@ -7,6 +7,11 @@ import bgImage2 from "./assets/services-image-2.png";
 import bgImage3 from "./assets/services-image-3.png";
 import bgImage4 from "./third.png";
 import bgImage5 from "./fourth.png";
+import service1 from "./assets/service-1.png";
+import service2 from "./assets/service-2.png";
+import service3 from "./assets/service-3.png";
+import service4 from "./assets/service-4.png";
+import service5 from "./assets/service-5.png";
 
 // Top Section Component
 const TopSection = () => (
@@ -22,12 +27,22 @@ const TopSection = () => (
 );
 
 // Service Section Component
-const ServiceSection = ({ number, title, description }) => (
-  <div className="section">
-    <div className="section-number">{number}</div>
-    <div className="content">
-      <h2>{title}</h2>
-      <p>{description}</p>
+const ServiceSection = ({ number, title, description, backgroundImage }) => (
+  <div 
+    className="section" 
+    style={{ 
+      backgroundImage: `url(${backgroundImage})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat'
+    }}
+  >
+    <div className="section-content">
+      <div className="section-number">{number}</div>
+      <div className="content">
+        <h2>{title}</h2>
+        <p>{description}</p>
+      </div>
     </div>
   </div>
 );
@@ -36,37 +51,41 @@ const ServiceSection = ({ number, title, description }) => (
 const Services = () => {
   return (
     <div className="main-body">
-      {" "}
-      {/* Wrap everything inside this div */}
       <TopSection />
-      <h2 className="text-primary text-[65px] text-center font-semibold">Our Services</h2>
+      <h2 className="text-primary text-[38px] sm:text-[48px] md:text-[65px] text-center font-semibold"
+      >Our Services</h2>
       <div className="parent-container">
-      <div style={{ paddingBottom: '6%' }} className="desktop-view">
-  <ServiceSection
-    number="01"
-    title="Mail Sender"
-    description="Send high-volume, AI-optimized email campaigns with unmatched deliverability and inbox placement — all with real-time analytics."
-  />
-  <ServiceSection
-    number="02"
-    title="WhatsApp Bulk Sender"
-    description="Engage your audience instantly with personalized, rich-media messages on WhatsApp — perfect for promotions, alerts, and updates."
-  />
-  <ServiceSection
-    number="03"
-    title="Email Scraper"
-    description="Extract verified, niche-specific email leads from targeted sources to fuel your outreach and marketing pipelines."
-  />
-  <ServiceSection
-    number="04"
-    title="Mobile Number Scraper"
-    description="Effortlessly gather clean, accurate mobile numbers to power SMS marketing, WhatsApp campaigns, or tele-sales strategies."
-  />
-  <ServiceSection
-    number="05"
-    title="Real-Time Tracking Dashboard"
-    description="Track opens, clicks, engagement, and delivery metrics across all your campaigns — all in one smart, centralized dashboard."
-  />
+        <div style={{ paddingBottom: '6%' }} className="desktop-view">
+          <ServiceSection
+            number="01"
+            title="Mail Sender"
+            description="Send high-volume, AI-optimized email campaigns with unmatched deliverability and inbox placement — all with real-time analytics."
+            backgroundImage={service1}
+          />
+          <ServiceSection
+            number="02"
+            title="WhatsApp Bulk Sender"
+            description="Engage your audience instantly with personalized, rich-media messages on WhatsApp — perfect for promotions, alerts, and updates."
+            backgroundImage={service2}
+          />
+          <ServiceSection
+            number="03"
+            title="Email Scraper"
+            description="Extract verified, niche-specific email leads from targeted sources to fuel your outreach and marketing pipelines."
+            backgroundImage={service3}
+          />
+          <ServiceSection
+            number="04"
+            title="Mobile Number Scraper"
+            description="Effortlessly gather clean, accurate mobile numbers to power SMS marketing, WhatsApp campaigns, or tele-sales strategies."
+            backgroundImage={service4}
+          />
+          <ServiceSection
+            number="05"
+            title="Real-Time Tracking Dashboard"
+            description="Track opens, clicks, engagement, and delivery metrics across all your campaigns — all in one smart, centralized dashboard."
+            backgroundImage={service5}
+          />
 
         </div>
       </div>
@@ -84,27 +103,6 @@ const Services = () => {
         <div className="about-us-container"><img src={bgImage1} alt="" /></div>
         </div>
 
-        <div className="mobile-tablet-view">
-          <div
-            style={{ background: "#04081D" }}
-            className="about-us-container about-us-container-1"
-          >
-            <h1>Our Story</h1>
-            <p>
-              Our mission is to provide convenience and quality service to every
-              marketing professional, so they can make their marketing efforts
-              easier and better. We are always committed to giving our customers
-              the best experience, and every day, we aim to exceed their
-              expectations in new ways. This will help make marketing even
-              easier in the future.
-            </p>
-          </div>
-          <div className="scroll-row">
-        <div className="about-us-container"><img src={bgImage1} alt="" /></div>
-        <div className="about-us-container"><img src={bgImage2} alt="" /></div>
-        <div className="about-us-container"><img src={bgImage3} alt="" /></div>
-          </div>
-        </div>
       {/* Separate "What We Want" Section */}
       <div className="what-we-want-container">
       <div className="parent-container">

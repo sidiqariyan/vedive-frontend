@@ -98,7 +98,7 @@ const ContactUs = () => {
             <label>
               <span>Mobile No:</span>
               <input
-                type="number"
+                type="phone"
                 name="mobile"
                 value={formData.mobile}
                 onChange={handleChange}
