@@ -453,7 +453,7 @@ const AnimatedRoutes = () => {
               </Suspense>
             }
           />
-          <Route
+          {/* <Route
             path="number-scraper"
             element={
               <Suspense fallback={<div>Loading...</div>}>
@@ -462,7 +462,7 @@ const AnimatedRoutes = () => {
                 </PageTransition>
               </Suspense>
             }
-          />
+          /> */}
           
           {/* Template Routes */}
           <Route

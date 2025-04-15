@@ -14,6 +14,14 @@ const Plan = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Define the plan order to determine upgrade/downgrade
+  const planOrder = {
+    free: 0,
+    starter: 1,
+    business: 2,
+    enterprise: 3,
+  };
+
   const plans = [
     {
       id: "free",
@@ -25,7 +33,7 @@ const Plan = () => {
         { name: "Unlimited Mail Sending", restricted: false },
         { name: "Scrap Unlimited Mails", restricted: true },
         { name: "Unlimited WhatsApp Message Sending", restricted: false },
-        { name: "Scrap Unlimited Numbers", restricted: true },
+        // { name: "Scrap Unlimited Numbers", restricted: true },
         { name: "Unlimited Mail & WhatsApp Template", restricted: true },
       ],
       buttonText: "Free Plan",
@@ -43,7 +51,7 @@ const Plan = () => {
         { name: "Unlimited Mail Sending", restricted: false },
         { name: "Scrap Unlimited Mails", restricted: false },
         { name: "Unlimited WhatsApp Message Sending", restricted: false },
-        { name: "Scrap Unlimited Numbers", restricted: false },
+        // { name: "Scrap Unlimited Numbers", restricted: false },
         { name: "Unlimited Mail & WhatsApp Template", restricted: false },
       ],
       buttonText: "Buy Now",
@@ -61,7 +69,7 @@ const Plan = () => {
         { name: "Unlimited Mail Sending", restricted: false },
         { name: "Scrap Unlimited Mails", restricted: false },
         { name: "Unlimited WhatsApp Message Sending", restricted: false },
-        { name: "Scrap Unlimited Numbers", restricted: false },
+        // { name: "Scrap Unlimited Numbers", restricted: false },
         { name: "Unlimited Mail & WhatsApp Template", restricted: false },
       ],
       buttonText: "Buy Now",
@@ -79,7 +87,7 @@ const Plan = () => {
         { name: "Unlimited Mail Sending", restricted: false },
         { name: "Scrap Unlimited Mails", restricted: false },
         { name: "Unlimited WhatsApp Message Sending", restricted: false },
-        { name: "Scrap Unlimited Numbers", restricted: false },
+        // { name: "Scrap Unlimited Numbers", restricted: false },
         { name: "Unlimited Mail & WhatsApp Template", restricted: false },
       ],
       buttonText: "Buy Now",
@@ -92,7 +100,7 @@ const Plan = () => {
   const initializePayment = useCallback((paymentSessionId, orderId) => {
     const checkoutOptions = {
       paymentSessionId,
-      returnUrl: `https://vedive.com:3000/plans/payment-status?order_id=${orderId}`,
+      returnUrl: `https://vedive.com/plans/payment-status?order_id=${orderId}`,
       redirectTarget: "_self",
       theme: {
         navbarColor: "#2563eb",
@@ -122,7 +130,7 @@ const Plan = () => {
       
       if (!localStorage.getItem("token")) {
         navigate("/login", {
-          state: { redirectTo: `https://vedive.com:3000/plans/payment-status?order_id=${orderId}` },
+          state: { redirectTo: `https://vedive.com/plans/payment-status?order_id=${orderId}` },
         });
         return;
       }
@@ -135,11 +143,9 @@ const Plan = () => {
         await fetchSubscriptionStatus();
         navigate("/dashboard", { replace: true });
       } else {
-        // Payment failed but API responded
         toast.error(response.data.error || "Payment verification failed");
         localStorage.removeItem("pendingOrder");
         setPaymentCancelled(true);
-        // Stay on plans page instead of showing payment failed page
         navigate("/plans", { replace: true });
       }
     } catch (error) {
@@ -147,7 +153,6 @@ const Plan = () => {
       toast.error(error.response?.data?.error || "Payment verification failed");
       localStorage.removeItem("pendingOrder");
       setPaymentCancelled(true);
-      // Stay on plans page instead of showing payment failed page
       navigate("/plans", { replace: true });
     } finally {
       setVerifyingPayment(false);
@@ -159,28 +164,43 @@ const Plan = () => {
     const params = new URLSearchParams(location.search);
     const orderId = params.get("order_id");
     
-    // Only process if this is actually a payment status page
     if (location.pathname.includes("/payment-status") && orderId) {
       verifyAndProcessPayment(orderId);
     } else if (location.pathname === "/plans") {
-      // Clear payment verification state when directly on plans page
       setVerifyingPayment(false);
       setPaymentCancelled(false);
     }
   }, [location.pathname, location.search, verifyAndProcessPayment]);
 
   const handlePlanSelection = async (planId) => {
-    if (planId === "free") return; // Ignore clicks on the free plan
+    // Get the selected plan details
+    const selectedPlan = plans.find((plan) => plan.id === planId);
+
+    // If free plan or no upgrade available, return early
+    if (planId === "free") return;
     
+    // If user is not authenticated, prompt to login
     if (!isAuthenticated) {
       toast.info("Please login to subscribe to a plan");
       navigate("/login", { state: { redirectTo: "/plans" } });
       return;
     }
+
+    // If user already has an active plan that is equal or higher, do not allow purchase
+    const currentPlanLevel = currentSubscription?.currentPlan ? planOrder[currentSubscription.currentPlan] : 0;
+    const selectedPlanLevel = planOrder[selectedPlan.id];
+    if (currentPlanLevel > 0 && selectedPlanLevel <= currentPlanLevel) {
+      toast.info("You can only upgrade to a higher plan");
+      return;
+    }
     
     try {
       setLoading(true);
-      const orderResponse = await subscriptionService.createOrder(planId);
+      // Pass both planId and the plan price as amount
+      const orderResponse = await subscriptionService.createOrder({
+        planId,
+        amount: selectedPlan.price,
+      });
       console.log("Order Response:", orderResponse.data);
       
       if (orderResponse?.data?.paymentSessionId) {
@@ -216,14 +236,12 @@ const Plan = () => {
     }
   }, []);
 
-  // Check for pending orders but don't automatically redirect
+  // Clear stale pending orders
   useEffect(() => {
     const pendingOrderData = localStorage.getItem("pendingOrder");
     
     if (pendingOrderData) {
       const pendingOrder = JSON.parse(pendingOrderData);
-      
-      // Add timestamp check to automatically clear old pending orders (older than 1 hour)
       const currentTime = Date.now();
       const orderTime = pendingOrder.timestamp || 0;
       const oneHourInMs = 60 * 60 * 1000;
@@ -232,9 +250,8 @@ const Plan = () => {
         console.log("Removing stale pending order");
         localStorage.removeItem("pendingOrder");
       }
-      // Don't automatically redirect to payment status page
     }
-  }, [navigate]);
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -243,19 +260,36 @@ const Plan = () => {
   }, [fetchSubscriptionStatus]);
 
   const renderButton = (plan) => {
-    const isCurrentPlan = currentSubscription?.currentPlan === plan.name;
+    const currentPlanLevel = currentSubscription?.currentPlan ? planOrder[currentSubscription.currentPlan] : 0;
+    const selectedPlanLevel = planOrder[plan.id];
+    const isCurrentPlan = currentSubscription?.currentPlan === plan.id;
+    // If user has an active subscription (non-free), lock buttons for plans that are lower or equal to their current plan.
+    const isLocked = currentPlanLevel > 0 && selectedPlanLevel <= currentPlanLevel && !isCurrentPlan;
     const isProcessing = loading || verifyingPayment;
+    
+    // Set button text: if current plan then "Current Plan", if locked then "Locked", otherwise use plan.buttonText.
+    let btnText = plan.buttonText;
+    if (isCurrentPlan) {
+      btnText = "Current Plan";
+    } else if (isLocked) {
+      btnText = "Locked";
+    }
+
     return (
       <button
-        onClick={() => !isProcessing && !plan.disabled && !isCurrentPlan && handlePlanSelection(plan.id)}
-        disabled={isProcessing || isCurrentPlan || plan.disabled}
+        onClick={() => {
+          if (!isProcessing && !isLocked && !isCurrentPlan) {
+            handlePlanSelection(plan.id);
+          }
+        }}
+        disabled={isProcessing || isCurrentPlan || isLocked || plan.disabled}
         className={`w-full py-3 px-4 rounded-lg text-sm font-semibold transition-all ${
           isCurrentPlan
             ? "bg-green-100 text-green-800 cursor-not-allowed"
             : isProcessing
             ? "bg-gray-100 text-gray-500 cursor-wait"
-            : plan.disabled
-            ? plan.buttonStyle
+            : isLocked
+            ? "bg-gray-100 text-gray-500 cursor-not-allowed"
             : plan.buttonStyle
         }`}
       >
@@ -264,16 +298,13 @@ const Plan = () => {
             <Loader className="animate-spin mr-2 inline" size={16} />
             {verifyingPayment ? "Verifying Payment..." : "Processing..."}
           </>
-        ) : isCurrentPlan ? (
-          "Current Plan"
         ) : (
-          plan.buttonText
+          btnText
         )}
       </button>
     );
   };
 
-  // Create a separate component for payment status
   const PaymentStatusPage = () => {
     const params = new URLSearchParams(location.search);
     const orderId = params.get("order_id");
@@ -304,12 +335,10 @@ const Plan = () => {
     );
   };
 
-  // If we're on payment status page, render that component
   if (location.pathname.includes("/payment-status")) {
     return <PaymentStatusPage />;
   }
 
-  // Otherwise render the plans page
   return (
     <div className="min-h-screen bg-white text-gray-800 py-12 px-4 sm:px-6 lg:px-8 relative overflow-auto">
       <div className="w-full max-w-7xl mx-auto">
@@ -342,14 +371,14 @@ const Plan = () => {
             <div
               key={plan.id}
               className={`relative rounded-2xl bg-white p-8 border ${
-                currentSubscription?.currentPlan === plan.name
+                currentSubscription?.currentPlan === plan.id
                   ? "border-blue-500 ring-2 ring-blue-200"
                   : "border-gray-200"
               } shadow-lg hover:shadow-xl transition-all duration-300 ${
                 plan.popular ? "transform hover:-translate-y-2" : "hover:-translate-y-1"
               }`}
             >
-              {currentSubscription?.currentPlan === plan.name && (
+              {currentSubscription?.currentPlan === plan.id && (
                 <div className="absolute -top-5 inset-x-0 flex justify-center">
                   <span className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold px-6 py-2 rounded-full shadow-lg flex items-center">
                     <Crown className="w-4 h-4 mr-1" />
@@ -358,7 +387,7 @@ const Plan = () => {
                 </div>
               )}
               
-              {plan.popular && currentSubscription?.currentPlan !== plan.name && (
+              {plan.popular && currentSubscription?.currentPlan !== plan.id && (
                 <div className="absolute -top-5 inset-x-0 flex justify-center">
                   <span className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold px-6 py-2 rounded-full shadow-lg">
                     Most Popular
@@ -369,7 +398,7 @@ const Plan = () => {
               <div className="flex items-center justify-center mb-6">
                 {plan.icon && (
                   <plan.icon className={`w-12 h-12 ${
-                    currentSubscription?.currentPlan === plan.name ? "text-blue-600" : "text-blue-500"
+                    currentSubscription?.currentPlan === plan.id ? "text-blue-600" : "text-blue-500"
                   }`} />
                 )}
               </div>
@@ -388,7 +417,7 @@ const Plan = () => {
                       <X className="w-5 h-5 text-red-500 mr-3 flex-shrink-0" />
                     ) : (
                       <Check className={`w-5 h-5 ${
-                        currentSubscription?.currentPlan === plan.name ? "text-blue-600" : "text-blue-500"
+                        currentSubscription?.currentPlan === plan.id ? "text-blue-600" : "text-blue-500"
                       } mr-3 flex-shrink-0`} />
                     )}
                     <span

@@ -258,7 +258,7 @@ const MainLayout = () => {
               </>
             )}
           </div>
-          <div
+          {/* <div
             className={`flex items-center px-4 py-3 mt-1 text-sm font-medium rounded-lg transition duration-200 cursor-pointer ${
               hasAccess("paid-tools")
                 ? "text-gray-300 hover:bg-gray-800/50 hover:text-white"
@@ -286,7 +286,7 @@ const MainLayout = () => {
                 </div>
               </>
             )}
-          </div>
+          </div> */}
           <NavLink
             to="/account"
             className={({ isActive }) =>

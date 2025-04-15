@@ -16,35 +16,30 @@ const NumberScraper = () => {
   const [countrySearch, setCountrySearch] = useState('');
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   
-  // Create ref for dropdown
+  // Define API base URL - prefer environment variable if available, otherwise use relative path
+  const API_BASE_URL = 'https://vedive.com:3000/api';
+  
   const dropdownRef = useRef(null);
 
-  // Handle click outside to close dropdown
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowCountryDropdown(false);
       }
     }
-
-    // Add event listener when dropdown is shown
     if (showCountryDropdown) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-    
-    // Cleanup event listener
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showCountryDropdown]);
 
-  // Clear previous results when component mounts
   useEffect(() => {
     setBusinesses([]);
     setDownloadUrl("");
   }, []);
 
-  // Get auth token from localStorage
   const getAuthToken = () => localStorage.getItem("token");
 
   const validateForm = () => {
@@ -74,7 +69,7 @@ const NumberScraper = () => {
     setError("");
     setResponse("");
     setLoading(true);
-    
+  
     try {
       const token = getAuthToken();
       if (!token) {
@@ -84,35 +79,47 @@ const NumberScraper = () => {
       }
       
       const combinedQuery = [keyword, country, city].filter(Boolean).join(" ");
-      console.log("Sending request to:", `https://vedive.com:3000/api/numberScraper`);
-      console.log("Query:", combinedQuery);
-      console.log("Campaign name:", campaignName);
-
-      const res = await fetch(`https://vedive.com:3000/api/numberScraper`, {
-        method: "GET",
+      
+      // Use the API_BASE_URL instead of hardcoded domain
+      const apiUrl = `${API_BASE_URL}/numberScraper`;
+      console.log("Sending request to:", apiUrl);
+      console.log("Request data:", { 
+        query: combinedQuery, 
+        campaignName 
+      });
+  
+      // Use POST and send body as JSON
+      const res = await fetch(apiUrl, {
+        method: "POST",
         headers: { 
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
-        params: {
+        body: JSON.stringify({
           query: combinedQuery,
           campaignName: campaignName
-        }
+        }),
+        // Add credentials to ensure cookies are sent
+        credentials: 'include'
       });
-
+      
+      console.log("Response status:", res.status);
+      
       if (!res.ok) {
         let errorMessage = "Failed to fetch data";
         try {
           const errorData = await res.json();
-          errorMessage = errorData.error || `HTTP error! Status: ${res.status}`;
+          console.error("Error response:", errorData);
+          errorMessage = errorData.error || errorData.message || `HTTP error! Status: ${res.status}`;
         } catch (parseError) {
           errorMessage = `HTTP error! Status: ${res.status}`;
         }
         throw new Error(errorMessage);
       }
-
+  
       const jsonResponse = await res.json();
-      
+      console.log("Success response:", jsonResponse);
+  
       if (!jsonResponse.businesses || jsonResponse.businesses.length === 0) {
         setError("No results found.");
       } else {
@@ -136,7 +143,6 @@ const NumberScraper = () => {
       return;
     }
     
-    // Get auth token for download request
     const token = getAuthToken();
     if (!token) {
       setError("Authentication required for download. Please login again.");
@@ -144,13 +150,22 @@ const NumberScraper = () => {
     }
     
     try {
-      const response = await fetch(downloadUrl, {
+      // Use full path for download if it's a relative URL
+      const downloadUrlFull = downloadUrl.startsWith('/') 
+        ? `${window.location.origin}${downloadUrl}` 
+        : downloadUrl;
+      
+      console.log("Downloading from:", downloadUrlFull);
+      
+      const response = await fetch(downloadUrlFull, {
         headers: { 
           "Authorization": `Bearer ${token}`
         },
+        credentials: 'include'
       });
 
       if (!response.ok) {
+        console.error("Download failed with status:", response.status);
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
@@ -158,7 +173,6 @@ const NumberScraper = () => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       
-      // Optionally, extract filename from response headers
       const contentDisposition = response.headers.get("content-disposition");
       let filename = "businesses.csv";
       if (contentDisposition) {
@@ -193,6 +207,24 @@ const NumberScraper = () => {
     setShowCampaignNameInput(false);
   };
 
+  // Helper for debugging - adds a test connection button in development mode
+  const testApiConnection = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/health`, {
+        method: 'GET'
+      });
+      
+      const data = await response.json();
+      alert(`API status: ${response.status}, Response: ${JSON.stringify(data)}`);
+    } catch (err) {
+      console.error("API test failed:", err);
+      alert(`API connection test failed: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-0 sm:p-6 md:p-8">
       <div className="mx-auto max-w-6xl bg-white rounded-lg shadow-md border border-gray-300">
@@ -209,6 +241,14 @@ const NumberScraper = () => {
             <a href="#" className="text-third underline">
               Watch tutorial
             </a>
+            {process.env.NODE_ENV === 'development' && (
+              <button 
+                onClick={testApiConnection}
+                className="ml-4 px-2 py-1 bg-gray-200 rounded text-xs"
+              >
+                Test API
+              </button>
+            )}
           </div>
         </div>
         <div className="p-4 sm:p-6">
@@ -266,7 +306,6 @@ const NumberScraper = () => {
                             placeholder="Type to filter..."
                             value={countrySearch}
                             onChange={(e) => setCountrySearch(e.target.value)}
-                            // Stop propagation to prevent closing when clicking this input
                             onClick={(e) => e.stopPropagation()}
                           />
                         </div>
