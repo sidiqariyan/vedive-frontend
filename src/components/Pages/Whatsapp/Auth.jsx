@@ -32,7 +32,7 @@ const QRCodeDisplay = () => {
       } catch (err) {
         // Handle network or other errors
         setError("Failed to fetch QR code. Please try again later.");
-        console.error("QR code fetch error:", err);
+        console.error("QR code error: Please try later!", err);
       }
     };
     
@@ -45,7 +45,7 @@ const QRCodeDisplay = () => {
   }
   
   if (!qrCode) {
-    return <div className="text-green-500 text-center">WhatsApp is authenticated! You can now send messages.</div>;
+    return <div className="text-green-500 text-center">Please Wait for WhatsApp Authentication!</div>;
   }
   
   return (

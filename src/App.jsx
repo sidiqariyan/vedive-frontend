@@ -418,7 +418,7 @@ const AnimatedRoutes = () => {
             element={
               <Suspense fallback={<div>Loading...</div>}>
                 <PageTransition>
-                  <SenderBody />
+                  <GmailSender />
                 </PageTransition>
               </Suspense>
             }
@@ -438,7 +438,7 @@ const AnimatedRoutes = () => {
             element={
               <Suspense fallback={<div>Loading...</div>}>
                 <PageTransition>
-                  <GmailSender />
+                  <SenderBody />
                 </PageTransition>
               </Suspense>
             }

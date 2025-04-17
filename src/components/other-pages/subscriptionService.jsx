@@ -1,24 +1,42 @@
-// frontend/subscriptionService.js
-import axios from "axios";
+// src/components/other-pages/subscriptionService.jsx
+import axios from 'axios';
 
-const API_BASE = "https://vedive.com:3000/api";
+// Create a pre-configured Axios instance
+const api = axios.create({
+  baseURL: 'https://vedive.com:3000/api',
+  withCredentials: true,      // ← this line
+});
 
-const subscriptionService = {
-  createOrder: (planId) => axios.post(
-    `${API_BASE}/subscription/createOrder`,
-    { planId },
-    { headers: { Authorization: localStorage.getItem("token") } }
-  ),
+// Request interceptor to attach JWT
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-  verifyPayment: (orderId) => axios.get(
-    `${API_BASE}/subscription/verifyPayment/${orderId}`,
-    { headers: { Authorization: localStorage.getItem("token") } }
-  ),
-
-  getSubscriptionStatus: () => axios.get(
-    `${API_BASE}/subscription/status`,
-    { headers: { Authorization: localStorage.getItem("token") } }
-  )
+// Create a subscription order
+const createOrder = async ({ planId }) => {
+  // The server will pull userId from req.user
+  return api.post('/subscription/createOrder', { planId });
 };
 
-export default subscriptionService;
+// Verify a payment after returning from Cashfree
+const verifyPayment = async (orderId) => {
+  return api.get(`/subscription/verifyPayment/${orderId}`);
+};
+
+// Fetch current subscription status
+const getSubscriptionStatus = async () => {
+  return api.get('/subscription/status');
+};
+
+export default {
+  createOrder,
+  verifyPayment,
+  getSubscriptionStatus,
+};

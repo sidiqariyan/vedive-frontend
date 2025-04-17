@@ -241,7 +241,7 @@ function SenderBody() {
                   <Upload className="text-third" size={24} />
                 </div>
                 <h3 className="text-base font-medium text-gray-900">Recipients List</h3>
-                <p className="text-sm text-gray-500 mt-1">Upload CSV file with recipients</p>
+                <p className="text-sm text-gray-500 mt-1">Upload .txt file with recipients</p>
               </div>
               <button
                 onClick={() => recipientsFileRef.current.click()}
