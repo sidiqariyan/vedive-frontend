@@ -544,7 +544,7 @@ const AnimatedRoutes = () => {
           path="*"
           element={
             <PageTransition>
-              <h1 className="text-4xl font-bold text-center mt-10">404 - Page Not Found</h1>
+              <h1 className="text-4xl font-bold text-center mt-10 text-primary">404 - Page Not Found</h1>
             </PageTransition>
           }
         />
