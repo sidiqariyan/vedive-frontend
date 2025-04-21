@@ -12,7 +12,7 @@ import service2 from "./assets/service-2.png";
 import service3 from "./assets/service-3.png";
 import service4 from "./assets/service-4.png";
 import service5 from "./assets/service-5.png";
-
+import { Helmet } from 'react-helmet';
 // Top Section Component
 const TopSection = () => (
   <div>
@@ -51,6 +51,10 @@ const ServiceSection = ({ number, title, description, backgroundImage }) => (
 const Services = () => {
   return (
     <div className="main-body">
+      <Helmet>
+      <title>Vedive Services: Best Bulk Email & WhatsApp Sender Tools</title>
+      <meta name="description" content="Explore Vedive’s marketing automation tools: bulk email sender, email scraper, and WhatsApp bulk sender. Streamline outreach and boost leads today!"/>
+      </Helmet>
       <TopSection />
       <h2 className="text-primary text-[38px] sm:text-[48px] md:text-[65px] text-center font-semibold"
       >Our Services</h2>

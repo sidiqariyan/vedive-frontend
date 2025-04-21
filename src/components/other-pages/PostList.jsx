@@ -4,6 +4,7 @@ import TemplateEditor from "./TemplateEditor";
 import Navbar from "../Pages/Hero/Navbar";
 import { useAuth } from "../Pages/Mailer/AuthContext"; // Import the useAuth hook
 import { NavLink } from "react-router-dom";
+import { Helmet } from 'react-helmet';
 
 const PostList = () => {
   const [posts, setPosts] = useState([]);
@@ -185,6 +186,10 @@ const PostList = () => {
 
   return (
     <>
+      <Helmet>
+      <title>Choose Your Email Template for Bulk Email Marketing.</title>
+      <meta name="description" content="Explore Vedive’s customizable email templates for bulk email sender. Create engaging campaigns with professional designs tailored for your business"/>
+      </Helmet>
     {/* Only show Navbar in grid view */}
     {viewMode === "grid" && <Navbar />}
     <LoginPromptModal 

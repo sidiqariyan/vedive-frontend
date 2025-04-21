@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import Navbar from '../Pages/Hero/Navbar';
+import { Helmet } from 'react-helmet';
 
 const BlogPostListPage = () => {
   const navigate = useNavigate();
@@ -38,6 +39,11 @@ const BlogPostListPage = () => {
 
   return (
     <div className="min-h-screen bg-[#04081d] text-white">
+   
+      <Helmet>
+      <title>Vedive Blog: Email & WhatsApp Marketing Tips India</title>
+      <meta name="description" content="Read Vedive’s blog for bulk email marketing tips, WhatsApp strategies, and email scraper guides. Boost your campaigns with expert advice for India!"/>
+      </Helmet>
       {/* Navigation */}
      <Navbar />
 
@@ -55,11 +61,11 @@ const BlogPostListPage = () => {
             <p className="text-xl text-gray-300 mb-6">Our mission is to provide convenience and quality service to every marketing professional</p>
             <div className="flex items-center space-x-4 text-sm">
               <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Author" className="w-8 h-8 rounded-full" />
-              <span>Afroz uddin</span>
+              {/* <span>Afroz uddin</span>
               <span>•</span>
               <span>28/01/2025</span>
               <span>•</span>
-              <span>Technology</span>
+              <span>Technology</span> */}
             </div>
           </div>
         </div>

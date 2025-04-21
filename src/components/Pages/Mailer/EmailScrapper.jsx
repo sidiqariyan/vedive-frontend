@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import countries from "./countries.json";
 import { Mail, Search, Download, HelpCircle, ChevronDown } from 'lucide-react';
+import { Helmet } from 'react-helmet';
 
 const EmailScraper = () => {
   const [keyword, setKeyword] = useState("");
@@ -140,6 +141,10 @@ const EmailScraper = () => {
   // Rest of component remains the same
   return (
     <div className="min-h-screen bg-gray-50 p-0 sm:p-6 md:p-8">
+        <Helmet>
+      <title>Email Scraper Tool | Fast Email Extraction | Vedive</title>
+      <meta name="description" content="Extract emails quickly with Vedive's email scraper tool. Scrape accurate email data from websites for marketing. Start now!"/>
+      </Helmet>
       {/* Component JSX remains unchanged */}
       <div className="mx-auto max-w-6xl bg-white rounded-lg shadow-md border border-gray-300">
         {/* Header */}

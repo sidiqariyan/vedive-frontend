@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./mainstyles.css"; // Make sure you create a separate CSS file for styling
 import Navbar from "./Hero/Navbar.jsx";
 import Footer from "./Hero/Footer.jsx";
+import { Helmet } from 'react-helmet';
 
 const ContactUs = () => {
   // State for form inputs
@@ -20,6 +21,10 @@ const ContactUs = () => {
 
   return (
     <div className="main-body">
+        <Helmet>
+      <title>Contact Vedive: Support for Email & WhatsApp Marketing Tools</title>
+      <meta name="description" content="We are always ready to help you and answer your questions ; Call Center. +91 8920593970 ; Our Location. New Delhi, Delhi, India 110084 ; Email."/>
+      </Helmet>
       {" "}
       {/* Wrapper div for the whole page */}
       <Navbar />

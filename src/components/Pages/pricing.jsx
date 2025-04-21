@@ -5,8 +5,7 @@ import Navbar from "./Hero/Navbar";
 import Footer from "./Hero/Footer";
 import CoreValues from "./Hero/Values";
 import bgImage1 from "./assets/pricing-image-1.jpg";
-import bgImage2 from "./assets/pricing-image-2.png";
-import bgImage3 from "./assets/pricing-image-3.png";
+import { Helmet } from 'react-helmet';
 
 // Add this CSS to your mainstyles.css file
 const cssToAdd = `
@@ -127,7 +126,10 @@ const Pricing = () => {
     <div>
       {/* This adds the CSS to the page - you can alternatively copy this to your CSS file */}
       <style>{cssToAdd}</style>
-      
+      <Helmet>
+      <title>Vedive Pricing: Affordable Email & WhatsApp Tools India</title>
+      <meta name="description" content="Discover Vedive’s affordable pricing for bulk email sender, email scraper, and WhatsApp bulk sender tools. Start with flexible plans or a free trial!"/>
+      </Helmet>
       {/* Top Section */}
       <Navbar />
 

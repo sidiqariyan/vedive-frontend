@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import axios from 'axios';
 import { Mail, Upload, Settings, HelpCircle } from 'lucide-react';
+import { Helmet } from 'react-helmet';
 
 function SenderBody() {
   const [formData, setFormData] = useState({});
@@ -114,6 +115,10 @@ function SenderBody() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-0 sm:p-4 md:p-8">
+        <Helmet>
+      <title>Best Bulk Email Sender: Vedive Bulk Email Sender & Scraper Tool</title>
+      <meta name="description" content="Vedive’s best email sender automates bulk campaigns & scrapes leads. Grow sales with Gmail-integrated tools in 2025. Start free now!"/>
+      </Helmet>
       <div className="mx-auto bg-white rounded-lg shadow-md border border-gray-300">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-center justify-between p-4 sm:p-6 border-b border-gray-300">

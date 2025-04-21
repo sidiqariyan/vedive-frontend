@@ -7,12 +7,16 @@ import bgImage2 from "./assets/about-us-image-2.jpg";
 import bgImage3 from "./assets/about-us-image-3.jpg";
 import bgImage4 from "./assets/about-us-image-4.png";
 import bgImage5 from "./secondAbout.png";
+import { Helmet } from 'react-helmet';
 
 const AboutUs = () => {
   return (
     <div className="main-body">
+        <Helmet>
+      <title>About Vedive: Leaders in Marketing Automation Tools</title>
+      <meta name="description" content="Discover Vedive, your trusted partner for bulk email sender, email scraper, and WhatsApp marketing tools. Empowering businesses with automation since 2025"/>
+      </Helmet>
       <Navbar />
-
       <div className="top-section">
         <h1>About Us</h1>
         <h2>

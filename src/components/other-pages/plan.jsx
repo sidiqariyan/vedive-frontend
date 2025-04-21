@@ -4,6 +4,7 @@ import { Check, Sparkles, Rocket, Building2, X, Loader, Crown } from "lucide-rea
 import subscriptionService from "./subscriptionService";
 import { toast } from "react-toastify";
 import { cashfree } from "./file/cashfree";
+import { Helmet } from 'react-helmet';
 
 const Plan = () => {
   const [loading, setLoading] = useState(false);
@@ -311,6 +312,10 @@ const Plan = () => {
     
     return (
       <div className="min-h-screen bg-white text-gray-800 py-24 px-4 flex flex-col items-center justify-center">
+          <Helmet>
+      <title>Vedive Pricing: Affordable Email & WhatsApp Tools India</title>
+      <meta name="description" content="Discover Vedive’s affordable pricing for bulk email sender, email scraper, and WhatsApp bulk sender tools. Start with flexible plans or a free trial!"/>
+      </Helmet>
         <div className="w-full max-w-md mx-auto text-center">
           <h1 className="text-3xl font-bold mb-6">Payment Status</h1>
           {verifyingPayment ? (

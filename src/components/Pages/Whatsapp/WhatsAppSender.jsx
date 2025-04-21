@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import QRCodeDisplay from "./Auth";
 import { MessageCircle, UploadCloud, HelpCircle } from "lucide-react"; // Import icons for consistency
+import { Helmet } from 'react-helmet';
 
 const MessageForm = () => {
   const [users, setUsers] = useState("");
@@ -71,6 +72,10 @@ const MessageForm = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-0 sm:p-4 md:p-8">
+      <Helmet>
+      <title>Bulk WhatsApp Sender Tool – Send Free Messages Online | Vedive</title>
+      <meta name="description" content="Use Vedive’s bulk WhatsApp sender to send unlimited messages online. 100% free, no daily limits or fees. Boost marketing reach for businesses & freelancers."/>
+      </Helmet>
       <div className="mx-auto bg-white rounded-lg shadow-md border border-gray-300">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-center justify-between p-4 sm:p-6 border-b border-gray-300">

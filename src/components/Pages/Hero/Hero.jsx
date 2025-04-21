@@ -14,6 +14,13 @@ import {
 } from "lucide-react";
 import "./Hero.css";
 import Navbar from "./Navbar";
+import { Helmet } from 'react-helmet';
+
+      <Helmet>
+        <title>Home | My React App</title>
+        <meta name="description" content="Welcome to the homepage of My React App." />
+      </Helmet>
+
 
 const Hero = () => {
   const [showPopup, setShowPopup] = useState(true);
@@ -117,6 +124,11 @@ const Hero = () => {
 
   return (
     <div className="w-full min-h-screen text-white bg-slate-950 flex flex-col relative overflow-hidden">
+      
+      <Helmet>
+      <title>Grow with Vedive Email, WhatsApp & Scraper Tools</title>
+      <meta name="description" content="Use Vedive to send bulk emails, bulk WhatsApp messages, and scrape emails or numbers. 100% free tools. No limits. Start growing your outreach today!"/>
+      </Helmet>
       {/* Enhanced background with deeper gradients and noise texture */}
       <div 
         className="absolute inset-0 bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950 z-0"

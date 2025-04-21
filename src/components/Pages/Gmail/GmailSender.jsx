@@ -2,6 +2,7 @@ import React, { useContext, useState, useRef } from "react";
 import axios from "axios";
 import { Mail, Upload, HelpCircle } from "lucide-react"; // Import icons for consistency
 import { AuthContext } from "../Mailer/AuthContext.jsx"; // Ensure this path is correct
+import { Helmet } from 'react-helmet';
 
 const GmailSender = () => {
   const { isLoggedIn } = useContext(AuthContext); // Access authentication state
@@ -101,6 +102,10 @@ const GmailSender = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-0 sm:p-4 md:p-8">
+      <Helmet>
+      <title>Vedive Gmail Sender: Best Bulk Email Tool India</title>
+      <meta name="description" content="Automate bulk email campaigns with Vedive’s Gmail sender tool. Send emails via Gmail easily and boost leads in India with our marketing solution"/>
+      </Helmet>
       <div className="mx-auto bg-white rounded-lg shadow-md border border-gray-300">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-center justify-between p-4 sm:p-6 border-b border-gray-300">
