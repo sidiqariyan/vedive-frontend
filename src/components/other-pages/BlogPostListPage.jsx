@@ -16,21 +16,28 @@ const BlogPostListPage = () => {
   const [loading, setLoading] = useState(false);
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('desc');
+  const [error, setError] = useState(null);
 
   const fetchPosts = async () => {
     setLoading(true);
+    setError(null);
     try {
       const params = { page, category, sortBy, sortOrder };
-      if (search.trim() !== "") {
-        params.search = search;
-      }
-      const response = await axios.get('/api/blog/blog-posts', { params });
-      setPosts(response.data.posts);
-      setTotalPages(response.data.totalPages);
-    } catch (error) {
-      console.error('Error fetching blog posts', error);
+      if (search.trim()) params.search = search;
+
+      const { data } = await axios.get('/api/blog/blog-posts', { params });
+      const { posts: fetchedPosts = [], totalPages: fetchedTotal = 0 } = data;
+
+      setPosts(fetchedPosts);
+      setTotalPages(fetchedTotal);
+    } catch (err) {
+      console.error('Error fetching blog posts', err);
+      setError('Failed to load posts. Please try again later.');
+      setPosts([]);
+      setTotalPages(0);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -39,17 +46,18 @@ const BlogPostListPage = () => {
 
   return (
     <div className="min-h-screen bg-[#04081d] text-white">
-   
       <Helmet>
-      <title>Vedive Blog: Email & WhatsApp Marketing Tips India</title>
-      <meta name="description" content="Read Vedive’s blog for bulk email marketing tips, WhatsApp strategies, and email scraper guides. Boost your campaigns with expert advice for India!"/>
+        <title>Vedive Blog: Email & WhatsApp Marketing Tips India</title>
+        <meta
+          name="description"
+          content="Read Vedive’s blog for bulk email marketing tips, WhatsApp strategies, and email scraper guides. Boost your campaigns with expert advice for India!"
+        />
       </Helmet>
-      {/* Navigation */}
-     <Navbar />
 
-      {/* Hero Section */}
+      <Navbar />
+
       <div className="relative h-[500px] overflow-hidden">
-        <img 
+        <img
           src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2072&q=80"
           className="absolute inset-0 w-full h-full object-cover"
           alt="Hero background"
@@ -58,24 +66,23 @@ const BlogPostListPage = () => {
         <div className="relative container mx-auto px-4 h-full flex items-center">
           <div className="max-w-2xl">
             <h1 className="text-5xl font-bold mb-4">Migration to linear 101</h1>
-            <p className="text-xl text-gray-300 mb-6">Our mission is to provide convenience and quality service to every marketing professional</p>
+            <p className="text-xl text-gray-300 mb-6">
+              Our mission is to provide convenience and quality service to every marketing professional
+            </p>
             <div className="flex items-center space-x-4 text-sm">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Author" className="w-8 h-8 rounded-full" />
-              {/* <span>Afroz uddin</span>
-              <span>•</span>
-              <span>28/01/2025</span>
-              <span>•</span>
-              <span>Technology</span> */}
+              <img
+                src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
+                alt="Author"
+                className="w-8 h-8 rounded-full"
+              />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Recent Blog Posts */}
       <div className="container mx-auto px-4 py-16">
         <h2 className="text-2xl font-bold mb-8">Recent Blog posts</h2>
-        
-        {/* Search and Filters */}
+
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <div className="relative flex-grow">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -87,7 +94,7 @@ const BlogPostListPage = () => {
               className="w-full pl-10 pr-4 py-2 bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <select 
+          <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             className="px-4 py-2 bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -100,19 +107,24 @@ const BlogPostListPage = () => {
           </select>
         </div>
 
-        {/* Blog Posts Grid */}
         {loading ? (
-          <div className="text-center py-8">Loading posts...</div>
-        ) : (
+          <div className="text-center py-8">Loading posts…</div>
+        ) : error ? (
+          <div className="text-center py-8 text-red-500">{error}</div>
+        ) : posts.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {posts.map(post => (
+            {posts.map((post) => (
               <motion.article
                 key={post._id}
                 whileHover={{ y: -5 }}
                 className="bg-gray-900 rounded-lg overflow-hidden"
               >
                 <img
-                  src={post.coverImage ? `https://vedive.com:3000${post.coverImage}` : "https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
+                  src={
+                    post.coverImage
+                      ? `https://vedive.com:3000${post.coverImage}`
+                      : "https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                  }
                   alt={post.title}
                   className="w-full h-48 object-cover"
                 />
@@ -121,7 +133,11 @@ const BlogPostListPage = () => {
                   <p className="text-gray-400 mb-4 line-clamp-2">{post.content}</p>
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center space-x-2">
-                      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Author" className="w-6 h-6 rounded-full" />
+                      <img
+                        src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
+                        alt="Author"
+                        className="w-6 h-6 rounded-full"
+                      />
                       <span>{post.author}</span>
                     </div>
                     <button
@@ -135,12 +151,13 @@ const BlogPostListPage = () => {
               </motion.article>
             ))}
           </div>
+        ) : (
+          <div className="text-center py-8 text-gray-400">No posts found.</div>
         )}
 
-        {/* Pagination */}
         <div className="flex justify-center items-center space-x-2 mt-8">
           <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
             className="p-2 bg-gray-900 rounded-lg disabled:opacity-50"
           >
@@ -156,7 +173,7 @@ const BlogPostListPage = () => {
             </button>
           ))}
           <button
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
             className="p-2 bg-gray-900 rounded-lg disabled:opacity-50"
           >

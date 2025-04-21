@@ -205,7 +205,7 @@ const PostList = () => {
     }}>
       {viewMode === "grid" ? (
         <>
-            <h1 style={{ 
+            <h1 className="text-primary" style={{ 
             fontSize: "32px", 
             marginBottom: "8px", 
             color: "#333",
@@ -213,7 +213,7 @@ const PostList = () => {
           }}>
             Email Templates
           </h1>
-          <p style={{ 
+          <p className="text-primary"  style={{ 
             fontSize: "16px", 
             color: "#666", 
             marginBottom: "32px",
