@@ -1,10 +1,11 @@
+/* src/pages/BlogPostListPage.jsx */
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import Navbar from '../Pages/Hero/Navbar';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 
 const BlogPostListPage = () => {
   const navigate = useNavigate();
@@ -25,13 +26,16 @@ const BlogPostListPage = () => {
       const params = { page, category, sortBy, sortOrder };
       if (search.trim()) params.search = search;
 
-      const { data } = await axios.get('/api/blog/blog-posts', { params });
-      const { posts: fetchedPosts = [], totalPages: fetchedTotal = 0 } = data;
-
-      setPosts(fetchedPosts);
-      setTotalPages(fetchedTotal);
+      const { data } = await axios.get('https:vedive.com/api/blog/blog-posts', { params });
+      setPosts(data.posts || []);
+      setTotalPages(data.totalPages || 0);
     } catch (err) {
-      console.error('Error fetching blog posts', err);
+      console.error('Error fetching blog posts', {
+        message: err.message,
+        status: err.response?.status,
+        data: err.response?.data,
+        headers: err.response?.headers,
+      });
       setError('Failed to load posts. Please try again later.');
       setPosts([]);
       setTotalPages(0);
@@ -56,33 +60,15 @@ const BlogPostListPage = () => {
 
       <Navbar />
 
+      {/* Hero Section */}
       <div className="relative h-[500px] overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2072&q=80"
-          className="absolute inset-0 w-full h-full object-cover"
-          alt="Hero background"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/40" />
-        <div className="relative container mx-auto px-4 h-full flex items-center">
-          <div className="max-w-2xl">
-            <h1 className="text-5xl font-bold mb-4">Migration to linear 101</h1>
-            <p className="text-xl text-gray-300 mb-6">
-              Our mission is to provide convenience and quality service to every marketing professional
-            </p>
-            <div className="flex items-center space-x-4 text-sm">
-              <img
-                src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
-                alt="Author"
-                className="w-8 h-8 rounded-full"
-              />
-            </div>
-          </div>
-        </div>
+        {/* ...existing hero code... */}
       </div>
 
       <div className="container mx-auto px-4 py-16">
         <h2 className="text-2xl font-bold mb-8">Recent Blog posts</h2>
 
+        {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <div className="relative flex-grow">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -90,12 +76,14 @@ const BlogPostListPage = () => {
               type="text"
               placeholder="Search posts..."
               value={search}
+              disabled={loading}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <select
             value={category}
+            disabled={loading}
             onChange={(e) => setCategory(e.target.value)}
             className="px-4 py-2 bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
@@ -107,6 +95,7 @@ const BlogPostListPage = () => {
           </select>
         </div>
 
+        {/* Content & Pagination */}
         {loading ? (
           <div className="text-center py-8">Loading posts…</div>
         ) : error ? (
@@ -114,40 +103,8 @@ const BlogPostListPage = () => {
         ) : posts.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {posts.map((post) => (
-              <motion.article
-                key={post._id}
-                whileHover={{ y: -5 }}
-                className="bg-gray-900 rounded-lg overflow-hidden"
-              >
-                <img
-                  src={
-                    post.coverImage
-                      ? `https://vedive.com:3000${post.coverImage}`
-                      : "https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                  }
-                  alt={post.title}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2">{post.title}</h3>
-                  <p className="text-gray-400 mb-4 line-clamp-2">{post.content}</p>
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center space-x-2">
-                      <img
-                        src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
-                        alt="Author"
-                        className="w-6 h-6 rounded-full"
-                      />
-                      <span>{post.author}</span>
-                    </div>
-                    <button
-                      onClick={() => navigate(`/blog-posts/${post._id}`)}
-                      className="text-blue-500 hover:text-blue-400"
-                    >
-                      Read more
-                    </button>
-                  </div>
-                </div>
+              <motion.article key={post._id} whileHover={{ y: -5 }} className="bg-gray-900 rounded-lg overflow-hidden">
+                {/* ...post card code... */}
               </motion.article>
             ))}
           </div>
@@ -158,7 +115,7 @@ const BlogPostListPage = () => {
         <div className="flex justify-center items-center space-x-2 mt-8">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
+            disabled={page === 1 || loading}
             className="p-2 bg-gray-900 rounded-lg disabled:opacity-50"
           >
             <ChevronLeft size={20} />
@@ -167,6 +124,7 @@ const BlogPostListPage = () => {
             <button
               key={i + 1}
               onClick={() => setPage(i + 1)}
+              disabled={loading}
               className={`w-8 h-8 rounded-lg ${page === i + 1 ? 'bg-blue-600' : 'bg-gray-900'}`}
             >
               {i + 1}
@@ -174,7 +132,7 @@ const BlogPostListPage = () => {
           ))}
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
+            disabled={page === totalPages || loading}
             className="p-2 bg-gray-900 rounded-lg disabled:opacity-50"
           >
             <ChevronRight size={20} />
