@@ -95,7 +95,7 @@ const CreatePostForm: React.FC = () => {
       }
       
       // Send request to API
-      const response = await fetch(`https://vedive.com:3000/api/posts/create-blog-post`, {
+      const response = await fetch(`https://vedive.com:3000/api/blog/create-blog-post`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
