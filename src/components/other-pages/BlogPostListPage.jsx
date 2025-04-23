@@ -1,146 +1,61 @@
-/* src/pages/BlogPostListPage.jsx */
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
-import Navbar from '../Pages/Hero/Navbar';
-import { Helmet } from 'react-helmet-async';
+// src/components/Blog/BlogPostListPage.jsx
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
-const BlogPostListPage = () => {
-  const navigate = useNavigate();
+export default function BlogPostListPage() {
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [category, setCategory] = useState('');
-  const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [sortBy, setSortBy] = useState('createdAt');
-  const [sortOrder, setSortOrder] = useState('desc');
-  const [error, setError] = useState(null);
-
-  const fetchPosts = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params = { page, category, sortBy, sortOrder };
-      if (search.trim()) params.search = search;
-
-      const { data } = await axios.get('https:vedive.com/api/blog/blog-posts', { params });
-      setPosts(data.posts || []);
-      setTotalPages(data.totalPages || 0);
-    } catch (err) {
-      console.error('Error fetching blog posts', {
-        message: err.message,
-        status: err.response?.status,
-        data: err.response?.data,
-        headers: err.response?.headers,
-      });
-      setError('Failed to load posts. Please try again later.');
-      setPosts([]);
-      setTotalPages(0);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
+    async function fetchPosts() {
+      const res = await fetch(`https://vedive.com:3000/api/posts/blog-posts?page=${page}&limit=12`);
+      const data = await res.json();
+      setPosts(data.posts);
+      setTotalPages(data.totalPages);
+    }
     fetchPosts();
-  }, [page, category, search, sortBy, sortOrder]);
+  }, [page]);
 
   return (
-    <div className="min-h-screen bg-[#04081d] text-white">
-      <Helmet>
-        <title>Vedive Blog: Email & WhatsApp Marketing Tips India</title>
-        <meta
-          name="description"
-          content="Read Vedive’s blog for bulk email marketing tips, WhatsApp strategies, and email scraper guides. Boost your campaigns with expert advice for India!"
-        />
-      </Helmet>
-
-      <Navbar />
-
-      {/* Hero Section */}
-      <div className="relative h-[500px] overflow-hidden">
-        {/* ...existing hero code... */}
+    <div className="max-w-6xl mx-auto p-4">
+      <h1 className="text-3xl mb-6 font-normal">Blog</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {posts.map(post => (
+          <div key={post.id} className="border rounded-lg overflow-hidden">
+            {post.coverImage && (
+              <img
+                src={post.coverImage}
+                alt={post.title}
+                className="w-full h-48 object-cover"
+              />
+            )}
+            <div className="p-4">
+              <h2 className="text-xl font-normal mb-2">{post.title}</h2>
+              <p className="text-sm mb-4">{post.content}</p>
+              <Link
+                to={`/blog-posts/${post.slug}`}
+                className="text-blue-600 hover:underline"
+              >
+                Read more
+              </Link>
+            </div>
+          </div>
+        ))}
       </div>
-
-      <div className="container mx-auto px-4 py-16">
-        <h2 className="text-2xl font-bold mb-8">Recent Blog posts</h2>
-
-        {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
-          <div className="relative flex-grow">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search posts..."
-              value={search}
-              disabled={loading}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <select
-            value={category}
-            disabled={loading}
-            onChange={(e) => setCategory(e.target.value)}
-            className="px-4 py-2 bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">All Categories</option>
-            <option value="Technology">Technology</option>
-            <option value="General">General</option>
-            <option value="Nature">Nature</option>
-            <option value="Grooming">Grooming</option>
-          </select>
-        </div>
-
-        {/* Content & Pagination */}
-        {loading ? (
-          <div className="text-center py-8">Loading posts…</div>
-        ) : error ? (
-          <div className="text-center py-8 text-red-500">{error}</div>
-        ) : posts.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {posts.map((post) => (
-              <motion.article key={post._id} whileHover={{ y: -5 }} className="bg-gray-900 rounded-lg overflow-hidden">
-                {/* ...post card code... */}
-              </motion.article>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-gray-400">No posts found.</div>
-        )}
-
-        <div className="flex justify-center items-center space-x-2 mt-8">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1 || loading}
-            className="p-2 bg-gray-900 rounded-lg disabled:opacity-50"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => setPage(i + 1)}
-              disabled={loading}
-              className={`w-8 h-8 rounded-lg ${page === i + 1 ? 'bg-blue-600' : 'bg-gray-900'}`}
-            >
-              {i + 1}
-            </button>
-          ))}
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages || loading}
-            className="p-2 bg-gray-900 rounded-lg disabled:opacity-50"
-          >
-            <ChevronRight size={20} />
-          </button>
-        </div>
+      <div className="flex justify-center mt-6 space-x-2">
+        <button
+          onClick={() => setPage(p => Math.max(1, p - 1))}
+          disabled={page === 1}
+          className="px-3 py-1 border rounded"
+        >Previous</button>
+        <span className="px-3 py-1">Page {page} of {totalPages}</span>
+        <button
+          onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+          disabled={page === totalPages}
+          className="px-3 py-1 border rounded"
+        >Next</button>
       </div>
     </div>
   );
-};
-
-export default BlogPostListPage;
+}

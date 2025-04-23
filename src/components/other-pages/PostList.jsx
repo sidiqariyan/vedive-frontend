@@ -1,775 +1,278 @@
-import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
-import TemplateEditor from "./TemplateEditor";
-import Navbar from "../Pages/Hero/Navbar";
-import { useAuth } from "../Pages/Mailer/AuthContext"; // Import the useAuth hook
-import { NavLink } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import Navbar from '../Pages/Hero/Navbar';
 import { Helmet } from 'react-helmet';
 
-const PostList = () => {
+const BlogPage = () => {
   const [posts, setPosts] = useState([]);
-  const [editingPost, setEditingPost] = useState(null);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [viewMode, setViewMode] = useState("grid"); // "grid" or "detail"
-  const [categories, setCategories] = useState(["All", "Promotional", "Seasonal", "Newsletter", "Transactional"]);
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [currentEditedHtml, setCurrentEditedHtml] = useState(null);
-  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
-  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false); // Add this line
-  const { isLoggedIn, login, logout } = useAuth();
-
-  const LoginPromptModal = ({ isOpen, onClose }) => {
-    if (!isOpen) return null;
-  
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div 
-          className="fixed inset-0 bg-black opacity-50"
-          onClick={onClose}
-        />
-        <div className="relative bg-white p-6 rounded-lg max-w-md w-full mx-4">
-          <h2 className="text-xl font-bold mb-4">Login Required</h2>
-          <p className="mb-6">Please log in to edit templates.</p>
-          
-          <div className="flex justify-end space-x-2">
-            <button 
-              onClick={onClose}
-              className="px-4 py-2 border rounded-md hover:bg-gray-100"
-            >
-              Close
-            </button>
-            <NavLink to="/login">
-            <button 
-              onClick={() => {
-                // Add your login navigation logic here
-                // For example:
-                // router.push('/login');
-                onClose();
-              }}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-            >
-              Go to Login
-            </button>
-            </NavLink>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const toggleEditor = () => {
-    // Check if user is logged in
-    if (!isLoggedIn) {
-      // Show login prompt modal
-      setIsLoginModalVisible(true);
-      return;
-    }
-  
-    if (editingPost?._id === selectedTemplate._id) {
-      setEditingPost(null); // Close editor
-      setCurrentEditedHtml(null);
-    } else {
-      setEditingPost(selectedTemplate); // Open editor
-    }
-  };
-  
-  // Add a ref to store the editor instance
-  const editorInstanceRef = useRef(null);
-
-  // Check if the device is a mobile or tablet
-  useEffect(() => {
-    const checkDeviceType = () => {
-      const width = window.innerWidth;
-      setIsMobileOrTablet(width <= 1024); // Common breakpoint for tablets/iPads
-    };
-    
-    // Initial check
-    checkDeviceType();
-    
-    // Add event listener for window resize
-    window.addEventListener('resize', checkDeviceType);
-    
-    // Cleanup
-    return () => window.removeEventListener('resize', checkDeviceType);
-  }, []);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [categories] = useState(['All', 'Technology', 'Business', 'Lifestyle', 'Other']);
 
   useEffect(() => {
-    // Set background when the component mounts
-    document.body.style.backgroundColor = "#f9f9f9";
-  
-    return () => {
-      // Reset background when the component unmounts
-      document.body.style.backgroundColor = "";
-    };
-  }, []);
-  
-  useEffect(() => {
-    const fetchPosts = async () => {
+    const fetchBlogPosts = async () => {
+      setLoading(true);
       try {
-        const response = await axios.get("https://vedive.com:3000/api/posts");
-        setPosts(response.data);
-      } catch (error) {
-        console.error("Error fetching posts:", error);
+        let url = `https://vedive.com:3000/api/blog/blog-posts?page=${currentPage}&limit=6`;
+        if (selectedCategory && selectedCategory !== 'All') {
+          url += `&category=${selectedCategory}`;
+        }
+        
+        const response = await axios.get(url);
+        
+        // Check if response has expected structure
+        if (response.data.posts) {
+          setPosts(response.data.posts);
+          setTotalPages(response.data.totalPages || 1);
+        } else if (Array.isArray(response.data)) {
+          // If the response is directly an array
+          setPosts(response.data);
+        } else {
+          console.error("Unexpected API response format:", response.data);
+          setPosts([]);
+        }
+      } catch (err) {
+        console.error("Error fetching blog posts:", err);
+        setError('Failed to load blog posts. Please try again later.');
+        setPosts([]);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchPosts();
-  }, []);
 
-  const handleSave = async (postId, updatedHtml) => {
-    try {
-      await axios.put(`/api/posts/${postId}`, { htmlContent: updatedHtml });
-      alert("Template saved successfully!");
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post._id === postId ? { ...post, htmlContent: updatedHtml } : post
-        )
-      );
-      setEditingPost(null);
-      setCurrentEditedHtml(null);
-      setViewMode("detail");
-    } catch (error) {
-      console.error("Error saving template:", error);
-    }
-  };
+    fetchBlogPosts();
+  }, [currentPage, selectedCategory]);
 
-  const handleDownload = (htmlContent, fileName) => {
-    const blob = new Blob([htmlContent], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = fileName;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
-  // New handler for downloading edited templates
-  const handleDownloadEdited = (editedHtml) => {
-    // Store the current edited HTML
-    setCurrentEditedHtml(editedHtml);
+  // Function to handle image URL formatting
+  const getImageUrl = (post) => {
+    if (!post || !post.coverImage) return '';
     
-    // Download it
-    handleDownload(editedHtml, `${selectedTemplate.name}-edited.html`);
-  };
-
-  // Function to get the current HTML from the GrapesJS editor
-  const getCurrentEditedHtml = () => {
-    if (editorInstanceRef.current) {
-      const html = editorInstanceRef.current.getHtml();
-      const css = editorInstanceRef.current.getCss();
-      return `<html>
-        <head>
-          <style>${css}</style>
-        </head>
-        <body>${html}</body>
-      </html>`;
+    // If it's already a full URL
+    if (post.coverImage.startsWith('http')) {
+      return post.coverImage;
     }
-    return null;
+    
+    // Otherwise, prepend the domain
+    return `https://vedive.com${post.coverImage}`;
   };
 
-  const viewTemplateDetails = (post) => {
-    setSelectedTemplate(post);
-    document.body.style.backgroundColor = "#ffffff";
-    setViewMode("detail");
+  // Function to extract a text excerpt from HTML content
+  const createExcerpt = (htmlContent, maxLength = 150) => {
+    if (!htmlContent) return '';
+    
+    // Remove HTML tags
+    const textContent = htmlContent.replace(/<\/?[^>]+(>|$)/g, '');
+    
+    // Trim and limit length
+    if (textContent.length <= maxLength) return textContent;
+    
+    return textContent.substring(0, maxLength) + '...';
   };
 
-  const backToGrid = () => {
-    setViewMode("grid");
-    document.body.style.backgroundColor = "#f9f9f9";
-    setEditingPost(null);
-    setCurrentEditedHtml(null);
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
-
-
-  const filteredPosts = activeCategory === "All" 
-    ? posts 
-    : posts.filter(post => post.category === activeCategory);
 
   return (
-    <>
+    <div className="min-h-screen bg-gray-50">
       <Helmet>
-      <title>Choose Your Email Template for Bulk Email Marketing.</title>
-      <meta name="description" content="Explore Vedive’s customizable email templates for bulk email sender. Create engaging campaigns with professional designs tailored for your business"/>
+        <title>Blog | Vedive</title>
+        <meta name="description" content="Read the latest articles and insights from Vedive's blog." />
       </Helmet>
-    {/* Only show Navbar in grid view */}
-    {viewMode === "grid" && <Navbar />}
-    <LoginPromptModal 
-        isOpen={isLoginModalVisible} 
-        onClose={() => setIsLoginModalVisible(false)} 
-      />
-
-    <div className="email-templates-container" style={{ 
-      fontFamily: 'Arial, sans-serif',
-      padding: "1vw",
-      width:'98vw',
-      margin: "0 auto"
-    }}>
-      {viewMode === "grid" ? (
-        <>
-            <h1 className="text-primary" style={{ 
-            fontSize: "32px", 
-            marginBottom: "8px", 
-            color: "#333",
-            textAlign: "center"
-          }}>
-            Email Templates
-          </h1>
-          <p className="text-primary"  style={{ 
-            fontSize: "16px", 
-            color: "#666", 
-            marginBottom: "32px",
-            textAlign: "center"
-          }}>
-            Choose from our collection of professional email templates
-          </p>
-
-          {/* Category Navigation */}
-          <div style={{ 
-            display: "flex", 
-            justifyContent: "center", 
-            marginBottom: "32px",
-            gap: "12px",
-            flexWrap: "wrap"
-          }}>
-            {categories.map(category => (
-              <button
-                key={category}
-                onClick={() => setActiveCategory(category)}
-                style={{
-                  padding: "10px 20px",
-                  borderRadius: "100px",
-                  backgroundColor: activeCategory === category ? "#7c3aed" : "#fff",
-                  color: activeCategory === category ? "#fff" : "#666",
-                  border: "none",
-                  fontWeight: "500",
-                  cursor: "pointer",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-                  transition: "all 0.2s ease"
-                }}
-              >
-                {category}
-              </button>
-            ))}
+      
+      <Navbar />
+      
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-7xl mx-auto">
+          {/* Header Section */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">Our Blog</h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Discover insights, tips, and the latest updates from our team.
+            </p>
           </div>
-
-          {/* Templates Grid */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
-            gap: "32px",
-          }}>
-            {filteredPosts.length > 0 ? (
-              filteredPosts.map((post) => (
-                <div
-                  key={post._id}
-                  style={{
-                    backgroundColor: "#fff",
-                    borderRadius: "12px",
-                    overflow: "hidden",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
-                    transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                    cursor: "pointer",
+          
+          {/* Category Filter */}
+          <div className="flex justify-center mb-12">
+            <div className="flex flex-wrap gap-2 justify-center">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => {
+                    setSelectedCategory(category === 'All' ? '' : category);
+                    setCurrentPage(1); // Reset to first page when changing category
                   }}
-                  onClick={() => viewTemplateDetails(post)}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.transform = "translateY(-8px)";
-                    e.currentTarget.style.boxShadow = "0 12px 24px rgba(0, 0, 0, 0.12)";
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.08)";
-                  }}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    (selectedCategory === category) || 
+                    (category === 'All' && selectedCategory === '')
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                  }`}
                 >
-                <div style={{
-                  zoom:0.65,
-                  aspectRatio:'4/4',
-                  overflow: "hidden",
-                  position: "relative",
-                  backgroundColor: "#f8f9fa",
-                  borderRadius: "8px 8px 0 0",
-                }}>
-                  <iframe
-                    title={`preview-${post._id}`}
-                    srcDoc={post.htmlContent}
-                    style={{
-                      width: "100%",
-                      height: "140%",
-                      border: "none",
-                      transform: "scale(0.75)",
-                      transformOrigin: "top center",
-                      pointerEvents: "none"
-                    }}
-                    scrolling="no"
-                  ></iframe>
-                  <div style={{
-                    position: "absolute",
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: "60px",
-                    background: "linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1))",
-                    pointerEvents: "none"
-                  }}></div>
-                </div>
-                  
-                  <div style={{ padding: "20px" }}>
-                    <div style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: "12px"
-                    }}>
-                      <h3 style={{ 
-                        margin: 0, 
-                        fontSize: "18px", 
-                        fontWeight: "600", 
-                        color: "#333" 
-                      }}>
-                        {post.name}
-                      </h3>
-                      <span style={{
-                        backgroundColor: "#f0edfc",
-                        color: "#7c3aed",
-                        fontSize: "12px",
-                        fontWeight: "500",
-                        padding: "4px 10px",
-                        borderRadius: "100px"
-                      }}>
-                        {post.category}
-                      </span>
+                  {category}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Error Message */}
+          {error && (
+            <div className="p-4 bg-red-50 text-red-700 rounded-lg mb-8 text-center">
+              {error}
+            </div>
+          )}
+          
+          {/* Loading State */}
+          {loading ? (
+            <div className="flex justify-center items-center py-16">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="text-center py-16">
+              <h3 className="text-xl text-gray-600">No blog posts found.</h3>
+              {selectedCategory && (
+                <p className="mt-2 text-gray-500">
+                  Try selecting a different category or check back later.
+                </p>
+              )}
+            </div>
+          ) : (
+            <>
+              {/* Blog Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {posts.map((post, index) => (
+                  <motion.div
+                    key={post._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                  >
+                    <Link 
+                      to={`/blog/${post.slug || post._id}`}
+                      className="block group h-full"
+                    >
+                      <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
+                        {/* Feature Image */}
+                        <div className="relative h-48 overflow-hidden">
+                          {post.coverImage ? (
+                            <img
+                              src={getImageUrl(post)}
+                              alt={post.title}
+                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                              <span className="text-gray-400">No image</span>
+                            </div>
+                          )}
+                          
+                          {/* Category Badge */}
+                          {post.category && (
+                            <span className="absolute top-3 right-3 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
+                              {post.category}
+                            </span>
+                          )}
+                        </div>
+                        
+                        <div className="p-5 flex flex-col flex-grow">
+                          {/* Post Date */}
+                          <div className="text-xs text-gray-500 mb-2">
+                            {formatDate(post.createdAt)}
+                          </div>
+                          
+                          {/* Title */}
+                          <h2 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+                            {post.title}
+                          </h2>
+                          
+                          {/* Excerpt */}
+                          <p className="text-gray-600 text-sm mb-4 flex-grow">
+                            {createExcerpt(post.content)}
+                          </p>
+                          
+                          {/* Read More */}
+                          <div className="flex items-center justify-between mt-auto">
+                            <span className="text-blue-600 text-sm font-medium group-hover:underline">
+                              Read more
+                            </span>
+                            
+                            {post.readTime && (
+                              <span className="text-xs text-gray-500">
+                                {post.readTime} min read
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+              
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center mt-12">
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className={`px-4 py-2 rounded-md ${
+                        currentPage === 1
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                      }`}
+                    >
+                      Previous
+                    </button>
+                    
+                    <div className="flex space-x-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                            currentPage === page
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
                     </div>
                     
-                    <p style={{ 
-                      margin: "0 0 16px 0", 
-                      fontSize: "14px", 
-                      color: "#666",
-                      lineHeight: "1.5"
-                    }}>
-                      {post.description.length > 80 
-                        ? post.description.substring(0, 80) + "..." 
-                        : post.description}
-                    </p>
-                    
-                    {post.tags.length > 0 && (
-                      <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                        {post.tags.slice(0, 3).map((tag, index) => (
-                          <span
-                            key={index}
-                            style={{
-                              backgroundColor: "#f5f5f5",
-                              padding: "4px 10px",
-                              borderRadius: "100px",
-                              fontSize: "12px",
-                              color: "#777",
-                            }}
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                        {post.tags.length > 3 && (
-                          <span style={{
-                            backgroundColor: "#f5f5f5",
-                            padding: "4px 10px",
-                            borderRadius: "100px",
-                            fontSize: "12px",
-                            color: "#777",
-                          }}>
-                            +{post.tags.length - 3}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p style={{ 
-                textAlign: "center", 
-                gridColumn: "1 / -1", 
-                color: "#666",
-                padding: "40px",
-                backgroundColor: "#fff",
-                borderRadius: "8px"
-              }}>
-                No templates available in this category.
-              </p>
-            )}
-          </div>
-        </>
-      ) : (
-        selectedTemplate && (
-          <div style={{
-            backgroundColor: "#fff", 
-            overflow: "hidden",
-            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)",
-            height: "95vh",
-            display: "flex",
-            flexDirection: isMobileOrTablet ? "column" : "row" // Changed to column layout for tablets/mobile
-          }}>
-            {/* Top/Left sidebar - Template info with header and buttons */}
-            <div style={{ 
-              width: isMobileOrTablet ? "100%" : "250px", 
-              borderRight: isMobileOrTablet ? "none" : "1px solid #eaeaea",
-              borderBottom: isMobileOrTablet ? "1px solid #eaeaea" : "none",
-              padding: "14px",
-              overflowY: "auto",
-              display: "flex",
-              flexDirection: isMobileOrTablet ? "column" : "column",
-              maxHeight: isMobileOrTablet ? "auto" : "100%"
-            }}>
-              {/* Header */}
-              <div style={{ 
-                marginBottom: isMobileOrTablet ? "16px" : "24px",
-                display: "flex",
-                flexDirection: isMobileOrTablet ? "row" : "column",
-                alignItems: isMobileOrTablet ? "center" : "flex-start",
-                justifyContent: isMobileOrTablet ? "space-between" : "flex-start",
-                width: "100%"
-              }}>
-                <div>
-                  <button
-                    onClick={backToGrid}
-                    style={{
-                      backgroundColor: "transparent",
-                      border: "none",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      color: "#7c3aed",
-                      cursor: "pointer",
-                      padding: "8px 0",
-                      fontSize: "16px",
-                      marginBottom: isMobileOrTablet ? "0" : "16px"
-                    }}
-                  >
-                    ← Back to templates
-                  </button>
-                  <h2 style={{ 
-                    fontSize: isMobileOrTablet ? "20px" : "24px", 
-                    margin: 0,
-                    color: "#333"
-                  }}>
-                    {selectedTemplate.name}
-                  </h2>
-                </div>
-                
-                {/* Move buttons to header for tablet/mobile view */}
-                {isMobileOrTablet && (
-                  <div style={{ 
-                    display: "flex",
-                    gap: "10px"
-                  }}>
-                    {editingPost?._id === selectedTemplate._id ? (
-                      <button
-                        onClick={() => {
-                          if (editorInstanceRef.current) {
-                            const html = editorInstanceRef.current.getHtml();
-                            const css = editorInstanceRef.current.getCss();
-                            const fullHtml = `<html>
-                              <head>
-                                <style>${css}</style>
-                              </head>
-                              <body>${html}</body>
-                            </html>`;
-                            
-                            handleDownload(fullHtml, `${selectedTemplate.name}-edited.html`);
-                            setCurrentEditedHtml(fullHtml);
-                          } else if (currentEditedHtml) {
-                            handleDownload(currentEditedHtml, `${selectedTemplate.name}-edited.html`);
-                          }
-                        }}
-                        style={{
-                          backgroundColor: "#f4f1fe",
-                          color: "#7c3aed",
-                          border: "none",
-                          padding: "14px 16px",
-                          borderRadius: "6px",
-                          fontWeight: "500",
-                          cursor: "pointer",
-                          fontSize: "16px"
-                        }}
-                      >
-                        Download Edited Template
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleDownload(selectedTemplate.htmlContent, `${selectedTemplate.name}.html`)}
-                        style={{
-                          backgroundColor: "#f4f1fe",
-                          color: "#7c3aed",
-                          border: "none",
-                          padding: "14px 16px",
-                          borderRadius: "6px",
-                          fontWeight: "500",
-                          cursor: "pointer",
-                          fontSize: "16px"
-                        }}
-                      >
-                        Download Template
-                      </button>
-                    )}
-                    
                     <button
-                      id="edit-button"
-                      onClick={toggleEditor}
-                      style={{
-                        backgroundColor: "#7c3aed",
-                        color: "white",
-                        border: "none",
-                        padding: "14px 16px",
-                        borderRadius: "6px",
-                        fontWeight: "500",
-                        cursor: "pointer",
-                        fontSize: "16px"
-                      }}
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      className={`px-4 py-2 rounded-md ${
+                        currentPage === totalPages
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                      }`}
                     >
-                      {editingPost?._id === selectedTemplate._id ? "View Template" : "Edit Template"}
+                      Next
                     </button>
                   </div>
-                )}
-              </div>
-              
-              {/* Template info in the middle - Horizontal layout for tablet/mobile */}
-              <div style={{ 
-                flex: isMobileOrTablet ? "0" : "1",
-                display: isMobileOrTablet ? "none" : "block",
-                flexDirection: isMobileOrTablet ? "row" : "column",
-                gap: isMobileOrTablet ? "16px" : "0",
-                flexWrap: isMobileOrTablet ? "wrap" : "nowrap",
-                marginBottom: isMobileOrTablet ? "8px" : "0"
-              }}>
-                <div style={{ 
-                  marginBottom: isMobileOrTablet ? "0" : "24px",
-                  flex: isMobileOrTablet ? "1 1 60%" : "auto",
-                  minWidth: isMobileOrTablet ? "200px" : "auto"
-                }}>
-                  <h4 style={{ 
-                    fontSize: "14px", 
-                    color: "#666", 
-                    marginBottom: "8px",
-                    fontWeight: "500"
-                  }}>
-                    Description
-                  </h4>
-                  <p style={{ 
-                    color: "#333", 
-                    margin: 0,
-                    lineHeight: "1.5",
-                    fontSize: "14px"
-                  }}>
-                    {selectedTemplate.description}
-                  </p>
-                </div>
-                
-                <div style={{ 
-                  marginBottom: isMobileOrTablet ? "0" : "24px",
-                  flex: isMobileOrTablet ? "1 1 30%" : "auto",
-                  minWidth: isMobileOrTablet ? "150px" : "auto" 
-                }}>
-                  <h4 style={{ 
-                    fontSize: "14px", 
-                    color: "#666", 
-                    marginBottom: "8px",
-                    fontWeight: "500"
-                  }}>
-                    Category
-                  </h4>
-                  <div>
-                    <span style={{
-                      backgroundColor: "#f0edfc",
-                      padding: "6px 12px",
-                      borderRadius: "100px",
-                      fontSize: "14px",
-                      color: "#7c3aed",
-                      fontWeight: "500"
-                    }}>
-                      {selectedTemplate.category}
-                    </span>
-                  </div>
-                </div>
-                
-                <div style={{ 
-                  marginBottom: isMobileOrTablet ? "0" : "24px",
-                  flex: isMobileOrTablet ? "1 1 100%" : "auto"
-                }}>
-                  <h4 style={{ 
-                    fontSize: "14px", 
-                    color: "#666", 
-                    marginBottom: "8px",
-                    fontWeight: "500"
-                  }}>
-                    Tags
-                  </h4>
-                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                    {selectedTemplate.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        style={{
-                          backgroundColor: "#f5f5f5",
-                          padding: "6px 12px",
-                          borderRadius: "100px",
-                          fontSize: "13px",
-                          color: "#777",
-                        }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              
-              {/* Buttons at the bottom of sidebar - Only show for desktop */}
-              {!isMobileOrTablet && (
-                <div style={{ 
-                  marginTop: "auto", 
-                  paddingTop: "20px", 
-                  borderTop: "1px solid #eaeaea",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "12px"
-                }}>
-                  {editingPost?._id === selectedTemplate._id ? (
-                    <button
-                      onClick={() => {
-                        if (editorInstanceRef.current) {
-                          const html = editorInstanceRef.current.getHtml();
-                          const css = editorInstanceRef.current.getCss();
-                          const fullHtml = `<html>
-                            <head>
-                              <style>${css}</style>
-                            </head>
-                            <body>${html}</body>
-                          </html>`;
-                          
-                          handleDownload(fullHtml, `${selectedTemplate.name}-edited.html`);
-                          setCurrentEditedHtml(fullHtml);
-                        } else if (currentEditedHtml) {
-                          handleDownload(currentEditedHtml, `${selectedTemplate.name}-edited.html`);
-                        }
-                      }}
-                      style={{
-                        backgroundColor: "#f4f1fe",
-                        color: "#7c3aed",
-                        border: "none",
-                        padding: "12px 20px",
-                        borderRadius: "6px",
-                        fontWeight: "500",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "8px",
-                        width: "100%"
-                      }}
-                    >
-                      <span>Download Edited Template</span>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleDownload(selectedTemplate.htmlContent, `${selectedTemplate.name}.html`)}
-                      style={{
-                        backgroundColor: "#f4f1fe",
-                        color: "#7c3aed",
-                        border: "none",
-                        padding: "12px 20px",
-                        borderRadius: "6px",
-                        fontWeight: "500",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "8px",
-                        width: "100%"
-                      }}
-                    >
-                      <span>Download</span>
-                    </button>
-                  )}
-                  
-                  <button
-                    onClick={toggleEditor}
-                    style={{
-                      backgroundColor: "#7c3aed",
-                      color: "white",
-                      border: "none",
-                      padding: "12px 20px",
-                      borderRadius: "6px",
-                      fontWeight: "500",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "8px",
-                      width: "100%"
-                    }}
-                  >
-                    {editingPost?._id === selectedTemplate._id ? "View Template" : "Edit Template"}
-                  </button>
                 </div>
               )}
-            </div>
-            <style>
-    {`
-      @media (max-width: 480px) {
-        #edit-button {
-          display: none;
-        }
-      }
-    `}
-  </style>
-
-            {/* Right/Bottom area - Template preview or editor taking full space */}
-            <div style={{ 
-              flex: 1, 
-              position: "relative",
-              display: "flex",
-              flexDirection: "column",
-              height: isMobileOrTablet ? "calc(95vh - 200px)" : "100%" // Adjust height for tablet mode
-            }}>
-              {editingPost?._id === selectedTemplate._id ? (
-                <div style={{ 
-                  position: "absolute", 
-                  top: 0, 
-                  left: 0, 
-                  right: 0, 
-                  bottom: 0
-                }}>
-                  <TemplateEditor
-                    htmlContent={selectedTemplate.htmlContent}
-                    onSave={(updatedHtml) => handleSave(selectedTemplate._id, updatedHtml)}
-                    onDownload={handleDownloadEdited}
-                    editorRef={editorInstanceRef} // Pass the ref to the TemplateEditor
-                  />
-                </div>
-              ) : (
-                <div style={{
-                  flex: 1,
-                  position: "relative",
-                  width: "100%",
-                  height: "100%"
-                }}>
-                  <iframe
-                    title={`template-${selectedTemplate._id}`}
-                    srcDoc={selectedTemplate.htmlContent}
-                    style={{
-                      position: "relative",
-                      top: 0,
-                      left: 0,
-                      width: "100%",
-                      height: "100%",
-                      border: "none",
-                      overflow: "auto"
-                    }}
-                  ></iframe>
-                </div>
-              )}
-            </div>
-          </div>
-        )
-      )}
+            </>
+          )}
+        </div>
+      </div>
     </div>
-    </>
   );
 };
 
-export default PostList;
+export default BlogPage;
