@@ -18,7 +18,7 @@ export default function CreateBlogPostPage() {
     formData.append('tags', tags);
     if (coverImage) formData.append('coverImage', coverImage);
 
-    const apiBase = 'https://vedive.com';
+    const apiBase = 'https://vedive.com:3000';
     const res = await fetch(`${apiBase}/api/posts/create-blog-post`, {
       method: 'POST',
       body: formData,
