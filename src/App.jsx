@@ -6,6 +6,10 @@ import ProtectedRoute from "./components/other-pages/ProtectedRoutes.jsx";
 import MainLayout from "./components/MailLayout.jsx";
 import "tailwindcss/tailwind.css";
 import ResetPassword from "./components/other-pages/ResetPassword.jsx";
+import Navbar from "./components/Pages/Hero/Navbar.jsx";
+import Footer from "./components/Pages/Hero/Footer.jsx";
+// import Header from './components/Header'; // Imported from new code
+// import Footer from './components/Footer'; // Imported from new code
 
 // Lazy-loaded pages - Public
 const CreateBlogPostPage = lazy(() => import("./components/other-pages/CreateBlogPost.jsx"));
@@ -21,6 +25,11 @@ const Signup = lazy(() => import("./components/other-pages/sign-up.jsx"));
 const Passreset = lazy(() => import("./components/other-pages/pass-reset.jsx"));
 const VerifyEmail = lazy(() => import("./components/other-pages/VerifyEmail"));
 const PaymentStatus = lazy(() => import("./components/other-pages/PaymentStatus.jsx"));
+
+// New Blog components from the second code
+const BlogPostList = lazy(() => import("./components/other-pages/BlogPostList"));
+const BlogPostDetail = lazy(() => import("./components/other-pages/BlogPostDetail"));
+const CreateBlogPost = lazy(() => import("./components/other-pages/CreateBlogPost"));
 
 // Lazy-loaded pages - Dashboard/Protected
 const Dashboard = lazy(() => import("./components/other-pages/dashboard.jsx"));
@@ -230,6 +239,21 @@ const globalStyles = `
   }
 `;
 
+// Blog Layout Component for new blog routes
+const BlogLayout = ({ children }) => {
+  return (
+    <div className="min-h-screen flex flex-col">
+      {/* <Header /> */}
+      <Navbar />
+      <main className="flex-grow container mx-auto px-4 py-8">
+        {children}
+      </main>
+      <Footer />
+      {/* <Footer /> */}
+    </div>
+  );
+};
+
 // Modified AnimatedRoutes component with properly nested routes
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -237,9 +261,59 @@ const AnimatedRoutes = () => {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        {/* Public Routes */}
+        {/* New Blog Routes with BlogLayout */}
         <Route
           path="/"
+          element={
+            <BlogLayout>
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <BlogPostList />
+                </PageTransition>
+              </Suspense>
+            </BlogLayout>
+          }
+        />
+        <Route
+          path="/blog"
+          element={
+            <BlogLayout>
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <BlogPostList />
+                </PageTransition>
+              </Suspense>
+            </BlogLayout>
+          }
+        />
+        <Route
+          path="/blog/:slug"
+          element={
+            <BlogLayout>
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <BlogPostDetail />
+                </PageTransition>
+              </Suspense>
+            </BlogLayout>
+          }
+        />
+        <Route
+          path="/create-blog"
+          element={
+            <BlogLayout>
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <CreateBlogPost />
+                </PageTransition>
+              </Suspense>
+            </BlogLayout>
+          }
+        />
+
+        {/* Original Public Routes */}
+        <Route
+          path="/home"
           element={
             <PageTransition>
               <Hero />
@@ -361,7 +435,7 @@ const AnimatedRoutes = () => {
           }
         />
         
-        {/* Blog & Content Routes - Public */}
+        {/* Original Blog & Content Routes - Public */}
         <Route
           path="/blog-posts/:identifier"
           element={

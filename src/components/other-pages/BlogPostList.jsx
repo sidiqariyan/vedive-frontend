@@ -42,7 +42,7 @@ const BlogPostList = () => {
   
   if (posts.length === 0) {
     return (
-      <div className="text-center p-10">
+      <div className="text-center p-10 bg-primary">
         <h2 className="text-2xl font-bold mb-4">No Blog Posts Yet</h2>
         <p className="mb-6">Be the first to create a blog post!</p>
         <Link to="/create-blog" className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">
@@ -53,21 +53,27 @@ const BlogPostList = () => {
   }
   
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto bg-primary">
       <h1 className="text-3xl font-bold mb-8 text-center">Blog Posts</h1>
      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {posts.map(post => (
           <div key={post._id} className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:shadow-lg hover:-translate-y-1">
             {post.coverImage && (
-              <div className="h-48 overflow-hidden">
-                <img
-                  src={`https://vedive.com:3000${post.coverImage}`}
-                  alt={post.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
+                <div className="h-48 overflow-hidden">
+                  <img
+                    src={post.coverImage.startsWith('http') 
+                      ? post.coverImage 
+                      : `https://vedive.com:3000${post.coverImage}`}
+                    alt={post.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error('Image failed to load:', post.coverImage);
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
            
             <div className="p-4">
               <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mb-2">
