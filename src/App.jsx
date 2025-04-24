@@ -8,9 +8,9 @@ import "tailwindcss/tailwind.css";
 import ResetPassword from "./components/other-pages/ResetPassword.jsx";
 
 // Lazy-loaded pages - Public
-const CreateBlogPostPage = lazy(() => import("./components/other-pages/CreateBlogPostPage.jsx"));
-const BlogPostListPage = lazy(() => import("./components/other-pages/BlogPostListPage.jsx"));
-const PostDetail = lazy(() => import("./components/other-pages/PostDetails.jsx"));
+const CreateBlogPostPage = lazy(() => import("./components/other-pages/CreateBlogPost.jsx"));
+const BlogPostListPage = lazy(() => import("./components/other-pages/BlogPostList.jsx"));
+const PostDetail = lazy(() => import("./components/other-pages/BlogPostDetail.jsx"));
 const Hero = lazy(() => import("./components/Pages/Hero/Hero"));
 const ContactUs = lazy(() => import("./components/Pages/contact.jsx"));
 const AboutUs = lazy(() => import("./components/Pages/about.jsx"));
@@ -361,6 +361,38 @@ const AnimatedRoutes = () => {
           }
         />
         
+        {/* Blog & Content Routes - Public */}
+        <Route
+          path="/blog-posts/:identifier"
+          element={
+            <Suspense fallback={null}>
+              <PageTransition>
+                <PostDetail />
+              </PageTransition>
+            </Suspense>
+          }
+        />
+        <Route
+          path="/blog/create"
+          element={
+            <Suspense fallback={null}>
+              <PageTransition>
+                <CreateBlogPostPage />
+              </PageTransition>
+            </Suspense>
+          }
+        />
+        <Route
+          path="/blogs"
+          element={
+            <Suspense fallback={null}>
+              <PageTransition>
+                <BlogPostListPage />
+              </PageTransition>
+            </Suspense>
+          }
+        />
+        
         {/* Protected Routes with MainLayout */}
         <Route
           path="/"
@@ -453,7 +485,7 @@ const AnimatedRoutes = () => {
               </Suspense>
             }
           />
-          {/* <Route
+          <Route
             path="number-scraper"
             element={
               <Suspense fallback={<div>Loading...</div>}>
@@ -462,7 +494,7 @@ const AnimatedRoutes = () => {
                 </PageTransition>
               </Suspense>
             }
-          /> */}
+          />
           
           {/* Template Routes */}
           <Route
@@ -496,48 +528,6 @@ const AnimatedRoutes = () => {
             }
           />
         </Route>
-        
-        {/* Blog & Content Routes */}
-        <Route
-          path="/blog-posts/:identifier"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <PostDetail />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/blog/create"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <CreateBlogPostPage />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/blogs"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <BlogPostListPage />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/blog-posts/:id"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <PostDetail />
-              </PageTransition>
-            </Suspense>
-          }
-        />
         
         {/* Fallback Route */}
         <Route
