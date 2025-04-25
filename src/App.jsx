@@ -240,19 +240,6 @@ const globalStyles = `
 `;
 
 // Blog Layout Component for new blog routes
-const BlogLayout = ({ children }) => {
-  return (
-    <div className="min-h-screen flex flex-col">
-      {/* <Header /> */}
-      <Navbar />
-      <main className="flex-grow container mx-auto px-4 py-8">
-        {children}
-      </main>
-      <Footer />
-      {/* <Footer /> */}
-    </div>
-  );
-};
 
 // Modified AnimatedRoutes component with properly nested routes
 const AnimatedRoutes = () => {
@@ -265,49 +252,42 @@ const AnimatedRoutes = () => {
         <Route
           path="/"
           element={
-            <BlogLayout>
               <Suspense fallback={<div>Loading...</div>}>
                 <PageTransition>
-                  <BlogPostList />
+                  <Hero />
                 </PageTransition>
               </Suspense>
-            </BlogLayout>
           }
         />
-        <Route
+        {/* <Route
           path="/blog"
           element={
-            <BlogLayout>
+          
               <Suspense fallback={<div>Loading...</div>}>
                 <PageTransition>
                   <BlogPostList />
                 </PageTransition>
               </Suspense>
-            </BlogLayout>
           }
-        />
+        /> */}
         <Route
           path="/blog/:slug"
           element={
-            <BlogLayout>
               <Suspense fallback={<div>Loading...</div>}>
                 <PageTransition>
                   <BlogPostDetail />
                 </PageTransition>
               </Suspense>
-            </BlogLayout>
           }
         />
         <Route
           path="/create-blog"
           element={
-            <BlogLayout>
               <Suspense fallback={<div>Loading...</div>}>
                 <PageTransition>
                   <CreateBlogPost />
                 </PageTransition>
               </Suspense>
-            </BlogLayout>
           }
         />
 
@@ -461,7 +441,7 @@ const AnimatedRoutes = () => {
           element={
             <Suspense fallback={null}>
               <PageTransition>
-                <BlogPostListPage />
+                <BlogPostList />
               </PageTransition>
             </Suspense>
           }
