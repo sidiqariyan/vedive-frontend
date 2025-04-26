@@ -291,16 +291,18 @@ const AnimatedRoutes = () => {
           }
         />
 
-        <Route
-          path="/create-blog"
-          element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <CreateBlogPost />
-                </PageTransition>
-              </Suspense>
-          }
-        />
+<Route
+  path="/create-blog"
+  element={
+    <ProtectedRoute>
+      <Suspense fallback={<div>Loading...</div>}>
+        <PageTransition>
+          <CreateBlogPost />
+        </PageTransition>
+      </Suspense>
+    </ProtectedRoute>
+  }
+/>
 
         {/* Original Public Routes */}
         <Route
