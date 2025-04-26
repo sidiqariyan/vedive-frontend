@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /
+Disallow: /plans/payment-status?order_id=ORID1744954101655
+Disallow: /blog/create
+Disallow: /post-form
+Disallow: /Dashboard
