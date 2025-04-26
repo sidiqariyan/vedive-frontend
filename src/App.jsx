@@ -13,7 +13,6 @@ import Footer from "./components/Pages/Hero/Footer.jsx";
 
 // Lazy-loaded pages - Public
 const CreateBlogPostPage = lazy(() => import("./components/other-pages/CreateBlogPost.jsx"));
-const BlogPostListPage = lazy(() => import("./components/other-pages/BlogPostList.jsx"));
 const PostDetail = lazy(() => import("./components/other-pages/BlogPostDetail.jsx"));
 const Hero = lazy(() => import("./components/Pages/Hero/Hero"));
 const ContactUs = lazy(() => import("./components/Pages/contact.jsx"));
@@ -259,17 +258,6 @@ const AnimatedRoutes = () => {
               </Suspense>
           }
         />
-        {/* <Route
-          path="/blog"
-          element={
-          
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <BlogPostList />
-                </PageTransition>
-              </Suspense>
-          }
-        /> */}
         <Route
           path="/blog/:slug"
           element={
@@ -427,6 +415,38 @@ const AnimatedRoutes = () => {
             </Suspense>
           }
         />
+        {/* Template Routes */}
+        <Route
+            path="post-form"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <PostForm />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+        <Route
+            path="templates"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <PostList />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          <Route
+            path="editor/:id"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <TemplateEditorPage />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+
         
         {/* Original Blog & Content Routes - Public */}
         <Route
@@ -558,38 +578,6 @@ const AnimatedRoutes = () => {
               <Suspense fallback={<div>Loading...</div>}>
                 <PageTransition>
                   <NumberScraper />
-                </PageTransition>
-              </Suspense>
-            }
-          />
-          
-          {/* Template Routes */}
-          <Route
-            path="post-form"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <PostForm />
-                </PageTransition>
-              </Suspense>
-            }
-          />
-          <Route
-            path="templates"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <PostList />
-                </PageTransition>
-              </Suspense>
-            }
-          />
-          <Route
-            path="editor/:id"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <TemplateEditorPage />
                 </PageTransition>
               </Suspense>
             }
