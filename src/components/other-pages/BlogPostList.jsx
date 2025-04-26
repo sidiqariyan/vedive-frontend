@@ -97,7 +97,7 @@ const BlogPostList = () => {
             {pagedPosts.map(post => (
               <Link
                 key={post._id}
-                to={`/blog/${post.slug}`}
+                to={`/${post.slug}`}
                 className="block bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition"
               >
                 <div className="w-[455px] h-[347px] overflow-hidden">

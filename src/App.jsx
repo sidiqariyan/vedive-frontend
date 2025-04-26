@@ -280,6 +280,17 @@ const AnimatedRoutes = () => {
               </Suspense>
           }
         />
+                <Route
+          path="/:slug"
+          element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <BlogPostDetail />
+                </PageTransition>
+              </Suspense>
+          }
+        />
+
         <Route
           path="/create-blog"
           element={
