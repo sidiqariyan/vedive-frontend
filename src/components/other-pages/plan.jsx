@@ -45,7 +45,7 @@ const Plan = () => {
     {
       id: "starter",
       name: "Starter",
-      price: "49",
+      price: "99",
       period: "/1-day",
       icon: Rocket,
       features: [
@@ -63,7 +63,7 @@ const Plan = () => {
     {
       id: "business",
       name: "Business",
-      price: "199",
+      price: "599",
       period: "/1-week",
       icon: Building2,
       features: [
@@ -81,7 +81,7 @@ const Plan = () => {
     {
       id: "enterprise",
       name: "Enterprise",
-      price: "699",
+      price: "1999",
       period: "/1-month",
       icon: Building2,
       features: [

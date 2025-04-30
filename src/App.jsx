@@ -8,6 +8,7 @@ import "tailwindcss/tailwind.css";
 import ResetPassword from "./components/other-pages/ResetPassword.jsx";
 import Navbar from "./components/Pages/Hero/Navbar.jsx";
 import Footer from "./components/Pages/Hero/Footer.jsx";
+import AdminRoute from "./components/other-pages/AdminRoute.jsx";
 // import Header from './components/Header'; // Imported from new code
 // import Footer from './components/Footer'; // Imported from new code
 
@@ -279,7 +280,7 @@ const AnimatedRoutes = () => {
           }
         />
 
-<Route
+{/* <Route
   path="/create-blog"
   element={
     <ProtectedRoute>
@@ -290,8 +291,14 @@ const AnimatedRoutes = () => {
       </Suspense>
     </ProtectedRoute>
   }
-/>
-
+/> */}
+   {/* Admin-only routes */}
+   <Route path="/create-blog" element={
+          <AdminRoute><Suspense fallback={<div>Loading...</div>}><PageTransition><CreateBlogPost/></PageTransition></Suspense></AdminRoute>
+        } />
+        <Route path="/post-form" element={
+          <AdminRoute><Suspense fallback={<div>Loading...</div>}><PageTransition><PostForm/></PageTransition></Suspense></AdminRoute>
+        } />
         {/* Original Public Routes */}
         <Route
           path="/home"
@@ -416,7 +423,7 @@ const AnimatedRoutes = () => {
           }
         />
         {/* Template Routes */}
-        <Route
+        {/* <Route
             path="post-form"
             element={
               <Suspense fallback={<div>Loading...</div>}>
@@ -425,8 +432,9 @@ const AnimatedRoutes = () => {
                 </PageTransition>
               </Suspense>
             }
-          />
+          /> */}
         <Route
+         <Route
             path="templates"
             element={
               <Suspense fallback={<div>Loading...</div>}>
@@ -446,7 +454,6 @@ const AnimatedRoutes = () => {
               </Suspense>
             }
           />
-
         
         {/* Original Blog & Content Routes - Public */}
         <Route
@@ -578,6 +585,29 @@ const AnimatedRoutes = () => {
               <Suspense fallback={<div>Loading...</div>}>
                 <PageTransition>
                   <NumberScraper />
+                </PageTransition>
+              </Suspense>
+            }
+          />
+          
+          {/* Template Routes */}
+          {/* <Route
+            path="post-form"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <PostForm />
+                </PageTransition>
+              </Suspense>
+            }
+          /> */}
+         
+          <Route
+            path="editor/:id"
+            element={
+              <Suspense fallback={<div>Loading...</div>}>
+                <PageTransition>
+                  <TemplateEditorPage />
                 </PageTransition>
               </Suspense>
             }

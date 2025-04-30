@@ -84,7 +84,7 @@ const Pricing = () => {
     },
     {
       title: "Starter",
-      price: 49,
+      price: 99,
       duration: "1-day",
       features: [
         { name: "Unlimited Mail Sending", available: true },
@@ -96,7 +96,7 @@ const Pricing = () => {
     },
     {
       title: "Business",
-      price: 199,
+      price: 599,
       duration: "1-week",
       highlight: true,
       recommended: true,
@@ -110,7 +110,7 @@ const Pricing = () => {
     },
     {
       title: "Enterprise",
-      price: 699,
+      price: 1999,
       duration: "1-month",
       features: [
         { name: "Unlimited Mail Sending", available: true },
@@ -128,7 +128,7 @@ const Pricing = () => {
       <style>{cssToAdd}</style>
       <Helmet>
       <title>Vedive Pricing: Affordable Email & WhatsApp Tools India</title>
-      <meta name="description" content="Discover Vedive’s affordable pricing for bulk email sender, email scraper, and WhatsApp bulk sender tools. Start with flexible plans or a free trial!"/>
+      <meta name="description" content="Discover Vedive's affordable pricing for bulk email sender, email scraper, and WhatsApp bulk sender tools. Start with flexible plans or a free trial!"/>
       </Helmet>
       {/* Top Section */}
       <Navbar />
