@@ -1,17 +1,8 @@
-<<<<<<< HEAD
-import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
-import TemplateEditor from "./TemplateEditor";
-import Navbar from "../Pages/Hero/Navbar";
-import { useAuth } from "../Pages/Mailer/AuthContext";
-import { NavLink } from "react-router-dom";
-=======
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import TemplateEditor from "./TemplateEditor";
 import Navbar from "../Pages/Hero/Navbar";
 import { NavLink, useNavigate } from "react-router-dom";
->>>>>>> eb0bf73 (new changes are added)
 import { Helmet } from 'react-helmet';
 
 const PostList = () => {
@@ -19,72 +10,6 @@ const PostList = () => {
   const [editingPost, setEditingPost] = useState(null);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [viewMode, setViewMode] = useState("grid");
-<<<<<<< HEAD
-  const [categories, setCategories] = useState(["All", "Promotional", "Seasonal", "Newsletter", "Transactional"]);
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [currentEditedHtml, setCurrentEditedHtml] = useState(null);
-  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
-  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
-  const { isLoggedIn, login, logout } = useAuth();
-
-  // Debugging: Log posts and their categories when posts are fetched
-  useEffect(() => {
-    if (posts.length > 0) {
-      console.log("Loaded posts with categories:", posts.map(post => post.category));
-    }
-  }, [posts]);
-
-  const LoginPromptModal = ({ isOpen, onClose }) => {
-    if (!isOpen) return null;
-  
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div 
-          className="fixed inset-0 bg-black opacity-50"
-          onClick={onClose}
-        />
-        <div className="relative bg-white p-6 rounded-lg max-w-md w-full mx-4">
-          <h2 className="text-xl font-bold mb-4">Login Required</h2>
-          <p className="mb-6">Please log in to edit templates.</p>
-          
-          <div className="flex justify-end space-x-2">
-            <button 
-              onClick={onClose}
-              className="px-4 py-2 border rounded-md hover:bg-gray-100"
-            >
-              Close
-            </button>
-            <NavLink to="/login">
-            <button 
-              onClick={onClose}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-            >
-              Go to Login
-            </button>
-            </NavLink>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const toggleEditor = () => {
-    if (!isLoggedIn) {
-      setIsLoginModalVisible(true);
-      return;
-    }
-  
-    if (editingPost?._id === selectedTemplate._id) {
-      setEditingPost(null);
-      setCurrentEditedHtml(null);
-    } else {
-      setEditingPost(selectedTemplate);
-    }
-  };
-  
-  const editorInstanceRef = useRef(null);
-
-=======
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [currentEditedHtml, setCurrentEditedHtml] = useState(null);
@@ -96,7 +21,6 @@ const PostList = () => {
 
   
   // Check device type for responsive layout
->>>>>>> eb0bf73 (new changes are added)
   useEffect(() => {
     const checkDeviceType = () => {
       const width = window.innerWidth;
@@ -109,10 +33,7 @@ const PostList = () => {
     return () => window.removeEventListener('resize', checkDeviceType);
   }, []);
 
-<<<<<<< HEAD
-=======
   // Set background color
->>>>>>> eb0bf73 (new changes are added)
   useEffect(() => {
     document.body.style.backgroundColor = "#f9f9f9";
   
@@ -120,11 +41,6 @@ const PostList = () => {
       document.body.style.backgroundColor = "";
     };
   }, []);
-<<<<<<< HEAD
-  
-  useEffect(() => {
-    const fetchPosts = async () => {
-=======
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -192,20 +108,10 @@ const PostList = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       setIsLoading(true);
->>>>>>> eb0bf73 (new changes are added)
       try {
         const response = await axios.get("https://vedive.com:3000/api/posts");
         setPosts(response.data);
         
-<<<<<<< HEAD
-        // Extract unique categories from the posts and update the categories state
-        const uniqueCategories = [...new Set(response.data.map(post => post.category))];
-        if (uniqueCategories.length > 0) {
-          setCategories(["All", ...uniqueCategories]);
-        }
-      } catch (error) {
-        console.error("Error fetching posts:", error);
-=======
         // Extract unique categories from the posts
         const uniqueCategories = [...new Set(response.data.map(post => 
           post.category ? post.category.trim() : null
@@ -217,15 +123,11 @@ const PostList = () => {
         console.error("Error fetching posts:", error);
       } finally {
         setIsLoading(false);
->>>>>>> eb0bf73 (new changes are added)
       }
     };
     fetchPosts();
   }, []);
 
-<<<<<<< HEAD
-  const handleSave = async (postId, updatedHtml) => {
-=======
   const isPaidUser = () => {
     return user && user.currentPlan && user.currentPlan.toLowerCase() !== "free";
   };
@@ -252,7 +154,6 @@ const PostList = () => {
       return;
     }
     
->>>>>>> eb0bf73 (new changes are added)
     try {
       await axios.put(`/api/posts/${postId}`, { htmlContent: updatedHtml });
       alert("Template saved successfully!");
@@ -270,14 +171,11 @@ const PostList = () => {
   };
 
   const handleDownload = (htmlContent, fileName) => {
-<<<<<<< HEAD
-=======
     if (!isPaidUser()) {
       navigate("/plan");
       return;
     }
     
->>>>>>> eb0bf73 (new changes are added)
     const blob = new Blob([htmlContent], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -288,35 +186,15 @@ const PostList = () => {
   };
 
   const handleDownloadEdited = (editedHtml) => {
-<<<<<<< HEAD
-=======
     if (!isPaidUser()) {
       navigate("/plan");
       return;
     }
     
->>>>>>> eb0bf73 (new changes are added)
     setCurrentEditedHtml(editedHtml);
     handleDownload(editedHtml, `${selectedTemplate.name}-edited.html`);
   };
 
-<<<<<<< HEAD
-  const getCurrentEditedHtml = () => {
-    if (editorInstanceRef.current) {
-      const html = editorInstanceRef.current.getHtml();
-      const css = editorInstanceRef.current.getCss();
-      return `<html>
-        <head>
-          <style>${css}</style>
-        </head>
-        <body>${html}</body>
-      </html>`;
-    }
-    return null;
-  };
-
-=======
->>>>>>> eb0bf73 (new changes are added)
   const viewTemplateDetails = (post) => {
     setSelectedTemplate(post);
     document.body.style.backgroundColor = "#ffffff";
@@ -344,14 +222,6 @@ const PostList = () => {
         <meta name="description" content="Explore Vedive's customizable email templates for bulk email sender. Create engaging campaigns with professional designs tailored for your business"/>
       </Helmet>
       {viewMode === "grid" && <Navbar />}
-<<<<<<< HEAD
-      <LoginPromptModal 
-        isOpen={isLoginModalVisible} 
-        onClose={() => setIsLoginModalVisible(false)} 
-      />
-
-=======
->>>>>>> eb0bf73 (new changes are added)
       <div className="email-templates-container" style={{ 
         fontFamily: 'Arial, sans-serif',
         padding: "1vw",
@@ -377,141 +247,6 @@ const PostList = () => {
               Choose from our collection of professional email templates
             </p>
 
-<<<<<<< HEAD
-            {/* Category Navigation */}
-            <div style={{ 
-              display: "flex", 
-              justifyContent: "center", 
-              marginBottom: "32px",
-              gap: "12px",
-              flexWrap: "wrap"
-            }}>
-              {categories.map(category => (
-                <button
-                  key={category}
-                  onClick={() => setActiveCategory(category)}
-                  style={{
-                    padding: "10px 20px",
-                    borderRadius: "100px",
-                    backgroundColor: activeCategory === category ? "#7c3aed" : "#fff",
-                    color: activeCategory === category ? "#fff" : "#666",
-                    border: "none",
-                    fontWeight: "500",
-                    cursor: "pointer",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-                    transition: "all 0.2s ease"
-                  }}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-
-            {/* Templates Grid with debug info */}
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
-              gap: "32px",
-            }}>
-              {filteredPosts.length > 0 ? (
-                filteredPosts.map((post) => (
-                  <div
-                    key={post._id}
-                    style={{
-                      backgroundColor: "#fff",
-                      borderRadius: "12px",
-                      overflow: "hidden",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
-                      transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => viewTemplateDetails(post)}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.transform = "translateY(-8px)";
-                      e.currentTarget.style.boxShadow = "0 12px 24px rgba(0, 0, 0, 0.12)";
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.08)";
-                    }}
-                  >
-                    <div style={{
-                      zoom:0.65,
-                      aspectRatio:'4/4',
-                      overflow: "hidden",
-                      position: "relative",
-                      backgroundColor: "#f8f9fa",
-                      borderRadius: "8px 8px 0 0",
-                    }}>
-                      <iframe
-                        title={`preview-${post._id}`}
-                        srcDoc={post.htmlContent}
-                        style={{
-                          width: "100%",
-                          height: "140%",
-                          border: "none",
-                          transform: "scale(0.75)",
-                          transformOrigin: "top center",
-                          pointerEvents: "none"
-                        }}
-                        scrolling="no"
-                      ></iframe>
-                      <div style={{
-                        position: "absolute",
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        height: "60px",
-                        background: "linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1))",
-                        pointerEvents: "none"
-                      }}></div>
-                    </div>
-                    
-                    <div style={{ padding: "20px" }}>
-                      <div style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        marginBottom: "12px"
-                      }}>
-                        <h3 style={{ 
-                          margin: 0, 
-                          fontSize: "18px", 
-                          fontWeight: "600", 
-                          color: "#333" 
-                        }}>
-                          {post.name}
-                        </h3>
-                        <span style={{
-                          backgroundColor: "#f0edfc",
-                          color: "#7c3aed",
-                          fontSize: "12px",
-                          fontWeight: "500",
-                          padding: "4px 10px",
-                          borderRadius: "100px"
-                        }}>
-                          {post.category}
-                        </span>
-                      </div>
-                      
-                      <p style={{ 
-                        margin: "0 0 16px 0", 
-                        fontSize: "14px", 
-                        color: "#666",
-                        lineHeight: "1.5"
-                      }}>
-                        {post.description.length > 80 
-                          ? post.description.substring(0, 80) + "..." 
-                          : post.description}
-                      </p>
-                      
-                      {post.tags.length > 0 && (
-                        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                          {post.tags.slice(0, 3).map((tag, index) => (
-                            <span
-                              key={index}
-                              style={{
-=======
             {/* Category Navigation - Only show when categories are loaded */}
             {categories.length > 0 && (
               <div style={{ 
@@ -685,48 +420,11 @@ const PostList = () => {
                             ))}
                             {post.tags.length > 3 && (
                               <span style={{
->>>>>>> eb0bf73 (new changes are added)
                                 backgroundColor: "#f5f5f5",
                                 padding: "4px 10px",
                                 borderRadius: "100px",
                                 fontSize: "12px",
                                 color: "#777",
-<<<<<<< HEAD
-                              }}
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                          {post.tags.length > 3 && (
-                            <span style={{
-                              backgroundColor: "#f5f5f5",
-                              padding: "4px 10px",
-                              borderRadius: "100px",
-                              fontSize: "12px",
-                              color: "#777",
-                            }}>
-                              +{post.tags.length - 3}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p style={{ 
-                  textAlign: "center", 
-                  gridColumn: "1 / -1", 
-                  color: "#666",
-                  padding: "40px",
-                  backgroundColor: "#fff",
-                  borderRadius: "8px"
-                }}>
-                  No templates available in this category.
-                </p>
-              )}
-            </div>
-=======
                               }}>
                                 +{post.tags.length - 3}
                               </span>
@@ -750,7 +448,6 @@ const PostList = () => {
                 )}
               </div>
             )}
->>>>>>> eb0bf73 (new changes are added)
           </>
         ) : (
         selectedTemplate && (
@@ -760,11 +457,7 @@ const PostList = () => {
             boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)",
             height: "95vh",
             display: "flex",
-<<<<<<< HEAD
-            flexDirection: isMobileOrTablet ? "column" : "row" // Changed to column layout for tablets/mobile
-=======
             flexDirection: isMobileOrTablet ? "column" : "row"
->>>>>>> eb0bf73 (new changes are added)
           }}>
             {/* Top/Left sidebar - Template info with header and buttons */}
             <div style={{ 
@@ -821,62 +514,6 @@ const PostList = () => {
                   }}>
                     {editingPost?._id === selectedTemplate._id ? (
                       <button
-<<<<<<< HEAD
-                        onClick={() => {
-                          if (editorInstanceRef.current) {
-                            const html = editorInstanceRef.current.getHtml();
-                            const css = editorInstanceRef.current.getCss();
-                            const fullHtml = `<html>
-                              <head>
-                                <style>${css}</style>
-                              </head>
-                              <body>${html}</body>
-                            </html>`;
-                            
-                            handleDownload(fullHtml, `${selectedTemplate.name}-edited.html`);
-                            setCurrentEditedHtml(fullHtml);
-                          } else if (currentEditedHtml) {
-                            handleDownload(currentEditedHtml, `${selectedTemplate.name}-edited.html`);
-                          }
-                        }}
-                        style={{
-                          backgroundColor: "#f4f1fe",
-                          color: "#7c3aed",
-                          border: "none",
-                          padding: "14px 16px",
-                          borderRadius: "6px",
-                          fontWeight: "500",
-                          cursor: "pointer",
-                          fontSize: "16px"
-                        }}
-                      >
-                        Download Edited Template
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleDownload(selectedTemplate.htmlContent, `${selectedTemplate.name}.html`)}
-                        style={{
-                          backgroundColor: "#f4f1fe",
-                          color: "#7c3aed",
-                          border: "none",
-                          padding: "14px 16px",
-                          borderRadius: "6px",
-                          fontWeight: "500",
-                          cursor: "pointer",
-                          fontSize: "16px"
-                        }}
-                      >
-                        Download Template
-                      </button>
-                    )}
-                    
-                    <button
-                      id="edit-button"
-                      onClick={toggleEditor}
-                      style={{
-                        backgroundColor: "#7c3aed",
-                        color: "white",
-=======
                       onClick={() => {
                         if (!isPaidUser()) {
                           navigate("/plan");
@@ -902,22 +539,10 @@ const PostList = () => {
                       style={{
                         backgroundColor: "#f4f1fe",
                         color: "#7c3aed",
->>>>>>> eb0bf73 (new changes are added)
                         border: "none",
                         padding: "14px 16px",
                         borderRadius: "6px",
                         fontWeight: "500",
-<<<<<<< HEAD
-                        cursor: "pointer",
-                        fontSize: "16px"
-                      }}
-                    >
-                      {editingPost?._id === selectedTemplate._id ? "View Template" : "Edit Template"}
-                    </button>
-                  </div>
-                )}
-              </div>
-=======
                         cursor: isPaidUser() ? "pointer" : "not-allowed",
                         fontSize: "16px",
                         opacity: isPaidUser() ? 1 : 0.7
@@ -966,7 +591,6 @@ const PostList = () => {
                 </div>
               )}
             </div>
->>>>>>> eb0bf73 (new changes are added)
               
               {/* Template info in the middle - Horizontal layout for tablet/mobile */}
               <div style={{ 
@@ -996,169 +620,6 @@ const PostList = () => {
                     lineHeight: "1.5",
                     fontSize: "14px"
                   }}>
-<<<<<<< HEAD
-                    {selectedTemplate.description}
-                  </p>
-                </div>
-                
-                <div style={{ 
-                  marginBottom: isMobileOrTablet ? "0" : "24px",
-                  flex: isMobileOrTablet ? "1 1 30%" : "auto",
-                  minWidth: isMobileOrTablet ? "150px" : "auto" 
-                }}>
-                  <h4 style={{ 
-                    fontSize: "14px", 
-                    color: "#666", 
-                    marginBottom: "8px",
-                    fontWeight: "500"
-                  }}>
-                    Category
-                  </h4>
-                  <div>
-                    <span style={{
-                      backgroundColor: "#f0edfc",
-                      padding: "6px 12px",
-                      borderRadius: "100px",
-                      fontSize: "14px",
-                      color: "#7c3aed",
-                      fontWeight: "500"
-                    }}>
-                      {selectedTemplate.category}
-                    </span>
-                  </div>
-                </div>
-                
-                <div style={{ 
-                  marginBottom: isMobileOrTablet ? "0" : "24px",
-                  flex: isMobileOrTablet ? "1 1 100%" : "auto"
-                }}>
-                  <h4 style={{ 
-                    fontSize: "14px", 
-                    color: "#666", 
-                    marginBottom: "8px",
-                    fontWeight: "500"
-                  }}>
-                    Tags
-                  </h4>
-                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                    {selectedTemplate.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        style={{
-                          backgroundColor: "#f5f5f5",
-                          padding: "6px 12px",
-                          borderRadius: "100px",
-                          fontSize: "13px",
-                          color: "#777",
-                        }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              
-              {/* Buttons at the bottom of sidebar - Only show for desktop */}
-              {!isMobileOrTablet && (
-                <div style={{ 
-                  marginTop: "auto", 
-                  paddingTop: "20px", 
-                  borderTop: "1px solid #eaeaea",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "12px"
-                }}>
-                  {editingPost?._id === selectedTemplate._id ? (
-                    <button
-                      onClick={() => {
-                        if (editorInstanceRef.current) {
-                          const html = editorInstanceRef.current.getHtml();
-                          const css = editorInstanceRef.current.getCss();
-                          const fullHtml = `<html>
-                            <head>
-                              <style>${css}</style>
-                            </head>
-                            <body>${html}</body>
-                          </html>`;
-                          
-                          handleDownload(fullHtml, `${selectedTemplate.name}-edited.html`);
-                          setCurrentEditedHtml(fullHtml);
-                        } else if (currentEditedHtml) {
-                          handleDownload(currentEditedHtml, `${selectedTemplate.name}-edited.html`);
-                        }
-                      }}
-                      style={{
-                        backgroundColor: "#f4f1fe",
-                        color: "#7c3aed",
-                        border: "none",
-                        padding: "12px 20px",
-                        borderRadius: "6px",
-                        fontWeight: "500",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "8px",
-                        width: "100%"
-                      }}
-                    >
-                      <span>Download Edited Template</span>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleDownload(selectedTemplate.htmlContent, `${selectedTemplate.name}.html`)}
-                      style={{
-                        backgroundColor: "#f4f1fe",
-                        color: "#7c3aed",
-                        border: "none",
-                        padding: "12px 20px",
-                        borderRadius: "6px",
-                        fontWeight: "500",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "8px",
-                        width: "100%"
-                      }}
-                    >
-                      <span>Download</span>
-                    </button>
-                  )}
-                  
-                  <button
-                    onClick={toggleEditor}
-                    style={{
-                      backgroundColor: "#7c3aed",
-                      color: "white",
-                      border: "none",
-                      padding: "12px 20px",
-                      borderRadius: "6px",
-                      fontWeight: "500",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "8px",
-                      width: "100%"
-                    }}
-                  >
-                    {editingPost?._id === selectedTemplate._id ? "View Template" : "Edit Template"}
-                  </button>
-                </div>
-              )}
-            </div>
-            <style>
-    {`
-      @media (max-width: 480px) {
-        #edit-button {
-          display: none;
-        }
-      }
-    `}
-  </style>
-=======
                     {selectedTemplate.description || "No description available"}
                   </p>
                 </div>
@@ -1420,7 +881,6 @@ const PostList = () => {
                 }
               `}
             </style>
->>>>>>> eb0bf73 (new changes are added)
 
             {/* Right/Bottom area - Template preview or editor taking full space */}
             <div style={{ 
@@ -1428,11 +888,7 @@ const PostList = () => {
               position: "relative",
               display: "flex",
               flexDirection: "column",
-<<<<<<< HEAD
-              height: isMobileOrTablet ? "calc(95vh - 200px)" : "100%" // Adjust height for tablet mode
-=======
               height: isMobileOrTablet ? "calc(95vh - 200px)" : "100%" 
->>>>>>> eb0bf73 (new changes are added)
             }}>
               {editingPost?._id === selectedTemplate._id ? (
                 <div style={{ 
@@ -1446,11 +902,7 @@ const PostList = () => {
                     htmlContent={selectedTemplate.htmlContent}
                     onSave={(updatedHtml) => handleSave(selectedTemplate._id, updatedHtml)}
                     onDownload={handleDownloadEdited}
-<<<<<<< HEAD
-                    editorRef={editorInstanceRef} // Pass the ref to the TemplateEditor
-=======
                     editorRef={editorInstanceRef}
->>>>>>> eb0bf73 (new changes are added)
                   />
                 </div>
               ) : (

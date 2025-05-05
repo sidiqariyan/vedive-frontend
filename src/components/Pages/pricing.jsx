@@ -145,11 +145,11 @@ const Pricing = () => {
         
         {/* Pricing Cards Section */}
         <div className="pricing-container">
-          <div className="pricing-grid">
+          <h2 className="pricing-grid text-[64px] font-semibold">
             {pricingPlans.map((plan, index) => (
               <PricingCard key={index} {...plan} />
             ))}
-          </div>
+          </h2>
         </div>
 
         {/* About Us Sections */}
@@ -158,7 +158,7 @@ const Pricing = () => {
             style={{ background: "transparent" }}
             className="about-us-container about-us-container-1"
           >
-            <h1>What's Included & Benefits</h1>
+            <h2 className="text-[64px] font-semibold">What's Included & Benefits</h2>
             <p>
             Every Vedive plan comes packed with powerful features designed to help you scale faster and communicate smarter. Enjoy AI-powered email deliverability, bulk WhatsApp messaging, and real-time tracking — all from one intuitive dashboard. Whether you're on a starter or premium plan, you'll benefit from enterprise-grade security, responsive customer support, and access to our email and mobile scraping tools. No hidden fees, no confusing limits — just reliable, high-performance tools built for growth. From marketers to large-scale teams, Vedive gives you everything you need to run successful campaigns and drive real results.
             </p>

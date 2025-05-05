@@ -5,7 +5,7 @@ const CoreValues = () => {
   return (
     <div className="parent-container">
     <div className="main-heading-text">
-      <h1>Why Choose Us</h1>
+      <h2 className='text-[64px] font-semibold'>Why Choose Us</h2>
       <p>
       At Vedive, we’re not just another communication tool — we’re your partner in growth. Businesses choose us because we combine cutting-edge technology with a deep understanding of what truly drives engagement and results. Our AI-powered platform is built to ensure that your messages aren’t just sent — they’re seen. With unmatched deliverability, lightning-fast speed, and enterprise-grade security, Vedive guarantees your communication reaches the right people at the right time.
 

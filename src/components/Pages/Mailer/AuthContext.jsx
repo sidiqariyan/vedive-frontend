@@ -1,36 +1,49 @@
-// File: src/components/Pages/Mailer/AuthContext.jsx
+// src/components/Pages/Mailer/AuthContext.jsx
 import React, { createContext, useState, useEffect, useContext } from "react";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Check if user is logged in on app load
   useEffect(() => {
     const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token); // Set isLoggedIn to true if token exists
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    fetch("/api/auth/user", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(res => (res.ok ? res.json() : Promise.reject()))
+      .then(data => setUser(data))
+      .catch(() => {
+        localStorage.removeItem("token");
+        setUser(null);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  const login = () => {
-    setIsLoggedIn(true);
-    // Optionally, set token in localStorage
-    localStorage.setItem("token", "your-jwt-token-here");
+  const login = token => {
+    localStorage.setItem("token", token);
+    setLoading(true);
+    fetch("/api/auth/user", { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => (res.ok ? res.json() : Promise.reject()))
+      .then(data => setUser(data))
+      .finally(() => setLoading(false));
   };
 
   const logout = () => {
     localStorage.removeItem("token");
-    setIsLoggedIn(false);
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom hook to use the auth context
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
+export const useAuth = () => useContext(AuthContext);

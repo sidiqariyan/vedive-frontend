@@ -274,9 +274,9 @@ const Hero = () => {
                   {service.icon}
                 </div>
               </div>
-              <h3 className="text-xl font-bold mb-3 font-raleway group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-indigo-300 transition-colors duration-500">
+              <h2 className="text-xl font-bold mb-3 font-raleway group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-indigo-300 transition-colors duration-500">
                 {service.name}
-              </h3>
+              </h2>
               <p className="font-secondary text-white/60 text-sm group-hover:text-white/80 transition-colors duration-500">
                 {service.description}
               </p>
