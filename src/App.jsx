@@ -9,6 +9,8 @@ import ResetPassword from "./components/other-pages/ResetPassword.jsx";
 import Navbar from "./components/Pages/Hero/Navbar.jsx";
 import Footer from "./components/Pages/Hero/Footer.jsx";
 import AdminRoute from "./components/other-pages/AdminRoute.jsx";
+import EditBlogPost from "./components/other-pages/EditorBlogPost.jsx";
+import BlogAdmin from "./components/other-pages/BlogAdmin.jsx";
 // import Header from './components/Header'; // Imported from new code
 // import Footer from './components/Footer'; // Imported from new code
 
@@ -262,18 +264,16 @@ const AnimatedRoutes = () => {
         <Route
           path="/blog/:slug"
           element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
+              <Suspense fallback={<div className="bg-[#04081d]">Loading...</div>}>
                   <BlogPostDetail />
-                </PageTransition>
               </Suspense>
           }
         />
                 <Route
           path="/:slug"
           element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
+              <Suspense fallback={<div className="bg-[#04081d]"> Loading...</div>}>
+                <PageTransition className="bg-primary">
                   <BlogPostDetail />
                 </PageTransition>
               </Suspense>
@@ -319,6 +319,22 @@ const AnimatedRoutes = () => {
             </AdminRoute>
           }
           />,
+          <Route
+  path="/admin/blog"
+  element={
+    <AdminRoute>
+      <BlogAdmin />
+    </AdminRoute>
+  }
+/>
+<Route
+  path="/admin/blog/edit/:id"
+  element={
+    <AdminRoute>
+      <EditBlogPost />
+    </AdminRoute>
+  }
+/>
         {/* Original Public Routes */}
         <Route
           path="/home"

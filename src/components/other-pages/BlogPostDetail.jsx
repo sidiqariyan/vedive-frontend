@@ -1,15 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import { FaSearch } from 'react-icons/fa';
+import Slider from 'react-slick';
 import Navbar from '../Pages/Hero/Navbar';
 import Footer from '../Pages/Hero/Footer';
+
+// Import slick-carousel CSS
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 const BlogPostDetail = () => {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [relatedPosts, setRelatedPosts] = useState([]);
+  const [allPosts, setAllPosts] = useState([]);
+  const [recentPosts, setRecentPosts] = useState([]);
+  const [hotPosts, setHotPosts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [comment, setComment] = useState({ name: '', email: '', website: '', message: '' });
   const { slug } = useParams();
+
+  const prefixImage = (img) =>
+    img && typeof img === 'string'
+      ? img.startsWith('http')
+        ? img
+        : `https://vedive.com:3000${img}`
+      : '/placeholder.png';
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -20,305 +39,268 @@ const BlogPostDetail = () => {
         );
         setPost(response.data);
         setError('');
-        
-        // Try to fetch related posts, but don't fail the whole page if this fails
         try {
-          const relatedResponse = await axios.get(
+          const rel = await axios.get(
             `https://vedive.com:3000/api/blog/blog-posts/related/${slug}`
           );
-          if (relatedResponse.data && Array.isArray(relatedResponse.data)) {
-            setRelatedPosts(relatedResponse.data);
-          }
-        } catch (relatedErr) {
-          console.log('Unable to fetch related posts:', relatedErr);
-          // Just set empty array, don't show error to user
+          setRelatedPosts(Array.isArray(rel.data) ? rel.data.slice(0, 3) : []);
+        } catch {
           setRelatedPosts([]);
         }
-        
       } catch (err) {
-        console.error('Error fetching blog post:', err.response || err);
+        console.error(err);
         setError('Failed to load the blog post. It may have been removed or does not exist.');
       } finally {
         setLoading(false);
       }
     };
-
     if (slug) fetchPost();
   }, [slug]);
 
-  // Add custom styles to match the editor styles
   useEffect(() => {
-    const style = document.createElement('style');
-    style.innerHTML = `
-      .blog-content h1 {
-        font-size: 2rem;
-        line-height: 1.3;
-        font-weight: 700;
-        margin-top: 2rem;
-        margin-bottom: 1rem;
-      }
-      @media (min-width: 768px) {
-        .blog-content h1 {
-          font-size: 2.5rem;
-        }
-      }
-      .blog-content h2 {
-        font-size: 1.5rem;
-        line-height: 1.35;
-        font-weight: 600;
-        margin-top: 1.75rem;
-        margin-bottom: 0.875rem;
-      }
-      @media (min-width: 768px) {
-        .blog-content h2 {
-          font-size: 2rem;
-        }
-      }
-      .blog-content h3 {
-        font-size: 1.25rem;
-        line-height: 1.4;
-        font-weight: 500;
-        margin-top: 1.5rem;
-        margin-bottom: 0.75rem;
-      }
-      @media (min-width: 768px) {
-        .blog-content h3 {
-          font-size: 1.5rem;
-        }
-      }
-      .blog-content p {
-        font-size: 1rem;
-        line-height: 1.75;
-        margin-bottom: 1rem;
-      }
-      .blog-content strong {
-        font-weight: bold;
-      }
-      
-      /* Main bullet points */
-      .blog-content ul {
-        list-style-type: disc;
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-        padding-left: 1.5rem;
-      }
-      @media (min-width: 768px) {
-        .blog-content ul {
-          padding-left: 2rem;
-        }
-      }
-      .blog-content ol {
-        list-style-type: decimal;
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-        padding-left: 1.5rem;
-      }
-      @media (min-width: 768px) {
-        .blog-content ol {
-          padding-left: 2rem;
-        }
-      }
-      
-      /* Nested bullet points */
-      .blog-content ul ul {
-        list-style-type: circle;
-        margin-top: 0.5rem;
-        margin-bottom: 0.5rem;
-      }
-      .blog-content ol ol {
-        list-style-type: lower-alpha;
-        margin-top: 0.5rem;
-        margin-bottom: 0.5rem;
-      }
-      
-      /* List items */
-      .blog-content li {
-        margin-top: 0.5rem;
-        margin-bottom: 0.5rem;
-        display: list-item;
-      }
-      
-      /* Ensure markers are visible */
-      .blog-content ul > li::marker,
-      .blog-content ol > li::marker {
-        color: inherit;
-      }
-      
-      /* Make images responsive */
-      .blog-content img {
-        max-width: 100%;
-        height: auto;
-        margin: 1rem auto;
-      }
-      
-      /* Responsive table styles */
-      .blog-content table {
-        width: 100%;
-        overflow-x: auto;
-        display: block;
-        border-collapse: collapse;
-        margin-bottom: 1rem;
-      }
-      @media (min-width: 768px) {
-        .blog-content table {
-          display: table;
-        }
-      }
-      .blog-content th,
-      .blog-content td {
-        border: 1px solid #e2e8f0;
-        padding: 0.5rem;
-        text-align: left;
-      }
-      
-      /* Responsive blockquote */
-      .blog-content blockquote {
-        border-left: 4px solid #e2e8f0;
-        padding-left: 1rem;
-        margin-left: 0;
-        margin-right: 0;
-        font-style: italic;
-      }
-      @media (min-width: 768px) {
-        .blog-content blockquote {
-          margin-left: 1rem;
-          margin-right: 1rem;
-          padding-left: 1.5rem;
-        }
-      }
-      
-      /* Code blocks */
-      .blog-content pre {
-        background-color: #f7fafc;
-        padding: 1rem;
-        border-radius: 0.25rem;
-        overflow-x: auto;
-        margin-bottom: 1rem;
-      }
-      .blog-content code {
-        font-family: monospace;
-        background-color: #f7fafc;
-        padding: 0.125rem 0.25rem;
-        border-radius: 0.25rem;
-      }
-    `;
+    const fetchAll = async () => {
+      try {
+        const res = await axios.get('https://vedive.com:3000/api/blog/blog-posts');
+        const posts = Array.isArray(res.data.posts) ? res.data.posts : [];
+        setAllPosts(posts);
 
-    document.head.appendChild(style);
-    return () => document.head.removeChild(style);
+        const recent = [...posts]
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 5);
+        setRecentPosts(recent);
+
+        const shuffled = [...posts].sort(() => 0.5 - Math.random());
+        setHotPosts(shuffled.slice(0, 5));
+
+        const cats = Array.from(new Set(posts.map(p => p.category).filter(Boolean)));
+        setCategories(cats);
+      } catch (err) {
+        console.error('Error fetching posts for sidebar:', err);
+      }
+    };
+    fetchAll();
   }, []);
+
+  const handleCommentChange = (e) => {
+    setComment({ ...comment, [e.target.name]: e.target.value });
+  };
+
+  const handleCommentSubmit = (e) => {
+    e.preventDefault();
+    console.log('Submit comment:', comment);
+    // TODO: send comment to API
+    setComment({ name: '', email: '', website: '', message: '' });
+  };
 
   if (loading) return (
     <div className="flex justify-center items-center h-64">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
     </div>
   );
-  
+
   if (error) return (
-    <div className="max-w-3xl mx-auto p-4 md:p-6 bg-red-100 text-red-700 rounded-lg">
-      <h2 className="text-xl font-normal mb-2">Error</h2>
+    <div className="w-full max-w-[1440px] mx-auto p-4 bg-red-100 text-red-700 rounded-lg">
+      <h2 className="text-xl mb-2">Error</h2>
       <p>{error}</p>
     </div>
   );
-  
+
   if (!post) return null;
 
+  const sliderSettings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+  };
+
   return (
-    <>
+    <div className='bg-primary'>
       <Navbar />
-      <div className="w-full bg-white">
-        {/* Blog Post Title Section - Centered like in the image */}
-        <div className="text-center max-w-4xl mx-auto pt-6 pb-4 px-4 md:pt-8 md:pb-6">
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6">{post.title}</h1>
-          <div className="flex flex-wrap items-center justify-center text-sm md:text-base space-x-2 mb-2">
-            <span>{post.authorName}</span>
-            <span className="hidden md:inline">•</span>
-            <time dateTime={post.createdAt} className="block md:inline mt-1 md:mt-0">
-              {new Date(post.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric', month: 'long', day: 'numeric'
-              })}
-            </time>
-            <span className="hidden md:inline">•</span>
-            <span className="text-gray-600 block md:inline mt-1 md:mt-0">{post.category}</span>
+
+      <div className="w-full bg-[#04081D]">
+        <div className="max-w-[1440px] mx-auto flex flex-col justify-center items-center h-[400px] text-center px-4">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl text-primary font-semibold mb-2">
+            {post.title}
+          </h1>
+          <div className="text-lg text-gray-400">
+            {post.authorName} • {new Date(post.createdAt).toLocaleDateString()} • {post.category}
           </div>
         </div>
+      </div>
 
-        {/* Cover Image - Responsive */}
-        {post.coverImage && (
-          <div className="mb-6 md:mb-8 flex justify-center px-4">
+      <div className="bg-primary w-full max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-[3fr_1fr] gap-8 items-start py-8">
+        <main>
+          {post.coverImage && (
             <img
-              src={
-                post.coverImage.startsWith('http')
-                  ? post.coverImage
-                  : `https://vedive.com:3000${post.coverImage}`
-              }
-              alt={post.title}
-              className="w-full max-w-full md:max-w-3xl lg:max-w-4xl object-cover rounded"
-              style={{ maxHeight: "545px", objectFit: "cover" }}
-              onError={e => {
-                console.error('Image failed to load:', post.coverImage);
-                e.target.style.display = 'none';
-              }}
+              src={prefixImage(post.coverImage)}
+              alt="cover"
+              className="w-full mx-auto rounded mb-6"
+              onError={(e) => (e.target.src = '/placeholder.png')}
             />
-          </div>
-        )}
-
-        {/* Blog Content */}
-        <div className="max-w-4xl mx-auto px-4 pb-8 md:pb-12">
+          )}
           <div
-            className="blog-content prose max-w-none"
+            className="blog-content w-full mx-auto"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
 
-          {post.tags?.length > 0 && (
-            <div className="mt-6 md:mt-8 pt-4 md:pt-6 border-t border-gray-200">
-              <div className="flex flex-wrap gap-2">
-                {post.tags.map((tag, i) => (
-                  <span key={i} className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm whitespace-nowrap mb-2">
-                    {tag}
-                  </span>
+          {/* About Author */}
+          <div className="flex items-center p-4 border rounded-lg mb-8">
+            <img
+              src={prefixImage(post.authorImage)}
+              alt={post.authorName}
+              className="w-16 h-16 rounded-full mr-4"
+            />
+            <div>
+              <h3 className="text-xl font-semibold">About the Author</h3>
+              <p className="text-gray-700">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vitae eros eget tellus tristique bibendum.</p>
+            </div>
+          </div>
+
+          {/* Comment Box */}
+          <form onSubmit={handleCommentSubmit} className="space-y-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <input
+                name="name"
+                value={comment.name}
+                onChange={handleCommentChange}
+                placeholder="Name"
+                className="border p-2 rounded w-full"
+                required
+              />
+              <input
+                name="email"
+                type="email"
+                value={comment.email}
+                onChange={handleCommentChange}
+                placeholder="Email"
+                className="border p-2 rounded w-full"
+                required
+              />
+              <input
+                name="website"
+                value={comment.website}
+                onChange={handleCommentChange}
+                placeholder="Website"
+                className="border p-2 rounded w-full"
+              />
+            </div>
+            <textarea
+              name="message"
+              value={comment.message}
+              onChange={handleCommentChange}
+              placeholder="Comment Us:"
+              className="border p-2 rounded w-full h-32"
+              required
+            />
+            <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded">
+              Comment
+            </button>
+          </form>
+
+          {/* Carousel of Other Posts */}
+          {relatedPosts.length > 0 && (
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold mb-4">Other Posts</h2>
+              <Slider {...sliderSettings}>
+                {relatedPosts.map((r) => (
+                  <Link key={r.slug} to={`/${r.slug}`} className="block p-4">
+                    <img
+                      src={prefixImage(r.coverImage)}
+                      alt={r.title}
+                      className="w-full h-48 object-cover rounded mb-2"
+                    />
+                    <h3 className="text-xl font-semibold">{r.title}</h3>
+                  </Link>
                 ))}
-              </div>
+              </Slider>
             </div>
           )}
 
-          {/* Related Posts Section - Only show if posts exist */}
-          {relatedPosts.length > 0 && (
-            <div className="mt-10 md:mt-16">
-              <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Related Blog posts</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                {relatedPosts.map((relatedPost, index) => (
-                  <div key={index} className="border rounded-lg overflow-hidden shadow-md">
-                    <img 
-                      src={relatedPost.coverImage || "/placeholder.png"} 
-                      alt={relatedPost.title}
-                      className="w-full h-40 sm:h-48 object-cover"
-                    />
-                    <div className="p-3 md:p-4">
-                      <h3 className="text-base md:text-lg font-semibold mb-2 line-clamp-2">{relatedPost.title}</h3>
-                      <div className="flex flex-wrap items-start text-xs md:text-sm text-gray-600">
-                        <div className="flex items-center mr-2">
-                          <img 
-                            src={relatedPost.authorImage || "/author-placeholder.png"} 
-                            alt={relatedPost.authorName}
-                            className="w-4 h-4 md:w-5 md:h-5 rounded-full mr-1"
-                          />
-                          <span className="truncate max-w-[80px]">{relatedPost.authorName}</span>
-                        </div>
-                        <span className="hidden sm:inline mx-1">•</span>
-                        <time className="mr-2">{new Date(relatedPost.createdAt).toLocaleDateString()}</time>
-                        <span className="hidden sm:inline mx-1">•</span>
-                        <span className="truncate max-w-[80px]">{relatedPost.category}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+        </main>
+
+        <aside className="sticky top-0 space-y-8 p-4">
+          {/* Sidebar unchanged... */}
+          <div>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full border-2 border-gray-200 px-10 py-2 rounded-lg text-lg focus:outline-none focus:border-blue-500"
+              />
+              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
             </div>
-          )}
-        </div>
+          </div>
+
+          {/* Recent Posts */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-2xl font-semibold mb-4">Recent Posts</h3>
+            <ul className="space-y-4">
+              {recentPosts.map((rp, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <img
+                    src={prefixImage(rp.coverImage)}
+                    alt={rp.title}
+                    className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                    onError={(e) => (e.target.src = '/placeholder.png')}
+                  />
+                  <Link
+                    to={`/${rp.slug}`}
+                    className="text-lg font-medium hover:text-blue-600 transition-colors line-clamp-3"
+                  >
+                    {rp.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-2xl font-semibold mb-4">Hot Topics</h3>
+            <ul className="space-y-4">
+              {hotPosts.map((hp, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <img
+                    src={prefixImage(hp.coverImage)}
+                    alt={hp.title}
+                    className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                    onError={(e) => (e.target.src = '/placeholder.png')}
+                  />
+                  <Link
+                    to={`/${hp.slug}`}
+                    className="text-lg font-medium hover:text-blue-600 transition-colors line-clamp-3"
+                  >
+                    {hp.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-2xl font-semibold mb-4">Categories</h3>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((cat, i) => (
+                <Link
+                  key={i}
+                  to={`/category/${encodeURIComponent(cat)}`}
+                  className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-lg hover:bg-blue-200 transition-colors"
+                >
+                  {cat}
+                </Link>
+              ))}
+            </div>
+          </div>
+          
+        </aside>
       </div>
+
       <Footer />
-    </>
+    </div>
   );
 };
 
