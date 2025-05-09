@@ -1,7 +1,0 @@
-User-agent: *
-Disallow: /
-Disallow: /plans/payment-status?order_id=ORID1744954101655
-Disallow: /post-form
-Disallow: /Dashboard
-Disallow: /pass-reset
-
