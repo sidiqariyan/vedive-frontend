@@ -5,7 +5,7 @@ import { FaSearch } from 'react-icons/fa';
 import Slider from 'react-slick';
 import Navbar from '../Pages/Hero/Navbar';
 import Footer from '../Pages/Hero/Footer';
-
+import AdminImage from "./admin.png"
 // Import slick-carousel CSS
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -100,7 +100,7 @@ const BlogPostDetail = () => {
 
   if (error) return (
     <div className="w-full max-w-[1440px] mx-auto p-4 bg-red-100 text-red-700 rounded-lg">
-      <h2 className="text-xl mb-2">Error</h2>
+      <h2 className="text-2xl mb-2">Error</h2>
       <p>{error}</p>
     </div>
   );
@@ -140,21 +140,21 @@ const BlogPostDetail = () => {
               onError={(e) => (e.target.src = '/placeholder.png')}
             />
           )}
-          <div
-            className="blog-content w-full mx-auto"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
+         <div
+  className="blog-content prose-custom lg:prose-xl leading-relaxed w-full mx-auto mb-8"
+  dangerouslySetInnerHTML={{ __html: post.content }}
+/>
 
           {/* About Author */}
           <div className="flex items-center p-4 border rounded-lg mb-8">
             <img
-              src={prefixImage(post.authorImage)}
+              src={AdminImage}
               alt={post.authorName}
               className="w-16 h-16 rounded-full mr-4"
             />
             <div>
               <h3 className="text-xl font-semibold">About the Author</h3>
-              <p className="text-gray-700">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vitae eros eget tellus tristique bibendum.</p>
+              <p className="text-gray-700">The admin is the site’s main author, pouring creativity and insight into every article with a deep passion for storytelling, clear expression, and meaningful content that resonates with readers.</p>
             </div>
           </div>
 
@@ -305,3 +305,4 @@ const BlogPostDetail = () => {
 };
 
 export default BlogPostDetail;
+ 

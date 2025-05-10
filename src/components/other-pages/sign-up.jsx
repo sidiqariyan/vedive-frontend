@@ -114,7 +114,7 @@ const Signup = () => {
           />
         </Link>
       </header>
-      <style jsx>{`
+      <style>{`
         /* Override autofill background and text color */
         input:-webkit-autofill,
         input:-webkit-autofill:hover, 
@@ -138,13 +138,13 @@ const Signup = () => {
           </div>
           
           {/* Google Sign In Button */}
-          <button className="flex items-center justify-center w-full py-3 h-[55px] px-4 mb-6 border-2 border-white rounded-md bg-transparent text-white hover:bg-blue-900/20 transition-colors">
+          {/* <button className="flex items-center justify-center w-full py-3 h-[55px] px-4 mb-6 border-2 border-white rounded-md bg-transparent text-white hover:bg-blue-900/20 transition-colors">
             <img src={Google} alt="Google logo" className="h-16 w-16 " />
             <span className="font-poppins font-medium leading-[100%] tracking-[0] 
                           sm:text-[20px] md:text-[20px] lg:text-[20px]">
               Continue with Google
             </span>
-          </button>
+          </button> */}
 
           {/* Signup Form */}
           <form onSubmit={handleSubmit} className="space-y-6">

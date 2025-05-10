@@ -1,12 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-* {
-    /* overflow-x: hidden !important; */
-    font-family: "Raleway", serif;
+/* apply only on the root element */
+body {
+  font-family: "Raleway", sans-serif;
+  background-color: #04081d;
 }
-body{
-    background-color: #04081d;
+
+/* custom typography if you’re NOT using the Tailwind Typography plugin */
+@layer components {
+  .prose-custom h1 { @apply text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4; }
+  .prose-custom h2 { @apply text-3xl md:text-4xl font-semibold leading-snug mb-3; }
+  .prose-custom h2 span strong { @apply text-3xl md:text-4xl font-semibold leading-snug mb-3; }
+  .prose-custom h3 { @apply text-2xl font-semibold leading-snug mb-2; }
+  .prose-custom h4 { @apply text-xl font-medium leading-snug mb-2; }
+  .prose-custom p,
+  .prose-custom li   { @apply text-base leading-relaxed mb-4; }
+  .prose-custom ul,
+  .prose-custom ol   { @apply list-inside list-disc mb-4; }
+  .prose-custom blockquote { @apply border-l-4 pl-4 italic text-gray-600 mb-4; }
+  .prose-custom code       { @apply bg-gray-100 px-1 rounded; }
 }
