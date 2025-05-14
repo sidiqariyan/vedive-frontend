@@ -6,6 +6,7 @@ export default function SenderBody() {
   const [userPassword, setUserPassword] = useState('');
   const [fromName, setFromName] = useState('');
   const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
   const [status, setStatus] = useState(null);
 
   const recipientsRef = useRef(null);
@@ -29,7 +30,11 @@ export default function SenderBody() {
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
 
-      setStatus(res.data.success ? 'Emails sent successfully!' : 'Failed to send emails');
+      if (res.data.success) {
+        setStatus('Emails sent successfully!');
+      } else {
+        setStatus('Failed to send emails');
+      }
     } catch (err) {
       setStatus('Error: ' + err.message);
     }

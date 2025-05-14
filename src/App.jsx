@@ -597,11 +597,11 @@ const AnimatedRoutes = () => {
           <Route
             path="email-sender"
             element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
+              // <Suspense fallback={<div>Loading...</div>}>
+              //   <PageTransition>
                   <SenderBody />
-                </PageTransition>
-              </Suspense>
+              //   </PageTransition>
+              // </Suspense>
             }
           />
           <Route
