@@ -57,9 +57,9 @@ const PostList = () => {
         // Fetch user authentication data
         const API_URL = "https://vedive.com:3000";
         const userResponse = await fetch(`${API_URL}/api/auth/user`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
           }
         });
         
@@ -77,12 +77,12 @@ const PostList = () => {
         
         // Fetch subscription status
         const subscriptionResponse = await fetch(`${API_URL}/api/subscription/status`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
-        });
-        
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
+            }
+          });
+                  
         if (subscriptionResponse.ok) {
           const subscriptionData = await subscriptionResponse.json();
           // Combine user data with subscription data
@@ -155,8 +155,8 @@ const PostList = () => {
     }
     
     try {
-      await axios.put(`/api/posts/${postId}`, { htmlContent: updatedHtml });
-      alert("Template saved successfully!");
+        await axios.put(`/api/posts/${postId}`, { htmlContent: updatedHtml });
+        alert("Template saved successfully!");
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post._id === postId ? { ...post, htmlContent: updatedHtml } : post
@@ -193,7 +193,7 @@ const PostList = () => {
     
     setCurrentEditedHtml(editedHtml);
     handleDownload(editedHtml, `${selectedTemplate.name}-edited.html`);
-  };
+};
 
   const viewTemplateDetails = (post) => {
     setSelectedTemplate(post);
@@ -225,7 +225,8 @@ const PostList = () => {
       <div className="email-templates-container" style={{ 
         fontFamily: 'Arial, sans-serif',
         padding: "1vw",
-        width:'98vw',
+        width: "100%",
+        maxWidth: "1800px",
         margin: "0 auto"
       }}>
         {viewMode === "grid" ? (
@@ -332,25 +333,40 @@ const PostList = () => {
                     >     
                       <div style={{
                         zoom: 0.65,
-                        aspectRatio: '4/4',
+                        aspectRatio: '2/3',
                         overflow: "hidden",
                         position: "relative",
                         backgroundColor: "#f8f9fa",
                         borderRadius: "8px 8px 0 0",
                       }}>
-                        <iframe
-                          title={`preview-${post._id}`}
-                          srcDoc={post.htmlContent}
-                          style={{
-                            width: "100%",
-                            height: "140%",
-                            border: "none",
-                            transform: "scale(0.75)",
-                            transformOrigin: "top center",
-                            pointerEvents: "none"
-                          }}
-                          scrolling="no"
-                        ></iframe>
+                        {post.image ? (
+  <img
+    src={`https://vedive.com:3000${post.image}`}
+    alt={post.name}
+    style={{
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+      pointerEvents: "none"
+    }}
+  />
+) : (
+  <div
+    style={{
+      width: "100%",
+      height: "100%",
+      backgroundColor: "#eaeaea",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      color: "#999",
+      fontSize: "14px",
+      pointerEvents: "none"
+    }}
+  >
+    No Image
+  </div>
+)}
                         <div style={{
                           position: "absolute",
                           bottom: 0,
@@ -709,12 +725,11 @@ const PostList = () => {
             const html = editorInstanceRef.current.getHtml();
             const css = editorInstanceRef.current.getCss();
             const fullHtml = `<html>
-              <head>
-                <style>${css}</style>
-              </head>
-              <body>${html}</body>
-            </html>`;
-            
+            <head>
+              <style>${css}</style>
+            </head>
+            <body>${html}</body>
+          </html>`;            
             handleDownload(fullHtml, `${selectedTemplate.name}-edited.html`);
             setCurrentEditedHtml(fullHtml);
           } else if (currentEditedHtml) {
@@ -890,43 +905,48 @@ const PostList = () => {
               flexDirection: "column",
               height: isMobileOrTablet ? "calc(95vh - 200px)" : "100%" 
             }}>
-              {editingPost?._id === selectedTemplate._id ? (
-                <div style={{ 
-                  position: "absolute", 
-                  top: 0, 
-                  left: 0, 
-                  right: 0, 
-                  bottom: 0
-                }}>
-                  <TemplateEditor
-                    htmlContent={selectedTemplate.htmlContent}
-                    onSave={(updatedHtml) => handleSave(selectedTemplate._id, updatedHtml)}
-                    onDownload={handleDownloadEdited}
-                    editorRef={editorInstanceRef}
-                  />
-                </div>
-              ) : (
-                <div style={{
-                  flex: 1,
-                  position: "relative",
-                  width: "100%",
-                  height: "100%"
-                }}>
-                  <iframe
-                    title={`template-${selectedTemplate._id}`}
-                    srcDoc={selectedTemplate.htmlContent}
-                    style={{
-                      position: "relative",
-                      top: 0,
-                      left: 0,
-                      width: "100%",
-                      height: "100%",
-                      border: "none",
-                      overflow: "auto"
-                    }}
-                  ></iframe>
-                </div>
-              )}
+{editingPost?._id === selectedTemplate._id ? (
+  <div style={{ 
+    position: "absolute", 
+    top: 0, 
+    left: 0, 
+    right: 0, 
+    bottom: 0,
+    overflow: "hidden", // Prevent parent from scrolling
+    display: "flex",
+    flexDirection: "column"
+  }}>
+    <TemplateEditor
+      htmlContent={selectedTemplate.htmlContent}
+      onSave={(updatedHtml) => handleSave(selectedTemplate._id, updatedHtml)}
+      onDownload={handleDownloadEdited}
+      editorRef={editorInstanceRef}
+    />
+  </div>
+) : (
+  // Preview iframe
+  <div style={{
+    flex: 1,
+    position: "relative",
+    width: "100%",
+    height: "100%",
+    overflow: "hidden" // Prevent iframe overflow
+  }}>
+    <iframe
+      title={`template-${selectedTemplate._id}`}
+      srcDoc={selectedTemplate.htmlContent}
+      style={{
+        position: "relative",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        border: "none",
+        overflow: "auto" // Allow iframe to scroll
+      }}
+    />
+  </div>
+)}
             </div>
           </div>
         )

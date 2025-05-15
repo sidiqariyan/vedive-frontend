@@ -5,7 +5,6 @@ import {useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const API_URL = "https://vedive.com:3000";
-  // const API_URL = "https://ec2-51-21-1-175.eu-north-1.compute.amazonaws.com:3000";
   const [currentPlan, setCurrentPlan] = useState("Free");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -42,7 +41,6 @@ const Dashboard = () => {
         
         const userData = await userResponse.json();
         
-        // Fetch subscription status
         const subscriptionResponse = await fetch(`${API_URL}/api/subscription/status`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -115,7 +113,7 @@ const Dashboard = () => {
           </p>
         </div>
         <div className="flex items-center space-x-4 mt-4 sm:mt-0">
-          <div className="text-right">
+          <div className="text-left">
           <p className="text-sm font-medium">{user?.name || "User"}</p>
               <p className="text-xs text-gray-400">
                 {user?.currentPlan && user.currentPlan !== "Free" ? `${user.currentPlan} Plan` : "Free User"}

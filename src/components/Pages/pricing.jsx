@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import "./mainstyles.css"; 
 import Navbar from "./Hero/Navbar";
@@ -36,14 +36,14 @@ const cssToAdd = `
 }
 `;
 
-const PricingCard = ({ title, price, duration, features, highlight, recommended }) => {
+const PricingCard = ({ title, price, currency, duration, features, highlight, recommended }) => {
   return (
     <div className="card-wrapper">
       <div className="pricing-card">
         <div className="card-header">
           <h3>{title}</h3>
           <div className="price">
-            <span>₹</span>{price}
+            <span>{currency}</span>{price}
             <span className="span1">/{duration}</span>
           </div>
           <p className="para1">Simple & Powerful</p>
@@ -69,34 +69,56 @@ const PricingCard = ({ title, price, duration, features, highlight, recommended 
 };
 
 const Pricing = () => {
+  const [isIndia, setIsIndia] = useState(true);
+  
+  useEffect(() => {
+    // Detect if user is in India
+    const detectLocation = async () => {
+      try {
+        // Using a free geolocation API
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        setIsIndia(data.country_code === 'IN');
+      } catch (error) {
+        console.error('Error detecting location:', error);
+        // Default to Indian pricing if there's an error
+        setIsIndia(true);
+      }
+    };
+    
+    detectLocation();
+  }, []);
+
+  // Define pricing plans based on location
   const pricingPlans = [
     {
       title: "Free",
       price: 0,
+      currency: isIndia ? "₹" : "$",
       duration: "1-day",
       features: [
         { name: "Unlimited Mail Sending", available: true },
         { name: "Scrap Unlimited Mails", available: false },
         { name: "Unlimited WhatsApp Message Sending", available: true },
-        // { name: "Scrap Unlimited Numbers", available: false },
         { name: "Unlimited Mail & WhatsApp Template", available: false },
       ],
     },
     {
       title: "Starter",
-      price: 99,
+      price: isIndia ? 99 : 4.99,
+      currency: isIndia ? "₹" : "$",
       duration: "1-day",
       features: [
         { name: "Unlimited Mail Sending", available: true },
         { name: "Scrap Unlimited Mails", available: true },
         { name: "Unlimited WhatsApp Message Sending", available: true },
-        // { name: "Scrap Unlimited Numbers", available: true },
         { name: "Unlimited Mail & WhatsApp Template", available: true },
       ],
     },
     {
       title: "Business",
-      price: 599,
+      price: isIndia ? 599 : 29.99,
+      currency: isIndia ? "₹" : "$",
       duration: "1-week",
       highlight: true,
       recommended: true,
@@ -104,19 +126,18 @@ const Pricing = () => {
         { name: "Unlimited Mail Sending", available: true },
         { name: "Scrap Unlimited Mails", available: true },
         { name: "Unlimited WhatsApp Message Sending", available: true },
-        // { name: "Scrap Unlimited Numbers", available: true },
         { name: "Unlimited Mail & WhatsApp Template", available: true },
       ],
     },
     {
       title: "Enterprise",
-      price: 1999,
+      price: isIndia ? 1999 : 99,
+      currency: isIndia ? "₹" : "$",
       duration: "1-month",
       features: [
         { name: "Unlimited Mail Sending", available: true },
         { name: "Scrap Unlimited Mails", available: true },
         { name: "Unlimited WhatsApp Message Sending", available: true },
-        // { name: "Scrap Unlimited Numbers", available: true },
         { name: "Unlimited Mail & WhatsApp Template", available: true },
       ],
     },
@@ -127,8 +148,8 @@ const Pricing = () => {
       {/* This adds the CSS to the page - you can alternatively copy this to your CSS file */}
       <style>{cssToAdd}</style>
       <Helmet>
-      <title>Vedive Pricing: Affordable Email & WhatsApp Tools India</title>
-      <meta name="description" content="Discover Vedive's affordable pricing for bulk email sender, email scraper, and WhatsApp bulk sender tools. Start with flexible plans or a free trial!"/>
+        <title>Vedive Pricing: Affordable Email & WhatsApp Tools {isIndia ? 'India' : 'Global'}</title>
+        <meta name="description" content="Discover Vedive's affordable pricing for bulk email sender, email scraper, and WhatsApp bulk sender tools. Start with flexible plans or a free trial!"/>
       </Helmet>
       {/* Top Section */}
       <Navbar />

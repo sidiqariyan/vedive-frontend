@@ -12,6 +12,7 @@ const Plan = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [verifyingPayment, setVerifyingPayment] = useState(false);
   const [paymentCancelled, setPaymentCancelled] = useState(false);
+  const [isIndianUser, setIsIndianUser] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -21,6 +22,50 @@ const Plan = () => {
     starter: 1,
     business: 2,
     enterprise: 3,
+  };
+
+  // Function to detect user's country and set currency
+  useEffect(() => {
+    const detectUserLocation = async () => {
+      try {
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        setIsIndianUser(data.country_code === 'IN');
+      } catch (error) {
+        console.error("Error detecting location:", error);
+        // Default to Indian pricing if detection fails
+        setIsIndianUser(true);
+      }
+    };
+    
+    detectUserLocation();
+  }, []);
+
+  // Define prices for both currencies
+  const pricingData = {
+    starter: {
+      inr: "99",
+      usd: "4.99"
+    },
+    business: {
+      inr: "599",
+      usd: "29.99"
+    },
+    enterprise: {
+      inr: "1999",
+      usd: "99"
+    }
+  };
+
+  // Get price based on user location
+  const getPrice = (planId) => {
+    if (planId === "free") return "0";
+    return isIndianUser ? pricingData[planId].inr : pricingData[planId].usd;
+  };
+
+  // Get currency symbol based on user location
+  const getCurrencySymbol = () => {
+    return isIndianUser ? "₹" : "$";
   };
 
   const plans = [
@@ -34,7 +79,6 @@ const Plan = () => {
         { name: "Unlimited Mail Sending", restricted: false },
         { name: "Scrap Unlimited Mails", restricted: true },
         { name: "Unlimited WhatsApp Message Sending", restricted: false },
-        // { name: "Scrap Unlimited Numbers", restricted: true },
         { name: "Unlimited Mail & WhatsApp Template", restricted: true },
       ],
       buttonText: "Free Plan",
@@ -45,14 +89,13 @@ const Plan = () => {
     {
       id: "starter",
       name: "Starter",
-      price: "99",
+      price: getPrice("starter"),
       period: "/1-day",
       icon: Rocket,
       features: [
         { name: "Unlimited Mail Sending", restricted: false },
         { name: "Scrap Unlimited Mails", restricted: false },
         { name: "Unlimited WhatsApp Message Sending", restricted: false },
-        // { name: "Scrap Unlimited Numbers", restricted: false },
         { name: "Unlimited Mail & WhatsApp Template", restricted: false },
       ],
       buttonText: "Buy Now",
@@ -63,14 +106,13 @@ const Plan = () => {
     {
       id: "business",
       name: "Business",
-      price: "599",
+      price: getPrice("business"),
       period: "/1-week",
       icon: Building2,
       features: [
         { name: "Unlimited Mail Sending", restricted: false },
         { name: "Scrap Unlimited Mails", restricted: false },
         { name: "Unlimited WhatsApp Message Sending", restricted: false },
-        // { name: "Scrap Unlimited Numbers", restricted: false },
         { name: "Unlimited Mail & WhatsApp Template", restricted: false },
       ],
       buttonText: "Buy Now",
@@ -81,14 +123,13 @@ const Plan = () => {
     {
       id: "enterprise",
       name: "Enterprise",
-      price: "1999",
+      price: getPrice("enterprise"),
       period: "/1-month",
       icon: Building2,
       features: [
         { name: "Unlimited Mail Sending", restricted: false },
         { name: "Scrap Unlimited Mails", restricted: false },
         { name: "Unlimited WhatsApp Message Sending", restricted: false },
-        // { name: "Scrap Unlimited Numbers", restricted: false },
         { name: "Unlimited Mail & WhatsApp Template", restricted: false },
       ],
       buttonText: "Buy Now",
@@ -197,10 +238,15 @@ const Plan = () => {
     
     try {
       setLoading(true);
+      // For international users, convert price to INR for backend processing
+      const priceForBackend = isIndianUser ? 
+        selectedPlan.price : 
+        pricingData[planId].inr;
+        
       // Pass both planId and the plan price as amount
       const orderResponse = await subscriptionService.createOrder({
         planId,
-        amount: selectedPlan.price,
+        amount: priceForBackend,
       });
       console.log("Order Response:", orderResponse.data);
       
@@ -314,7 +360,7 @@ const Plan = () => {
       <div className="min-h-screen bg-white text-gray-800 py-24 px-4 flex flex-col items-center justify-center">
           <Helmet>
       <title>Vedive Pricing: Affordable Email & WhatsApp Tools India</title>
-      <meta name="description" content="Discover Vedive’s affordable pricing for bulk email sender, email scraper, and WhatsApp bulk sender tools. Start with flexible plans or a free trial!"/>
+      <meta name="description" content="Discover Vedive's affordable pricing for bulk email sender, email scraper, and WhatsApp bulk sender tools. Start with flexible plans or a free trial!"/>
       </Helmet>
         <div className="w-full max-w-md mx-auto text-center">
           <h1 className="text-3xl font-bold mb-6">Payment Status</h1>
@@ -411,7 +457,7 @@ const Plan = () => {
               <h3 className="text-xl font-semibold text-center mb-2">{plan.name}</h3>
               
               <div className="text-center mb-6">
-                <span className="text-4xl font-bold">₹{plan.price}</span>
+                <span className="text-4xl font-bold">{getCurrencySymbol()}{plan.price}</span>
                 <span className="text-gray-500">{plan.period}</span>
               </div>
               

@@ -75,8 +75,8 @@ const Services = () => {
         <div className="desktop-view" style={{ paddingBottom: '6%' }}>
           <ServiceSection
             number="01"
-            title="Mail Sender"
-            description="Send high-volume, AI-optimized email campaigns with unmatched deliverability and inbox placement — all with real-time analytics."
+            title="Bulk Email Sender"
+            description="Vedive’s bulk email sender helps you send high-volume, AI-optimized emails with top inbox delivery and real-time tracking."
             backgroundImage={service1}
             link="https://vedive.com/email-sender"
           />
@@ -115,7 +115,16 @@ const Services = () => {
         <div className="about-us-container about-us-container-1" style={{ background: "transparent" }}>
           <h2 className="text-[64px] font-semibold">Why Choose Vedive</h2>
           <p>
-            Vedive offers a seamless blend of speed, reliability, and intelligence — designed to help businesses communicate better. Our AI-driven email and messaging solutions ensure your content reaches inboxes, not spam folders. With enterprise-grade security, you can trust your data is always protected. Whether you’re sending bulk emails, WhatsApp messages, or generating leads, Vedive delivers with precision. Real-time tracking, high deliverability, and user-friendly tools make us the go-to choice for modern marketers and growth teams. Choose Vedive for communication that’s faster, safer, and smarter — all from one powerful platform.
+Vedive.com offers a complete communication and lead generation platform
+that goes far beyond what other tools provide. While most platforms focus on
+either email or WhatsApp separately, Vedive combines a powerful Bulk Email
+Sender, WhatsApp Bulk Sender, and smart Email Scraper in one easy-to-use
+system. Our AI-driven technology ensures your messages land in the inbox,
+not the spam folder, while helping you extract verified leads in real time.
+Unlike other tools, we also offer free services like test credits and basic
+scraping access to help you get started without upfront costs. With faster
+delivery, better scalability, and built-in automation, Vedive is the smarter, more
+efficient solution for modern business outreach.
           </p>
         </div>
         <div className="about-us-container"><img src={bgImage1} alt="" /></div>
@@ -134,8 +143,16 @@ const Services = () => {
           <div className="grid-item" style={{ backgroundColor: "#1E90FF", color: "white" }}>
             <h2 className="text-[48px] font-medium">Use Cases</h2>
             <p>
-            Vedive is built to solve real-world communication challenges across multiple industries. Whether you're running email marketing campaigns, handling customer support, or scaling outreach, our tools make it seamless and effective. Marketers can launch high-volume email and WhatsApp campaigns that actually land in inboxes — not spam folders — thanks to our AI-driven deliverability engine. Sales teams can generate fresh, qualified leads through our email and mobile number scraping tools, enabling faster outreach and higher conversion rates. E-commerce businesses benefit from instant customer updates via WhatsApp, while service providers can use bulk messaging to send promotions, appointment reminders, or alerts. Even agencies managing multiple clients can centralize campaigns and monitor analytics from one secure dashboard. With Vedive, time-consuming processes like scraping leads, managing lists, and tracking performance are streamlined into one powerful platform. It’s not just about sending messages — it’s about sending smarter, faster, and more targeted communication at scale.
-            </p>
+Vedive helps businesses across industries streamline communication and
+boost results. Marketers can launch high-volume bulk email and WhatsApp
+campaigns with AI-powered deliverability that ensures inbox placement.
+Sales teams benefit from our email scraper and mobile number extractor to
+generate qualified leads faster. E-commerce brands send instant customer
+updates, while service providers use bulk messaging for promotions and
+reminders. Agencies can manage multiple client campaigns from a single,
+secure dashboard. From lead generation to performance tracking, Vedive
+simplifies outreach with smarter, faster, and more targeted communication
+tools.            </p>
           </div>
 
           <div className="grid-item" style={{ padding: 0 }}>

@@ -83,8 +83,8 @@ const Hero = () => {
   const services = [
     {
       id: "bulkMailer",
-      name: "Email Sender",
-      description: "Scale Your Business With Reliable Email Communication",
+      name: "Bulk Email Sender",
+      description: "Supercharge Your Business Growth with Reliable Bulk Email Senders for Effective Email Campaigns",
       icon: <Mail size={24} strokeWidth={2} className="text-white" />,
       color: "from-blue-600 to-indigo-400",
       hoverColor: "from-blue-500 to-indigo-300",
@@ -92,7 +92,7 @@ const Hero = () => {
     {
       id: "mailScraper",
       name: "Email Scraper",
-      description: "Extract and organize email contacts from various sources seamlessly",
+      description: "Boost Lead Generation Using an Intelligent Email Scraper",
       icon: <Search size={24} strokeWidth={2} className="text-white" />,
       color: "from-indigo-600 to-violet-400",
       hoverColor: "from-indigo-500 to-violet-300",
@@ -100,7 +100,7 @@ const Hero = () => {
     {
       id: "whatsAppSender",
       name: "WhatsApp Bulk Sender",
-      description: "Automated WhatsApp messaging for efficient customer outreach",
+      description: "Connect with Clients Instantly and Effectively",
       icon: <MessageSquare size={24} strokeWidth={2} className="text-white" />,
       color: "from-green-600 to-emerald-400",
       hoverColor: "from-green-500 to-emerald-300",
@@ -221,7 +221,7 @@ const Hero = () => {
           </div>
           
           <p className="text-xl text-white/70 mb-8 max-w-3xl mx-auto animate-fadeInDelay font-secondary">
-            Trusted for 99.9% Delivery Success. Spam-Free Messaging for Modern Businesses
+          Trusted for 99.9% Delivery Success—Spam-Free Messaging with WhatsApp Bulk Sender & Email Scraping Solutions.
           </p>
           
           <div className="flex flex-wrap justify-center gap-8 mb-8 animate-fadeInDelay2">
