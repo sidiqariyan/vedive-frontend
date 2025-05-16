@@ -65,24 +65,12 @@ const Footer = () => {
           {/* Column 3: Account Links */}
           <div className="column">
             <ul>
-              <li>
-                <a href="#">Account</a>
-              </li>
-              <li>
-                <a href="/login.html">Log in</a>
-              </li>
-              <li>
-                <a href="#">Sign Up</a>
-              </li>
-              <li>
-                <a href="#">Careers</a>
-              </li>
-              <li>
-                <a href="#">Privacy Policy</a>
-              </li>
-              <li>
-                <a href="#">Terms & Condition</a>
-              </li>
+              <li><Link to="/account">Account</Link></li>
+              <li><Link to="/login">Log in</Link></li>
+              <li><Link to="/signup">Sign Up</Link></li>
+              <li><Link to="#">Careers</Link></li>
+              <li><Link to="/privacy-policy">Privacy Policy</Link></li>
+              <li><Link to="#">Terms & Condition</Link></li>
             </ul>
           </div>
 

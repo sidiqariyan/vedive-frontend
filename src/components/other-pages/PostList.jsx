@@ -306,7 +306,7 @@ const PostList = () => {
               /* Templates Grid */
               <div style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+                gridTemplateColumns: "repeat(4, minmax(250px, 1fr))", // 4 columns, min 250px wide
                 gap: "32px",
               }}>
                 {filteredPosts.length > 0 ? (
@@ -332,8 +332,8 @@ const PostList = () => {
                       }}
                     >     
                       <div style={{
-                        zoom: 0.65,
-                        aspectRatio: '2/3',
+                        aspectRatio: '4/5',
+                        maxHeight:'500px',
                         overflow: "hidden",
                         position: "relative",
                         backgroundColor: "#f8f9fa",
@@ -367,15 +367,6 @@ const PostList = () => {
     No Image
   </div>
 )}
-                        <div style={{
-                          position: "absolute",
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          height: "60px",
-                          background: "linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1))",
-                          pointerEvents: "none"
-                        }}></div>
                       </div>
                       
                       <div style={{ padding: "20px" }}>
