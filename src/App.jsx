@@ -310,13 +310,13 @@ const AnimatedRoutes = () => {
         <Route
           path="/post-form"
           element={
-            <AdminRoute>
+{/*             <AdminRoute> */}
               <Suspense fallback={<div>Loading...</div>}>
                 <PageTransition>
                   <PostForm />
                 </PageTransition>
               </Suspense>
-            </AdminRoute>
+{/*             </AdminRoute> */}
           }
           />,
           <Route
