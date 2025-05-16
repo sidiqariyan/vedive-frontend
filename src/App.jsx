@@ -8,7 +8,6 @@ import "tailwindcss/tailwind.css";
 import ResetPassword from "./components/other-pages/ResetPassword.jsx";
 import Navbar from "./components/Pages/Hero/Navbar.jsx";
 import Footer from "./components/Pages/Hero/Footer.jsx";
-import Policy from "./components/policy-pages/privacy-policy.jsx";
 import AdminRoute from "./components/other-pages/AdminRoute.jsx";
 import EditBlogPost from "./components/other-pages/EditorBlogPost.jsx";
 import BlogAdmin from "./components/other-pages/BlogAdmin.jsx";
@@ -20,7 +19,6 @@ const CreateBlogPostPage = lazy(() => import("./components/other-pages/CreateBlo
 const PostDetail = lazy(() => import("./components/other-pages/BlogPostDetail.jsx"));
 const Hero = lazy(() => import("./components/Pages/Hero/Hero"));
 const ContactUs = lazy(() => import("./components/Pages/contact.jsx"));
-// const Policy = lazy(() => import("./components/policy-pages/privacy-policy.jsx"));
 const AboutUs = lazy(() => import("./components/Pages/about.jsx"));
 const Pricing = lazy(() => import("./components/Pages/pricing.jsx"));
 const Services = lazy(() => import("./components/Pages/services.jsx"));
@@ -376,17 +374,6 @@ const AnimatedRoutes = () => {
             </Suspense>
           }
         />
-        <Route
-          path="/privacy-policy"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <Policy />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-
         <Route
           path="/services"
           element={
