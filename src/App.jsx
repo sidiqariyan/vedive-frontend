@@ -292,8 +292,8 @@ const AnimatedRoutes = () => {
     </ProtectedRoute>
   }
 /> */}
-   {/* Admin-only Blog Creation */}
-   <Route
+   /* Admin-only routes */}
+        <Route
           path="/create-blog"
           element={
             <AdminRoute>
@@ -305,6 +305,23 @@ const AnimatedRoutes = () => {
             </AdminRoute>
           }
         />
+        <Route
+          path="/admin/blog"
+          element={
+            <AdminRoute>
+              <BlogAdmin />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/blog/edit/:id"
+          element={
+            <AdminRoute>
+              <EditBlogPost />
+            </AdminRoute>
+          }
+        />
+
 
         {/* Admin-only Template & PostForm */}
         <Route
@@ -312,12 +329,14 @@ const AnimatedRoutes = () => {
           element={
               <Suspense fallback={<div>Loading...</div>}>
                 <PageTransition>
+                   <AdminRoute>
                   <PostForm />
+                  </AdminRoute>
                 </PageTransition>
               </Suspense>
           }
           />,
-          <Route
+          {/* <Route
   path="/admin/blog"
   element={
     <AdminRoute>
@@ -332,7 +351,7 @@ const AnimatedRoutes = () => {
       <EditBlogPost />
     </AdminRoute>
   }
-/>
+/> */}
         {/* Original Public Routes */}
         <Route
           path="/home"
