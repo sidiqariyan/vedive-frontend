@@ -74,8 +74,7 @@ const Abouts = () => {
   };
 
   return (
-    <AuthProvider>
-      <Router>
+   <>
         <div className="container mx-auto p-4 bg-primary">
           <h1 className="text-3xl font-bold text-center mb-6">Subscription Plans</h1>
           {user && (
@@ -109,8 +108,7 @@ const Abouts = () => {
             />
           </div>
         </div>
-      </Router>
-    </AuthProvider>
+     </>
   );
 };
 
