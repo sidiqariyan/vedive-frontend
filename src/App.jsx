@@ -15,6 +15,7 @@ import SubscriptionCard from "./components/SubscriptionRoute.jsx";
 // import Header from './components/Header'; // Imported from new code
 // import Footer from './components/Footer'; // Imported from new code
 import axios from "axios";
+import Abouts from "./Abouts.jsx";
 
 // Lazy-loaded pages - Public
 const CreateBlogPostPage = lazy(() => import("./components/other-pages/CreateBlogPost.jsx"));
@@ -393,7 +394,7 @@ const AnimatedRoutes = () => {
           element={
             <Suspense fallback={null}>
               <PageTransition>
-                <AboutUs />
+                <Abouts />
               </PageTransition>
             </Suspense>
           }
