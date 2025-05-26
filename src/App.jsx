@@ -389,16 +389,16 @@ const AnimatedRoutes = () => {
             </Suspense>
           }
         />
-        <Route
+        {/* <Route
           path="/abouts"
           element={
             <Suspense fallback={null}>
               <PageTransition>
-                <Abouts />
+             
               </PageTransition>
             </Suspense>
           }
-        />
+        /> */}
         <Route
           path="/pricing"
           element={
@@ -654,11 +654,12 @@ const AnimatedRoutes = () => {
             element={
               <Suspense fallback={<div>Loading...</div>}>
                 <PageTransition>
-                  <NumberScraper />
+                 <Abouts />
                 </PageTransition>
               </Suspense>
             }
           />
+        
           
           {/* Template Routes */}
           {/* <Route

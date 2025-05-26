@@ -43,11 +43,12 @@ const Abouts = () => {
     }
 
     try {
-      const response = await axios.post(
-        "https://vedive.com:3000/api/subscription/subscribe", // Replace with your backend URL
-        { planId, phone },
-        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
-      );
+      const token = localStorage.getItem("token");
+const response = await axios.post(
+  "https://vedive.com:3000/api/subscription/subscribe",
+  { planId, phone },
+  { headers: { Authorization: `Bearer ${token}` } }
+);
 
       const { payment_session_id } = response.data;
       if (!payment_session_id) {
