@@ -11,8 +11,10 @@ import Footer from "./components/Pages/Hero/Footer.jsx";
 import AdminRoute from "./components/other-pages/AdminRoute.jsx";
 import EditBlogPost from "./components/other-pages/EditorBlogPost.jsx";
 import BlogAdmin from "./components/other-pages/BlogAdmin.jsx";
+import SubscriptionCard from "./components/SubscriptionRoute.jsx";
 // import Header from './components/Header'; // Imported from new code
 // import Footer from './components/Footer'; // Imported from new code
+import axios from "axios";
 
 // Lazy-loaded pages - Public
 const CreateBlogPostPage = lazy(() => import("./components/other-pages/CreateBlogPost.jsx"));
@@ -46,6 +48,7 @@ const SubscriptionHistory = lazy(() => import("./components/other-pages/Subscrip
 const PostForm = lazy(() => import("./components/other-pages/PostForm.jsx"));
 const PostList = lazy(() => import("./components/other-pages/PostList.jsx"));
 const TemplateEditorPage = lazy(() => import("./components/other-pages/TemplateEditor.jsx"));
+
 
 // Optimized Page Transition Component
 const PageTransition = ({ children }) => {
@@ -222,6 +225,8 @@ const VediveLoader = ({ onComplete }) => {
   );
 };
 
+
+
 // Simplified ScrollToTop component
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -261,6 +266,8 @@ const AnimatedRoutes = () => {
               </Suspense>
           }
         />
+        
+        
         <Route
           path="/blog/:slug"
           element={
@@ -292,7 +299,7 @@ const AnimatedRoutes = () => {
     </ProtectedRoute>
   }
 /> */}
-   /* Admin-only routes */}
+   {/* Admin-only routes */}
         <Route
           path="/create-blog"
           element={
@@ -373,6 +380,16 @@ const AnimatedRoutes = () => {
         />
         <Route
           path="/about"
+          element={
+            <Suspense fallback={null}>
+              <PageTransition>
+                <AboutUs />
+              </PageTransition>
+            </Suspense>
+          }
+        />
+        <Route
+          path="/abouts"
           element={
             <Suspense fallback={null}>
               <PageTransition>
@@ -681,13 +698,66 @@ const AnimatedRoutes = () => {
 };
 
 const App = () => {
+  const [plans, setPlans] = useState([]);
+  const [user, setUser] = useState(null);
   const [showLoader, setShowLoader] = useState(true);
+
+  useEffect(() => {
+    // move your subscriptions fetch here
+    axios.get("https://vedive.com:3000/api/subscription/plans")
+      .then(res => {
+        setPlans(res.data);
+      })
+      .catch(err => console.error("Error fetching plans:", err));
+
+    axios.get("https://vedive.com:3000/api/dashboard", {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    })
+      .then(res => {
+        setUser(res.data.subscriptionInfo);
+      })
+      .catch(err => console.error("Error fetching user:", err));
+  }, []);
 
   const handleLoaderComplete = () => {
     setShowLoader(false);
   };
 
-  return (
+  const handleSubscribe = (planId) => {
+    axios.post(
+      "https://vedive.com:3000/api/subscription/subscribe",
+      { planId },
+      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+    )
+    .then(response => {
+      window.location.href = response.data.paymentUrl;
+    })
+    .catch(error => alert("Error initiating payment: " + error.message));
+  };
+
+  // const handleLoaderComplete = () => {
+  //   setShowLoader(false);
+  // };
+
+  return (<>
+  
+ {/* <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold text-center mb-6">Subscription Plans</h1>
+      {user && (
+        <div className="text-center mb-4">
+          <p>Current Plan: {user.currentPlan}</p>
+          {user.subscriptionEndDate && (
+            <p>Expires: {new Date(user.subscriptionEndDate).toLocaleDateString()}</p>
+          )}
+        </div>
+      )}
+      <div className="flex flex-wrap justify-center">
+        {plans.map(plan => (
+          <SubscriptionCard key={plan._id} plan={plan} onSubscribe={handleSubscribe} />
+        ))}
+      </div>
+    </div>    */}
+
     <AuthProvider>
       <style>{globalStyles}</style>
       {showLoader ? (
@@ -699,7 +769,7 @@ const App = () => {
         </Router>
       )}
     </AuthProvider>
-  );
+</>  );
 };
 
 export default App;

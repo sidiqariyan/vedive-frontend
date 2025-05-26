@@ -1,11 +1,21 @@
-// src/components/other-pages/subscriptionService.jsx
+// file: subscriptionService.js
+/**
+ * Subscription Service
+ * This module handles API calls related to subscriptions
+ */
+
 import axios from 'axios';
 
+// Use an environment variable (and fallback to localhost for dev)
+const BASE_URL = 'https://vedive.com:3000';
+
 const api = axios.create({
-  baseURL: 'https://vedive.com:3000/api',
-  withCredentials: true,
+  baseURL: BASE_URL,
+  headers: { "Content-Type": "application/json" },
+  withCredentials: true,     // ← this is correct
 });
 
+// Include auth token if you’re using Bearer tokens
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -17,20 +27,47 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-const createOrder = async ({ planId }) => {
-  return api.post('/subscription/createOrder', { planId });
+const subscriptionService = {
+  /**
+   * Get current subscription status
+   * GET /api/subscription/status
+   */
+  getSubscriptionStatus: () => {
+    return api.get('/api/subscription/status');
+  },
+
+  /**
+   * Create a payment order
+   * POST /api/subscription/create
+   * Body: { planId, amount }
+   */
+  createOrder: (data) => {
+    return api.post('/api/subscription/create', data);
+  },
+
+  /**
+   * Verify payment after checkout
+   * GET /api/subscription/verify/:orderid
+   */
+  verifyPayment: (orderId) => {
+    return api.get(`/api/subscription/verify/${orderId}`);
+  },
+
+  /**
+   * (Optional) Cancel subscription
+   * — you’ll need to add this route server-side if you want it
+   */
+  cancelSubscription: () => {
+    return api.post('/api/subscription/cancel');
+  },
+
+  /**
+   * (Optional) Get payment history
+   * — add this route to your back end if you need it
+   */
+  getPaymentHistory: () => {
+    return api.get('/api/subscription/history');
+  },
 };
 
-const verifyPayment = async (orderId) => {
-  return api.get(`/subscription/verifyPayment/${orderId}`);
-};
-
-const getSubscriptionStatus = async () => {
-  return api.get('/subscription/status');
-};
-
-export default {
-  createOrder,
-  verifyPayment,
-  getSubscriptionStatus,
-};
+export default subscriptionService;

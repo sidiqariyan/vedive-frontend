@@ -30,32 +30,32 @@ const BlogPostDetail = () => {
         : `https://vedive.com:3000${img}`
       : '/placeholder.png';
 
-  useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(
-          `https://vedive.com:3000/api/blog/blog-posts/${slug}`
-        );
-        setPost(response.data);
-        setError('');
-        try {
-          const rel = await axios.get(
-            `https://vedive.com:3000/api/blog/blog-posts/related/${slug}`
-          );
-          setRelatedPosts(Array.isArray(rel.data) ? rel.data.slice(0, 3) : []);
-        } catch {
-          setRelatedPosts([]);
-        }
-      } catch (err) {
-        console.error(err);
-        setError('Failed to load the blog post. It may have been removed or does not exist.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (slug) fetchPost();
-  }, [slug]);
+  // useEffect(() => {
+  //   const fetchPost = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const response = await axios.get(
+  //         `https://vedive.com:3000/api/blog/blog-posts/${slug}`
+  //       );
+  //       setPost(response.data);
+  //       setError('');
+  //       try {
+  //         const rel = await axios.get(
+  //           `https://vedive.com:3000/api/blog/blog-posts/related/${slug}`
+  //         );
+  //         setRelatedPosts(Array.isArray(rel.data) ? rel.data.slice(0, 3) : []);
+  //       } catch {
+  //         setRelatedPosts([]);
+  //       }
+  //     } catch (err) {
+  //       console.error(err);
+  //       setError('Failed to load the blog post. It may have been removed or does not exist.');
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   if (slug) fetchPost();
+  // }, [slug]);
 
   useEffect(() => {
     const fetchAll = async () => {

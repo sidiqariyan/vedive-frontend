@@ -1,9 +1,10 @@
+// file: src/components/Plan.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Check, Sparkles, Rocket, Building2, X, Loader, Crown } from "lucide-react";
 import subscriptionService from "./subscriptionService";
 import { toast } from "react-toastify";
-import { cashfree } from "./file/cashfree";
+import { initializePayment } from "./file/cashfree"; // Corrected import path
 import { Helmet } from 'react-helmet';
 
 const Plan = () => {
@@ -16,7 +17,6 @@ const Plan = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Define the plan order to determine upgrade/downgrade
   const planOrder = {
     free: 0,
     starter: 1,
@@ -24,7 +24,6 @@ const Plan = () => {
     enterprise: 3,
   };
 
-  // Function to detect user's country and set currency
   useEffect(() => {
     const detectUserLocation = async () => {
       try {
@@ -33,15 +32,12 @@ const Plan = () => {
         setIsIndianUser(data.country_code === 'IN');
       } catch (error) {
         console.error("Error detecting location:", error);
-        // Default to Indian pricing if detection fails
         setIsIndianUser(true);
       }
     };
-    
     detectUserLocation();
   }, []);
 
-  // Define prices for both currencies
   const pricingData = {
     starter: {
       inr: "99",
@@ -57,13 +53,11 @@ const Plan = () => {
     }
   };
 
-  // Get price based on user location
   const getPrice = (planId) => {
     if (planId === "free") return "0";
     return isIndianUser ? pricingData[planId].inr : pricingData[planId].usd;
   };
 
-  // Get currency symbol based on user location
   const getCurrencySymbol = () => {
     return isIndianUser ? "₹" : "$";
   };
@@ -139,46 +133,81 @@ const Plan = () => {
     },
   ];
 
-  const initializePayment = useCallback((paymentSessionId, orderId) => {
-    const checkoutOptions = {
-      paymentSessionId,
-      returnUrl: `https://vedive.com/plans/payment-status?order_id=${orderId}`,
-      redirectTarget: "_self",
-      theme: {
-        navbarColor: "#2563eb",
-        primaryColor: "#2563eb",
-        buttonColor: "#2563eb",
-      },
-    };
-    cashfree.checkout(checkoutOptions).then(({ error, redirect }) => {
-      if (error) {
-        console.error("Payment Error:", error);
-        toast.error(error.message || "Payment initialization failed");
-        localStorage.removeItem("pendingOrder");
-        setPaymentCancelled(true);
+  const handlePlanSelection = async (planId) => {
+    if (planId === "free") return;
+    if (!isAuthenticated) {
+      toast.info("Please login to subscribe to a plan");
+      navigate("/login", { state: { redirectTo: "/plans" } });
+      return;
+    }
+
+    const currentPlanLevel = currentSubscription?.currentPlan ? planOrder[currentSubscription.currentPlan] : 0;
+    const selectedPlanLevel = planOrder[planId];
+    if (currentPlanLevel > 0 && selectedPlanLevel <= currentPlanLevel) {
+      toast.info("You can only upgrade to a higher plan");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const selectedPlan = plans.find((plan) => plan.id === planId);
+      const priceForBackend = isIndianUser ? selectedPlan.price : pricingData[planId].inr;
+
+      // Create order with credentials
+      const orderResponse = await subscriptionService.createOrder({
+        planId,
+        amount: priceForBackend,
+      }, {
+        withCredentials: true, // Include cookies
+      });
+
+      if (orderResponse?.data?.paymentSessionId) {
+        localStorage.setItem(
+          "pendingOrder",
+          JSON.stringify({
+            orderId: orderResponse.data.orderId,
+            planId,
+            timestamp: Date.now()
+          })
+        );
+        setPaymentCancelled(false);
+
+        // Initialize payment
+        const paymentResult = await initializePayment(
+          orderResponse.data.paymentSessionId,
+          orderResponse.data.orderId
+        );
+
+        if (paymentResult?.error) {
+          throw new Error(paymentResult.error.message);
+        }
+      } else {
+        throw new Error("Invalid order response. Missing payment session ID.");
       }
-      if (redirect) {
-        console.log("Redirecting to payment gateway...");
-      }
-    });
-  }, []);
+    } catch (error) {
+      console.error("Payment Error:", error);
+      toast.error(error.response?.data?.error || error.message || "Payment initialization failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const verifyAndProcessPayment = useCallback(async (orderId) => {
     if (!orderId || verifyingPayment || paymentCancelled) return;
-    
+
     try {
       setVerifyingPayment(true);
       toast.info("Verifying your payment...");
-      
+
       if (!localStorage.getItem("token")) {
         navigate("/login", {
-          state: { redirectTo: `https://vedive.com/plans/payment-status?order_id=${orderId}` },
+          state: { redirectTo: `${window.location.origin}/plans/payment-status?order_id=${orderId}` },
         });
         return;
       }
-      
+
       const response = await subscriptionService.verifyPayment(orderId);
-      
+
       if (response.data.success) {
         toast.success("Payment successful! Subscription activated.");
         localStorage.removeItem("pendingOrder");
@@ -191,7 +220,7 @@ const Plan = () => {
         navigate("/plans", { replace: true });
       }
     } catch (error) {
-      console.error("Payment Error:", error);
+      console.error("Payment Verification Error:", error);
       toast.error(error.response?.data?.error || "Payment verification failed");
       localStorage.removeItem("pendingOrder");
       setPaymentCancelled(true);
@@ -200,75 +229,6 @@ const Plan = () => {
       setVerifyingPayment(false);
     }
   }, [verifyingPayment, navigate, paymentCancelled]);
-
-  // Handle URL parameters for payment verification
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const orderId = params.get("order_id");
-    
-    if (location.pathname.includes("/payment-status") && orderId) {
-      verifyAndProcessPayment(orderId);
-    } else if (location.pathname === "/plans") {
-      setVerifyingPayment(false);
-      setPaymentCancelled(false);
-    }
-  }, [location.pathname, location.search, verifyAndProcessPayment]);
-
-  const handlePlanSelection = async (planId) => {
-    // Get the selected plan details
-    const selectedPlan = plans.find((plan) => plan.id === planId);
-
-    // If free plan or no upgrade available, return early
-    if (planId === "free") return;
-    
-    // If user is not authenticated, prompt to login
-    if (!isAuthenticated) {
-      toast.info("Please login to subscribe to a plan");
-      navigate("/login", { state: { redirectTo: "/plans" } });
-      return;
-    }
-
-    // If user already has an active plan that is equal or higher, do not allow purchase
-    const currentPlanLevel = currentSubscription?.currentPlan ? planOrder[currentSubscription.currentPlan] : 0;
-    const selectedPlanLevel = planOrder[selectedPlan.id];
-    if (currentPlanLevel > 0 && selectedPlanLevel <= currentPlanLevel) {
-      toast.info("You can only upgrade to a higher plan");
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      // For international users, convert price to INR for backend processing
-      const priceForBackend = isIndianUser ? 
-        selectedPlan.price : 
-        pricingData[planId].inr;
-        
-      // Pass both planId and the plan price as amount
-      const orderResponse = await subscriptionService.createOrder({
-        planId,
-        amount: priceForBackend,
-      });
-      console.log("Order Response:", orderResponse.data);
-      
-      if (orderResponse?.data?.paymentSessionId) {
-        localStorage.setItem(
-          "pendingOrder",
-          JSON.stringify({
-            orderId: orderResponse.data.orderId,
-            planId,
-            timestamp: Date.now()
-          })
-        );
-        setPaymentCancelled(false);
-        initializePayment(orderResponse.data.paymentSessionId, orderResponse.data.orderId);
-      }
-    } catch (error) {
-      console.error("Payment Error:", error);
-      toast.error(error.response?.data?.error || "Payment initialization failed");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const fetchSubscriptionStatus = useCallback(async () => {
     try {
@@ -283,16 +243,26 @@ const Plan = () => {
     }
   }, []);
 
-  // Clear stale pending orders
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const orderId = params.get("order_id");
+
+    if (location.pathname.includes("/payment-status") && orderId) {
+      verifyAndProcessPayment(orderId);
+    } else if (location.pathname === "/plans") {
+      setVerifyingPayment(false);
+      setPaymentCancelled(false);
+    }
+  }, [location.pathname, location.search, verifyAndProcessPayment]);
+
   useEffect(() => {
     const pendingOrderData = localStorage.getItem("pendingOrder");
-    
     if (pendingOrderData) {
       const pendingOrder = JSON.parse(pendingOrderData);
       const currentTime = Date.now();
       const orderTime = pendingOrder.timestamp || 0;
       const oneHourInMs = 60 * 60 * 1000;
-      
+
       if (currentTime - orderTime > oneHourInMs) {
         console.log("Removing stale pending order");
         localStorage.removeItem("pendingOrder");
@@ -310,11 +280,9 @@ const Plan = () => {
     const currentPlanLevel = currentSubscription?.currentPlan ? planOrder[currentSubscription.currentPlan] : 0;
     const selectedPlanLevel = planOrder[plan.id];
     const isCurrentPlan = currentSubscription?.currentPlan === plan.id;
-    // If user has an active subscription (non-free), lock buttons for plans that are lower or equal to their current plan.
     const isLocked = currentPlanLevel > 0 && selectedPlanLevel <= currentPlanLevel && !isCurrentPlan;
     const isProcessing = loading || verifyingPayment;
-    
-    // Set button text: if current plan then "Current Plan", if locked then "Locked", otherwise use plan.buttonText.
+
     let btnText = plan.buttonText;
     if (isCurrentPlan) {
       btnText = "Current Plan";
@@ -325,7 +293,7 @@ const Plan = () => {
     return (
       <button
         onClick={() => {
-          if (!isProcessing && !isLocked && !isCurrentPlan) {
+          if (!isProcessing && !isLocked && !isCurrentPlan && !plan.disabled) {
             handlePlanSelection(plan.id);
           }
         }}
@@ -355,13 +323,13 @@ const Plan = () => {
   const PaymentStatusPage = () => {
     const params = new URLSearchParams(location.search);
     const orderId = params.get("order_id");
-    
+
     return (
       <div className="min-h-screen bg-white text-gray-800 py-24 px-4 flex flex-col items-center justify-center">
-          <Helmet>
-      <title>Vedive Pricing: Affordable Email & WhatsApp Tools India</title>
-      <meta name="description" content="Discover Vedive's affordable pricing for bulk email sender, email scraper, and WhatsApp bulk sender tools. Start with flexible plans or a free trial!"/>
-      </Helmet>
+        <Helmet>
+          <title>Vedive Pricing: Affordable Email & WhatsApp Tools India</title>
+          <meta name="description" content="Discover Vedive's affordable pricing for bulk email sender, email scraper, and WhatsApp bulk sender tools. Start with flexible plans or a free trial!"/>
+        </Helmet>
         <div className="w-full max-w-md mx-auto text-center">
           <h1 className="text-3xl font-bold mb-6">Payment Status</h1>
           {verifyingPayment ? (
@@ -437,7 +405,6 @@ const Plan = () => {
                   </span>
                 </div>
               )}
-              
               {plan.popular && currentSubscription?.currentPlan !== plan.id && (
                 <div className="absolute -top-5 inset-x-0 flex justify-center">
                   <span className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold px-6 py-2 rounded-full shadow-lg">
@@ -445,7 +412,6 @@ const Plan = () => {
                   </span>
                 </div>
               )}
-              
               <div className="flex items-center justify-center mb-6">
                 {plan.icon && (
                   <plan.icon className={`w-12 h-12 ${
@@ -453,14 +419,11 @@ const Plan = () => {
                   }`} />
                 )}
               </div>
-              
               <h3 className="text-xl font-semibold text-center mb-2">{plan.name}</h3>
-              
               <div className="text-center mb-6">
                 <span className="text-4xl font-bold">{getCurrencySymbol()}{plan.price}</span>
                 <span className="text-gray-500">{plan.period}</span>
               </div>
-              
               <div className="space-y-4 mb-8">
                 {plan.features.map((feature) => (
                   <div key={feature.name} className="flex items-center">
@@ -483,12 +446,10 @@ const Plan = () => {
                   </div>
                 ))}
               </div>
-              
               {renderButton(plan)}
             </div>
           ))}
         </div>
-        
         <div className="mt-12 text-center max-w-2xl mx-auto p-8 rounded-2xl bg-gray-50 border border-gray-200 shadow-md">
           <h3 className="text-2xl font-bold mb-4">Need a custom solution?</h3>
           <p className="text-gray-600 mb-6">

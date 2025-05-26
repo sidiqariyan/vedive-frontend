@@ -1,4 +1,6 @@
-import {load} from '@cashfreepayments/cashfree-js';
+// file: src/utils/utils.js
+import { load } from '@cashfreepayments/cashfree-js';
+
 export const cashfree = await load({
-	mode: "sandbox" //or production
+  mode: "production" // Changed from sandbox to production
 });
