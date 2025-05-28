@@ -15,7 +15,7 @@ import SubscriptionCard from "./components/SubscriptionRoute.jsx";
 // import Header from './components/Header'; // Imported from new code
 // import Footer from './components/Footer'; // Imported from new code
 import axios from "axios";
-import Abouts from "./Abouts.jsx";
+const Abouts = lazy(() => import("./Abouts.jsx"));
 
 // Lazy-loaded pages - Public
 const CreateBlogPostPage = lazy(() => import("./components/other-pages/CreateBlogPost.jsx"));
@@ -649,16 +649,14 @@ const AnimatedRoutes = () => {
               </Suspense>
             }
           />
-          <Route
-            path="number-scraper"
+            {/* <Route
+            path="abouts"
             element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                 <Abouts />
-                </PageTransition>
+              <Suspense fallback={<div>Loading…</div>}>
+                <Abouts />
               </Suspense>
             }
-          />
+          /> */}
         
           
           {/* Template Routes */}

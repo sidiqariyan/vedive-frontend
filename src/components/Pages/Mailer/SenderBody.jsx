@@ -1,9 +1,11 @@
 import React, { useRef, useState } from 'react';
 import axios from 'axios';
-import { Mail, Upload, Settings, HelpCircle } from 'lucide-react';
+import { Mail, Upload, Settings, HelpCircle, ExternalLink, Search } from 'lucide-react';
 import { Helmet } from 'react-helmet';
+import { useNavigate } from 'react-router-dom';
 
 function SenderBody() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({});
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
@@ -113,11 +115,19 @@ function SenderBody() {
     }
   };
 
+  const handleTemplateRedirect = () => {
+    navigate('/templates');
+  };
+
+  const handleScraperRedirect = () => {
+    navigate('/email-scraper');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-0 sm:p-4 md:p-8">
         <Helmet>
       <title>Best Bulk Email Sender: Vedive Bulk Email Sender & Scraper Tool</title>
-      <meta name="description" content="Vedive’s best email sender automates bulk campaigns & scrapes leads. Grow sales with Gmail-integrated tools in 2025. Start free now!"/>
+      <meta name="description" content="Vedive's best email sender automates bulk campaigns & scrapes leads. Grow sales with Gmail-integrated tools in 2025. Start free now!"/>
       </Helmet>
       <div className="mx-auto bg-white rounded-lg shadow-md border border-gray-300">
         {/* Header */}
@@ -215,23 +225,33 @@ function SenderBody() {
           </div>
           {/* Template and Recipients */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+            {/* Email Template Section */}
             <div className="space-y-4 p-4 sm:p-6 border border-gray-300 rounded-lg shadow-sm">
               <div className="text-center">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-third-light mb-2">
                   <Mail className="text-third" size={24} />
                 </div>
                 <h3 className="text-base font-medium text-gray-900">Email Template</h3>
-                <p className="text-sm text-gray-500 mt-1">Upload your HTML template</p>
+                <p className="text-sm text-gray-500 mt-1">Upload HTML, HTM, or TXT templates</p>
               </div>
-              <button
-                onClick={() => htmlTemplateRef.current.click()}
-                className="w-full py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-third hover:bg-third-light focus:outline-none focus:ring-2 focus:ring-third focus:ring-offset-2"
-              >
-                Choose Template
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={() => htmlTemplateRef.current.click()}
+                  className="w-full py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-third hover:bg-third-light focus:outline-none focus:ring-2 focus:ring-third focus:ring-offset-2"
+                >
+                  Choose Template
+                </button>
+                <button
+                  onClick={handleTemplateRedirect}
+                  className="w-full py-2 px-4 bg-third text-white rounded-lg text-sm font-medium hover:bg-third-dark focus:outline-none focus:ring-2 focus:ring-third focus:ring-offset-2 flex items-center justify-center space-x-2"
+                >
+                  <ExternalLink size={16} />
+                  <span>Browse Templates</span>
+                </button>
+              </div>
               <input
                 type="file"
-                accept=".html"
+                accept=".html,.htm,.txt"
                 ref={htmlTemplateRef}
                 onChange={() => handleFileUpload(htmlTemplateRef, 'htmlTemplate')}
                 className="hidden"
@@ -240,23 +260,34 @@ function SenderBody() {
                 <p className="text-sm text-gray-600 text-center truncate">{htmlTemplateName}</p>
               )}
             </div>
+            
+            {/* Recipients List Section */}
             <div className="space-y-4 p-4 sm:p-6 border border-gray-300 rounded-lg shadow-sm">
               <div className="text-center">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-third-light mb-2">
                   <Upload className="text-third" size={24} />
                 </div>
                 <h3 className="text-base font-medium text-gray-900">Recipients List</h3>
-                <p className="text-sm text-gray-500 mt-1">Upload .txt file with recipients</p>
+                <p className="text-sm text-gray-500 mt-1">Upload TXT, CSV, or XLSX files</p>
               </div>
-              <button
-                onClick={() => recipientsFileRef.current.click()}
-                className="w-full py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-third hover:bg-third-light focus:outline-none focus:ring-2 focus:ring-third focus:ring-offset-2"
-              >
-                Choose File
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={() => recipientsFileRef.current.click()}
+                  className="w-full py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-third hover:bg-third-light focus:outline-none focus:ring-2 focus:ring-third focus:ring-offset-2"
+                >
+                  Choose File
+                </button>
+                <button
+                  onClick={handleScraperRedirect}
+                  className="w-full py-2 px-4 bg-third text-white rounded-lg text-sm font-medium hover:bg-third-dark focus:outline-none focus:ring-2 focus:ring-third focus:ring-offset-2 flex items-center justify-center space-x-2"
+                >
+                  <Search size={16} />
+                  <span>Scrape Emails</span>
+                </button>
+              </div>
               <input
                 type="file"
-                accept=".txt,.csv"
+                accept=".txt,.csv,.xlsx"
                 ref={recipientsFileRef}
                 onChange={() => handleFileUpload(recipientsFileRef, 'recipientsFile')}
                 className="hidden"
