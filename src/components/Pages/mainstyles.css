@@ -119,7 +119,7 @@ text-decoration-skip-ink: none;
   }
   .grid-item h2 {
       font-size: 32px;
-      line-height: 37px;
+      margin-bottom: 0;
   }
   .grid-item p {
       font-size: 14px;
@@ -347,7 +347,7 @@ max-width: none;
 /* Small Tablets (Portrait and landscape, <= 768px) */
 @media (max-width: 768px) {
   .main-heading-text{
-    padding: 45px 0 22.5px 0;
+    padding: 45px 0 20px 0 !important;
   }
   .main-heading-text p {
   font-size: 12px;
@@ -790,8 +790,9 @@ line-height: 32px;
 }
 
 .form-container-contact h1 {
-font-size: 36px;
-line-height: 44px;
+font-size: 48px;
+line-height: 100%;
+font-weight: 400;
 }
 
 textarea {
@@ -809,15 +810,22 @@ padding: 2%;
 .form-container-contact p{
 margin-bottom: 4%;
 }
-.info-container-contact, .form-container-contact {
-width: 95%;
-padding: 15px;
+.form-container-contact {
+width: 100%;
+padding-left: 10px;
+padding-right: 10px;
+
 }
+.info-container-contact{
+  width: 100%;
+  padding-left: 0px;
+  padding-right: 0px;
 
+}
 .info-container-contact h2 {
-
-font-size: 32px;
-line-height: 48px;
+font-size: 38px;
+line-height: 100%;
+font-weight: 600;
 }
 
 .contact-grid {
@@ -829,8 +837,9 @@ text-align: left;
 }
 
 .form-container-contact h1 {
-font-size: 28px;
-line-height: 36px;
+font-size: 38px;
+line-height: 100%;
+font-weight: 600;
 }
 
 .form-group {
@@ -854,9 +863,7 @@ padding: 15px 0;
 padding: 3%;
 }
 
-.info-container-contact h2 {
-font-size: 46px;
-}
+
 
 .contact-item h3 {
 font-size: 28px;

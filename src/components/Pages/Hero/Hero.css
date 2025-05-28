@@ -4,126 +4,155 @@
   font-family: 'Raleway', sans-serif;
 }
 
-/* Optimized Animation Keyframes */
+/* Optimized Animation Keyframes with GPU acceleration */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { 
+    opacity: 0; 
+    transform: translateZ(0); /* Force GPU layer */
+  }
+  to { 
+    opacity: 1; 
+    transform: translateZ(0);
+  }
 }
 
 @keyframes scaleIn {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from { 
+    transform: scale3d(0.95, 0.95, 1) translateZ(0); 
+    opacity: 0; 
+  }
+  to { 
+    transform: scale3d(1, 1, 1) translateZ(0); 
+    opacity: 1; 
+  }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from { 
+    transform: translate3d(0, 20px, 0); 
+    opacity: 0; 
+  }
+  to { 
+    transform: translate3d(0, 0, 0); 
+    opacity: 1; 
+  }
 }
 
-/* Animation classes - reduced number and simplified */
+/* Optimized glow animations using transform3d */
+@keyframes glow1 {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(30px, 30px, 0); }
+}
+
+@keyframes glow2 {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-30px, 30px, 0); }
+}
+
+@keyframes glow3 {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(30px, -30px, 0); }
+}
+
+/* Smooth animation classes with proper GPU acceleration */
 .fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
+  animation: fadeIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  will-change: opacity, transform;
 }
 
 .scale-in {
-  animation: scaleIn 0.3s ease-out forwards;
+  animation: scaleIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  will-change: opacity, transform;
 }
 
 .slide-up-fade {
-  animation: slideUp 0.4s ease-out forwards;
+  animation: slideUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  will-change: opacity, transform;
 }
 
 .slide-up-fade-delay {
-  animation: slideUp 0.4s ease-out 0.1s forwards;
+  animation: slideUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s forwards;
   opacity: 0;
+  will-change: opacity, transform;
 }
 
 .fade-in-delay {
-  animation: fadeIn 0.4s ease-out 0.2s forwards;
+  animation: fadeIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s forwards;
   opacity: 0;
+  will-change: opacity, transform;
 }
 
 .fade-in-delay-2 {
-  animation: fadeIn 0.4s ease-out 0.3s forwards;
+  animation: fadeIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s forwards;
   opacity: 0;
+  will-change: opacity, transform;
 }
 
 .fade-in-delay-3 {
-  animation: fadeIn 0.4s ease-out 0.4s forwards;
+  animation: fadeIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s forwards;
   opacity: 0;
+  will-change: opacity, transform;
 }
 
-/* Optimized glow orbs - reduced number and simplified */
+/* Highly optimized glow orbs with reduced blur and GPU acceleration */
 .glow-orb {
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
-  filter: blur(40px);
+  filter: blur(30px); /* Reduced from 40px */
+  will-change: transform;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
 }
 
 .glow-orb-1 {
   top: 10%;
   left: 10%;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0) 70%);
-  animation: glow1 35s infinite alternate;
-  will-change: transform;
+  width: 280px; /* Slightly smaller for better performance */
+  height: 280px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0) 65%);
+  animation: glow1 30s ease-in-out infinite alternate;
 }
 
 .glow-orb-2 {
   top: 50%;
   right: 10%;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0) 70%);
-  animation: glow2 45s infinite alternate;
-  will-change: transform;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(99, 102, 241, 0) 65%);
+  animation: glow2 35s ease-in-out infinite alternate;
 }
 
 .glow-orb-3 {
   bottom: 10%;
   left: 40%;
-  width: 250px;
-  height: 250px;
-  background: radial-gradient(circle, rgba(79, 70, 229, 0.1) 0%, rgba(79, 70, 229, 0) 70%);
-  animation: glow3 40s infinite alternate;
-  will-change: transform;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(79, 70, 229, 0.12) 0%, rgba(79, 70, 229, 0) 65%);
+  animation: glow3 32s ease-in-out infinite alternate;
 }
 
-/* Simplified glow orb animations using transform only */
-@keyframes glow1 {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(30px, 30px); }
-}
-
-@keyframes glow2 {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(-30px, 30px); }
-}
-
-@keyframes glow3 {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(30px, -30px); }
-}
-
-/* Optimized noise texture with a static pattern */
+/* Optimized noise texture with better compression */
 .noise-texture {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.25'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.7' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.2'/%3E%3C/svg%3E");
+  background-size: 100px 100px;
 }
 
-/* Grid overlay as background image */
+/* Optimized grid overlay */
 .grid-overlay {
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23202020' fill-opacity='0.05'%3E%3Cpath d='M36 34h4v1h-4v-1zm0-2h4v1h-4v-1zm0-2h4v1h-4v-1zm0-2h4v1h-4v-1zm0-2h4v1h-4v-1zm0-2h4v1h-4v-1zM34 34h1v1h-1v-1zm0-2h1v1h-1v-1zm0-2h1v1h-1v-1zm0-2h1v1h-1v-1zm0-2h1v1h-1v-1zm0-2h1v1h-1v-1zM32 34h1v1h-1v-1zm0-2h1v1h-1v-1zm0-2h1v1h-1v-1zm0-2h1v1h-1v-1zm0-2h1v1h-1v-1zm0-2h1v1h-1v-1zM30 34h1v1h-1v-1zm0-2h1v1h-1v-1zm0-2h1v1h-1v-1zm0-2h1v1h-1v-1zm0-2h1v1h-1v-1zm0-2h1v1h-1v-1zM28 34h1v1h-1v-1zm0-2h1v1h-1v-1zm0-2h1v1h-1v-1zm0-2h1v1h-1v-1zm0-2h1v1h-1v-1zm0-2h1v1h-1v-1z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h1v1H0zM20 0h1v1h-1zM0 20h1v1H0zM20 20h1v1h-1z' fill='%23202020' fill-opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 40px 40px;
 }
 
-/* Benefit items with simplified hover effects */
+/* Smooth benefit items with optimized transforms */
 .benefit-item {
-  transition: transform 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .benefit-item:hover {
-  transform: translateY(-2px);
+  transform: translate3d(0, -3px, 0);
 }
 
 .benefit-icon {
@@ -135,7 +164,8 @@
   align-items: center;
   justify-content: center;
   color: rgba(59, 130, 246, 0.8);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: background-color, color;
 }
 
 .benefit-item:hover .benefit-icon {
@@ -143,33 +173,40 @@
   color: rgba(59, 130, 246, 1);
 }
 
-/* Optimized CTA buttons */
+/* Buttery smooth CTA buttons */
 .primary-cta,
 .secondary-cta {
   padding: 0.875rem 1.5rem;
   border-radius: 0.5rem;
   font-weight: 500;
-  transition: transform 0.3s ease, background-color 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform, background-color, border-color;
+  backface-visibility: hidden;
+  position: relative;
+  overflow: hidden;
 }
 
 .primary-cta:hover,
 .secondary-cta:hover {
-  transform: translateY(-2px);
+  transform: translate3d(0, -2px, 0);
 }
 
 .primary-cta {
   background-color: #3b82f6;
   color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
 .primary-cta:hover {
   background-color: #2563eb;
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
 }
 
 .secondary-cta {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
+  backdrop-filter: blur(10px);
 }
 
 .secondary-cta:hover {
@@ -177,13 +214,13 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Service cards with optimized hover effects */
+/* Ultra-smooth service cards */
 .service-card {
   background: rgba(15, 23, 42, 0.5);
   border: 1px solid rgba(30, 41, 59, 0.8);
   border-radius: 0.75rem;
   padding: 1.5rem;
-  transition: transform 0.3s ease, background-color 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -191,17 +228,23 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  will-change: transform, background-color, box-shadow;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
 }
 
 .service-card.hovered {
-  transform: scale(1.03);
+  transform: scale3d(1.02, 1.02, 1) translateZ(0);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
 .service-card:hover {
   background: rgba(15, 23, 42, 0.7);
+  transform: scale3d(1.02, 1.02, 1) translateZ(0);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
-/* Service icon containers */
+/* Smooth service icon animations */
 .service-icon-container {
   width: 64px;
   height: 64px;
@@ -210,24 +253,28 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 1.25rem;
-  transition: background-color 0.3s ease, transform 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: background-color, transform;
+  backface-visibility: hidden;
 }
 
 .service-card:hover .service-icon-container {
-  transform: scale(1.05);
+  transform: scale3d(1.08, 1.08, 1) translateZ(0);
 }
 
 .service-icon {
-  transition: color 0.3s ease;
+  transition: color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: color;
 }
 
-/* Service color variants - simplified */
+/* Service color variants with smooth transitions */
 .blue-service .service-icon-container {
   background: rgba(59, 130, 246, 0.15);
 }
 
 .blue-service:hover .service-icon-container {
   background: rgba(59, 130, 246, 0.25);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
 }
 
 .indigo-service .service-icon-container {
@@ -236,6 +283,7 @@
 
 .indigo-service:hover .service-icon-container {
   background: rgba(99, 102, 241, 0.25);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
 }
 
 .green-service .service-icon-container {
@@ -244,6 +292,7 @@
 
 .green-service:hover .service-icon-container {
   background: rgba(16, 185, 129, 0.25);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
 }
 
 .purple-service .service-icon-container {
@@ -252,11 +301,13 @@
 
 .purple-service:hover .service-icon-container {
   background: rgba(139, 92, 246, 0.25);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
 }
 
-/* Service title hover effects */
+/* Smooth service title transitions */
 .service-title {
-  transition: color 0.3s ease;
+  transition: color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: color;
 }
 
 .blue-service:hover .service-title {
@@ -275,53 +326,110 @@
   color: rgba(139, 92, 246, 1);
 }
 
-/* Service description and arrow animations */
+/* Service description smooth transitions */
 .service-description {
-  transition: color 0.3s ease;
+  transition: color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: color;
 }
 
 .service-card:hover .service-description {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.8);
 }
 
+/* Buttery smooth arrow animation */
 .service-arrow {
   margin-top: 1rem;
   opacity: 0;
-  transform: translateY(5px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translate3d(0, 8px, 0);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: opacity, transform;
+  backface-visibility: hidden;
 }
 
 .service-card:hover .service-arrow {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate3d(0, 0, 0);
 }
 
-/* Optimized for mobile */
+/* Performance optimizations for mobile */
 @media (max-width: 768px) {
   .glow-orb {
-    opacity: 0.15;
-    filter: blur(30px);
+    opacity: 0.1;
+    filter: blur(20px);
   }
   
   .glow-orb-1, 
   .glow-orb-2, 
   .glow-orb-3 {
-    width: 200px;
-    height: 200px;
+    width: 180px;
+    height: 180px;
+    animation-duration: 60s; /* Slower on mobile */
+  }
+  
+  /* Reduce motion for better mobile performance */
+  .service-card:hover {
+    transform: scale3d(1.01, 1.01, 1);
+  }
+  
+  .service-card:hover .service-icon-container {
+    transform: scale3d(1.04, 1.04, 1);
   }
 }
 
 @media (max-width: 640px) {
-  /* Disable animations on small screens for better performance */
+  /* Disable heavy animations on small screens */
   .glow-orb {
     display: none;
   }
   
-  .service-card.hovered {
+  .noise-texture {
+    background-image: none;
+  }
+  
+  .service-card.hovered,
+  .service-card:hover {
     transform: none;
+    box-shadow: none;
   }
   
   .service-card:hover .service-icon-container {
+    transform: none;
+  }
+  
+  .benefit-item:hover {
+    transform: none;
+  }
+  
+  .primary-cta:hover,
+  .secondary-cta:hover {
+    transform: none;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .glow-orb-1,
+  .glow-orb-2,
+  .glow-orb-3 {
+    animation: none;
+  }
+  
+  .fade-in,
+  .scale-in,
+  .slide-up-fade,
+  .slide-up-fade-delay,
+  .fade-in-delay,
+  .fade-in-delay-2,
+  .fade-in-delay-3 {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  
+  .service-card:hover,
+  .benefit-item:hover,
+  .primary-cta:hover,
+  .secondary-cta:hover {
     transform: none;
   }
 }

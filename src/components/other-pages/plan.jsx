@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Check, Sparkles, Rocket, Building2, X, Loader, Crown } from "lucide-react";
 import subscriptionService from "./subscriptionService";
@@ -6,25 +6,26 @@ import { toast } from "react-toastify";
 import { cashfree } from "./file/cashfree";
 import { Helmet } from 'react-helmet';
 
-const Plan = () => {
-  const [loading, setLoading] = useState(false);
-  const [currentSubscription, setCurrentSubscription] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [verifyingPayment, setVerifyingPayment] = useState(false);
-  const [paymentCancelled, setPaymentCancelled] = useState(false);
+// Constants
+const PLAN_ORDER = {
+  free: 0,
+  starter: 1,
+  business: 2,
+  enterprise: 3,
+};
+
+const PRICING_DATA = {
+  starter: { inr: "99", usd: "4.99" },
+  business: { inr: "599", usd: "29.99" },
+  enterprise: { inr: "1999", usd: "99" }
+};
+
+const STALE_ORDER_TIMEOUT = 60 * 60 * 1000; // 1 hour
+
+// Custom hooks
+const useUserLocation = () => {
   const [isIndianUser, setIsIndianUser] = useState(true);
-  const navigate = useNavigate();
-  const location = useLocation();
 
-  // Define the plan order to determine upgrade/downgrade
-  const planOrder = {
-    free: 0,
-    starter: 1,
-    business: 2,
-    enterprise: 3,
-  };
-
-  // Function to detect user's country and set currency
   useEffect(() => {
     const detectUserLocation = async () => {
       try {
@@ -33,42 +34,234 @@ const Plan = () => {
         setIsIndianUser(data.country_code === 'IN');
       } catch (error) {
         console.error("Error detecting location:", error);
-        // Default to Indian pricing if detection fails
-        setIsIndianUser(true);
+        setIsIndianUser(true); // Default fallback
       }
     };
     
     detectUserLocation();
   }, []);
 
-  // Define prices for both currencies
-  const pricingData = {
-    starter: {
-      inr: "99",
-      usd: "4.99"
-    },
-    business: {
-      inr: "599",
-      usd: "29.99"
-    },
-    enterprise: {
-      inr: "1999",
-      usd: "99"
+  return isIndianUser;
+};
+
+const useAuthentication = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+  }, []);
+
+  return isAuthenticated;
+};
+
+const useStaleOrderCleanup = () => {
+  useEffect(() => {
+    const pendingOrderData = localStorage.getItem("pendingOrder");
+    
+    if (pendingOrderData) {
+      try {
+        const pendingOrder = JSON.parse(pendingOrderData);
+        const currentTime = Date.now();
+        const orderTime = pendingOrder.timestamp || 0;
+        
+        if (currentTime - orderTime > STALE_ORDER_TIMEOUT) {
+          console.log("Removing stale pending order");
+          localStorage.removeItem("pendingOrder");
+        }
+      } catch (error) {
+        console.error("Error parsing pending order:", error);
+        localStorage.removeItem("pendingOrder");
+      }
     }
-  };
+  }, []);
+};
 
-  // Get price based on user location
-  const getPrice = (planId) => {
+// Utility functions
+const getPriceUtils = (isIndianUser) => ({
+  getPrice: (planId) => {
     if (planId === "free") return "0";
-    return isIndianUser ? pricingData[planId].inr : pricingData[planId].usd;
+    return isIndianUser ? PRICING_DATA[planId].inr : PRICING_DATA[planId].usd;
+  },
+  getCurrencySymbol: () => isIndianUser ? "₹" : "$"
+});
+
+// Components
+const PaymentStatusPage = ({ verifyingPayment, navigate, location }) => {
+  const params = new URLSearchParams(location.search);
+  const orderId = params.get("order_id");
+  
+  const handleReturnToPlans = useCallback(() => {
+    localStorage.removeItem("pendingOrder");
+    navigate("/plans", { replace: true });
+  }, [navigate]);
+  
+  return (
+    <div className="min-h-screen bg-white text-gray-800 py-24 px-4 flex flex-col items-center justify-center">
+      <Helmet>
+        <title>Payment Status - Vedive</title>
+        <meta name="description" content="Payment verification status for Vedive subscription"/>
+      </Helmet>
+      <div className="w-full max-w-md mx-auto text-center">
+        <h1 className="text-3xl font-bold mb-6">Payment Status</h1>
+        {verifyingPayment ? (
+          <div className="mb-6">
+            <Loader className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
+            <p className="text-lg">Verifying your payment...</p>
+          </div>
+        ) : (
+          <p className="text-xl text-red-500 mb-8">Payment verification failed</p>
+        )}
+        <button
+          onClick={handleReturnToPlans}
+          className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-all"
+        >
+          Return to Plans
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const PlanCard = ({ 
+  plan, 
+  currentSubscription, 
+  onPlanSelect, 
+  loading, 
+  verifyingPayment,
+  currencySymbol 
+}) => {
+  const currentPlanLevel = currentSubscription?.currentPlan ? PLAN_ORDER[currentSubscription.currentPlan] : 0;
+  const selectedPlanLevel = PLAN_ORDER[plan.id];
+  const isCurrentPlan = currentSubscription?.currentPlan === plan.id;
+  const isLocked = currentPlanLevel > 0 && selectedPlanLevel <= currentPlanLevel && !isCurrentPlan;
+  const isProcessing = loading || verifyingPayment;
+  
+  const getButtonText = () => {
+    if (isCurrentPlan) return "Current Plan";
+    if (isLocked) return "Locked";
+    return plan.buttonText;
   };
 
-  // Get currency symbol based on user location
-  const getCurrencySymbol = () => {
-    return isIndianUser ? "₹" : "$";
+  const getButtonStyle = () => {
+    if (isCurrentPlan) return "bg-green-100 text-green-800 cursor-not-allowed";
+    if (isProcessing) return "bg-gray-100 text-gray-500 cursor-wait";
+    if (isLocked) return "bg-gray-100 text-gray-500 cursor-not-allowed";
+    return plan.buttonStyle;
   };
 
-  const plans = [
+  const handleClick = useCallback(() => {
+    if (!isProcessing && !isLocked && !isCurrentPlan && !plan.disabled) {
+      onPlanSelect(plan.id);
+    }
+  }, [isProcessing, isLocked, isCurrentPlan, plan.disabled, plan.id, onPlanSelect]);
+
+  return (
+    <div
+      className={`relative rounded-2xl bg-white p-8 border ${
+        isCurrentPlan
+          ? "border-blue-500 ring-2 ring-blue-200"
+          : "border-gray-200"
+      } shadow-lg hover:shadow-xl transition-all duration-300 ${
+        plan.popular ? "transform hover:-translate-y-2" : "hover:-translate-y-1"
+      }`}
+    >
+      {isCurrentPlan && (
+        <div className="absolute -top-5 inset-x-0 flex justify-center">
+          <span className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold px-6 py-2 rounded-full shadow-lg flex items-center">
+            <Crown className="w-4 h-4 mr-1" />
+            Current Plan
+          </span>
+        </div>
+      )}
+      
+      {plan.popular && !isCurrentPlan && (
+        <div className="absolute -top-5 inset-x-0 flex justify-center">
+          <span className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold px-6 py-2 rounded-full shadow-lg">
+            Most Popular
+          </span>
+        </div>
+      )}
+      
+      <div className="flex items-center justify-center mb-6">
+        {plan.icon && (
+          <plan.icon className={`w-12 h-12 ${
+            isCurrentPlan ? "text-blue-600" : "text-blue-500"
+          }`} />
+        )}
+      </div>
+      
+      <h3 className="text-xl font-semibold text-center mb-2">{plan.name}</h3>
+      
+      <div className="text-center mb-6">
+        <span className="text-4xl font-bold">{currencySymbol}{plan.price}</span>
+        <span className="text-gray-500">{plan.period}</span>
+      </div>
+      
+      <div className="space-y-4 mb-8">
+        {plan.features.map((feature) => (
+          <div key={feature.name} className="flex items-center">
+            {feature.restricted ? (
+              <X className="w-5 h-5 text-red-500 mr-3 flex-shrink-0" />
+            ) : (
+              <Check className={`w-5 h-5 ${
+                isCurrentPlan ? "text-blue-600" : "text-blue-500"
+              } mr-3 flex-shrink-0`} />
+            )}
+            <span
+              className={`text-sm ${
+                feature.restricted
+                  ? "text-gray-400 line-through"
+                  : "text-gray-700"
+              }`}
+            >
+              {feature.name}
+            </span>
+          </div>
+        ))}
+      </div>
+      
+      <button
+        onClick={handleClick}
+        disabled={isProcessing || isCurrentPlan || isLocked || plan.disabled}
+        className={`w-full py-3 px-4 rounded-lg text-sm font-semibold transition-all ${getButtonStyle()}`}
+      >
+        {isProcessing ? (
+          <>
+            <Loader className="animate-spin mr-2 inline" size={16} />
+            {verifyingPayment ? "Verifying Payment..." : "Processing..."}
+          </>
+        ) : (
+          getButtonText()
+        )}
+      </button>
+    </div>
+  );
+};
+
+const Plan = () => {
+  // State management
+  const [loading, setLoading] = useState(false);
+  const [currentSubscription, setCurrentSubscription] = useState(null);
+  const [verifyingPayment, setVerifyingPayment] = useState(false);
+  const [paymentCancelled, setPaymentCancelled] = useState(false);
+  
+  // Custom hooks
+  const isIndianUser = useUserLocation();
+  const isAuthenticated = useAuthentication();
+  useStaleOrderCleanup();
+  
+  // Router hooks
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Memoized values
+  const { getPrice, getCurrencySymbol } = useMemo(
+    () => getPriceUtils(isIndianUser),
+    [isIndianUser]
+  );
+
+  const plans = useMemo(() => [
     {
       id: "free",
       name: "Free",
@@ -137,8 +330,9 @@ const Plan = () => {
       buttonStyle: "border border-gray-300 hover:border-gray-400",
       disabled: false
     },
-  ];
+  ], [getPrice]);
 
+  // Payment initialization
   const initializePayment = useCallback((paymentSessionId, orderId) => {
     const checkoutOptions = {
       paymentSessionId,
@@ -150,6 +344,7 @@ const Plan = () => {
         buttonColor: "#2563eb",
       },
     };
+
     cashfree.checkout(checkoutOptions).then(({ error, redirect }) => {
       if (error) {
         console.error("Payment Error:", error);
@@ -163,6 +358,7 @@ const Plan = () => {
     });
   }, []);
 
+  // Payment verification
   const verifyAndProcessPayment = useCallback(async (orderId) => {
     if (!orderId || verifyingPayment || paymentCancelled) return;
     
@@ -170,7 +366,7 @@ const Plan = () => {
       setVerifyingPayment(true);
       toast.info("Verifying your payment...");
       
-      if (!localStorage.getItem("token")) {
+      if (!isAuthenticated) {
         navigate("/login", {
           state: { redirectTo: `https://vedive.com/plans/payment-status?order_id=${orderId}` },
         });
@@ -199,38 +395,35 @@ const Plan = () => {
     } finally {
       setVerifyingPayment(false);
     }
-  }, [verifyingPayment, navigate, paymentCancelled]);
+  }, [verifyingPayment, navigate, paymentCancelled, isAuthenticated]);
 
-  // Handle URL parameters for payment verification
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const orderId = params.get("order_id");
-    
-    if (location.pathname.includes("/payment-status") && orderId) {
-      verifyAndProcessPayment(orderId);
-    } else if (location.pathname === "/plans") {
-      setVerifyingPayment(false);
-      setPaymentCancelled(false);
+  // Subscription status fetching
+  const fetchSubscriptionStatus = useCallback(async () => {
+    try {
+      const response = await subscriptionService.getSubscriptionStatus();
+      setCurrentSubscription(response.data);
+      if (response.data.hasActiveSubscription) {
+        localStorage.removeItem("pendingOrder");
+      }
+    } catch (error) {
+      console.error("Subscription Error:", error);
+      toast.error("Failed to load subscription status");
     }
-  }, [location.pathname, location.search, verifyAndProcessPayment]);
+  }, []);
 
-  const handlePlanSelection = async (planId) => {
-    // Get the selected plan details
-    const selectedPlan = plans.find((plan) => plan.id === planId);
-
-    // If free plan or no upgrade available, return early
+  // Plan selection handler
+  const handlePlanSelection = useCallback(async (planId) => {
     if (planId === "free") return;
     
-    // If user is not authenticated, prompt to login
     if (!isAuthenticated) {
       toast.info("Please login to subscribe to a plan");
       navigate("/login", { state: { redirectTo: "/plans" } });
       return;
     }
 
-    // If user already has an active plan that is equal or higher, do not allow purchase
-    const currentPlanLevel = currentSubscription?.currentPlan ? planOrder[currentSubscription.currentPlan] : 0;
-    const selectedPlanLevel = planOrder[selectedPlan.id];
+    const currentPlanLevel = currentSubscription?.currentPlan ? PLAN_ORDER[currentSubscription.currentPlan] : 0;
+    const selectedPlanLevel = PLAN_ORDER[planId];
+    
     if (currentPlanLevel > 0 && selectedPlanLevel <= currentPlanLevel) {
       toast.info("You can only upgrade to a higher plan");
       return;
@@ -238,17 +431,14 @@ const Plan = () => {
     
     try {
       setLoading(true);
-      // For international users, convert price to INR for backend processing
       const priceForBackend = isIndianUser ? 
-        selectedPlan.price : 
-        pricingData[planId].inr;
+        getPrice(planId) : 
+        PRICING_DATA[planId].inr;
         
-      // Pass both planId and the plan price as amount
       const orderResponse = await subscriptionService.createOrder({
         planId,
         amount: priceForBackend,
       });
-      console.log("Order Response:", orderResponse.data);
       
       if (orderResponse?.data?.paymentSessionId) {
         localStorage.setItem(
@@ -268,130 +458,46 @@ const Plan = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isAuthenticated, currentSubscription, isIndianUser, getPrice, initializePayment, navigate]);
 
-  const fetchSubscriptionStatus = useCallback(async () => {
-    try {
-      const response = await subscriptionService.getSubscriptionStatus();
-      setCurrentSubscription(response.data);
-      if (response.data.hasActiveSubscription) {
-        localStorage.removeItem("pendingOrder");
-      }
-    } catch (error) {
-      console.error("Subscription Error:", error);
-      toast.error("Failed to load subscription status");
-    }
-  }, []);
-
-  // Clear stale pending orders
+  // Effects
   useEffect(() => {
-    const pendingOrderData = localStorage.getItem("pendingOrder");
-    
-    if (pendingOrderData) {
-      const pendingOrder = JSON.parse(pendingOrderData);
-      const currentTime = Date.now();
-      const orderTime = pendingOrder.timestamp || 0;
-      const oneHourInMs = 60 * 60 * 1000;
-      
-      if (currentTime - orderTime > oneHourInMs) {
-        console.log("Removing stale pending order");
-        localStorage.removeItem("pendingOrder");
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsAuthenticated(!!token);
-    if (token) fetchSubscriptionStatus();
-  }, [fetchSubscriptionStatus]);
-
-  const renderButton = (plan) => {
-    const currentPlanLevel = currentSubscription?.currentPlan ? planOrder[currentSubscription.currentPlan] : 0;
-    const selectedPlanLevel = planOrder[plan.id];
-    const isCurrentPlan = currentSubscription?.currentPlan === plan.id;
-    // If user has an active subscription (non-free), lock buttons for plans that are lower or equal to their current plan.
-    const isLocked = currentPlanLevel > 0 && selectedPlanLevel <= currentPlanLevel && !isCurrentPlan;
-    const isProcessing = loading || verifyingPayment;
-    
-    // Set button text: if current plan then "Current Plan", if locked then "Locked", otherwise use plan.buttonText.
-    let btnText = plan.buttonText;
-    if (isCurrentPlan) {
-      btnText = "Current Plan";
-    } else if (isLocked) {
-      btnText = "Locked";
-    }
-
-    return (
-      <button
-        onClick={() => {
-          if (!isProcessing && !isLocked && !isCurrentPlan) {
-            handlePlanSelection(plan.id);
-          }
-        }}
-        disabled={isProcessing || isCurrentPlan || isLocked || plan.disabled}
-        className={`w-full py-3 px-4 rounded-lg text-sm font-semibold transition-all ${
-          isCurrentPlan
-            ? "bg-green-100 text-green-800 cursor-not-allowed"
-            : isProcessing
-            ? "bg-gray-100 text-gray-500 cursor-wait"
-            : isLocked
-            ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-            : plan.buttonStyle
-        }`}
-      >
-        {isProcessing ? (
-          <>
-            <Loader className="animate-spin mr-2 inline" size={16} />
-            {verifyingPayment ? "Verifying Payment..." : "Processing..."}
-          </>
-        ) : (
-          btnText
-        )}
-      </button>
-    );
-  };
-
-  const PaymentStatusPage = () => {
     const params = new URLSearchParams(location.search);
     const orderId = params.get("order_id");
     
-    return (
-      <div className="min-h-screen bg-white text-gray-800 py-24 px-4 flex flex-col items-center justify-center">
-          <Helmet>
-      <title>Vedive Pricing: Affordable Email & WhatsApp Tools India</title>
-      <meta name="description" content="Discover Vedive's affordable pricing for bulk email sender, email scraper, and WhatsApp bulk sender tools. Start with flexible plans or a free trial!"/>
-      </Helmet>
-        <div className="w-full max-w-md mx-auto text-center">
-          <h1 className="text-3xl font-bold mb-6">Payment Status</h1>
-          {verifyingPayment ? (
-            <div className="mb-6">
-              <Loader className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
-              <p className="text-lg">Verifying your payment...</p>
-            </div>
-          ) : (
-            <p className="text-xl text-red-500 mb-8">Payment verification failed</p>
-          )}
-          <button
-            onClick={() => {
-              localStorage.removeItem("pendingOrder");
-              navigate("/plans", { replace: true });
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-all"
-          >
-            Return to Plans
-          </button>
-        </div>
-      </div>
-    );
-  };
+    if (location.pathname.includes("/payment-status") && orderId) {
+      verifyAndProcessPayment(orderId);
+    } else if (location.pathname === "/plans") {
+      setVerifyingPayment(false);
+      setPaymentCancelled(false);
+    }
+  }, [location.pathname, location.search, verifyAndProcessPayment]);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchSubscriptionStatus();
+    }
+  }, [isAuthenticated, fetchSubscriptionStatus]);
+
+  // Render payment status page
   if (location.pathname.includes("/payment-status")) {
-    return <PaymentStatusPage />;
+    return (
+      <PaymentStatusPage 
+        verifyingPayment={verifyingPayment} 
+        navigate={navigate} 
+        location={location} 
+      />
+    );
   }
 
+  // Main component render
   return (
     <div className="min-h-screen bg-white text-gray-800 py-12 px-4 sm:px-6 lg:px-8 relative overflow-auto">
+      <Helmet>
+        <title>Vedive Pricing: Affordable Email & WhatsApp Tools India</title>
+        <meta name="description" content="Discover Vedive's affordable pricing for bulk email sender, email scraper, and WhatsApp bulk sender tools. Start with flexible plans or a free trial!"/>
+      </Helmet>
+      
       <div className="w-full max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h1 className="text-3xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-third">
@@ -419,73 +525,15 @@ const Plan = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {plans.map((plan) => (
-            <div
+            <PlanCard
               key={plan.id}
-              className={`relative rounded-2xl bg-white p-8 border ${
-                currentSubscription?.currentPlan === plan.id
-                  ? "border-blue-500 ring-2 ring-blue-200"
-                  : "border-gray-200"
-              } shadow-lg hover:shadow-xl transition-all duration-300 ${
-                plan.popular ? "transform hover:-translate-y-2" : "hover:-translate-y-1"
-              }`}
-            >
-              {currentSubscription?.currentPlan === plan.id && (
-                <div className="absolute -top-5 inset-x-0 flex justify-center">
-                  <span className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold px-6 py-2 rounded-full shadow-lg flex items-center">
-                    <Crown className="w-4 h-4 mr-1" />
-                    Current Plan
-                  </span>
-                </div>
-              )}
-              
-              {plan.popular && currentSubscription?.currentPlan !== plan.id && (
-                <div className="absolute -top-5 inset-x-0 flex justify-center">
-                  <span className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold px-6 py-2 rounded-full shadow-lg">
-                    Most Popular
-                  </span>
-                </div>
-              )}
-              
-              <div className="flex items-center justify-center mb-6">
-                {plan.icon && (
-                  <plan.icon className={`w-12 h-12 ${
-                    currentSubscription?.currentPlan === plan.id ? "text-blue-600" : "text-blue-500"
-                  }`} />
-                )}
-              </div>
-              
-              <h3 className="text-xl font-semibold text-center mb-2">{plan.name}</h3>
-              
-              <div className="text-center mb-6">
-                <span className="text-4xl font-bold">{getCurrencySymbol()}{plan.price}</span>
-                <span className="text-gray-500">{plan.period}</span>
-              </div>
-              
-              <div className="space-y-4 mb-8">
-                {plan.features.map((feature) => (
-                  <div key={feature.name} className="flex items-center">
-                    {feature.restricted ? (
-                      <X className="w-5 h-5 text-red-500 mr-3 flex-shrink-0" />
-                    ) : (
-                      <Check className={`w-5 h-5 ${
-                        currentSubscription?.currentPlan === plan.id ? "text-blue-600" : "text-blue-500"
-                      } mr-3 flex-shrink-0`} />
-                    )}
-                    <span
-                      className={`text-sm ${
-                        feature.restricted
-                          ? "text-gray-400 line-through"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      {feature.name}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              
-              {renderButton(plan)}
-            </div>
+              plan={plan}
+              currentSubscription={currentSubscription}
+              onPlanSelect={handlePlanSelection}
+              loading={loading}
+              verifyingPayment={verifyingPayment}
+              currencySymbol={getCurrencySymbol()}
+            />
           ))}
         </div>
         

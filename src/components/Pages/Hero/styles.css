@@ -7,6 +7,10 @@
   padding: 0;
   box-sizing: border-box;
 }
+.contact-item a,
+.contact-item a:hover {
+  text-decoration: none !important;
+}
 
 .navbar {
   position: relative;

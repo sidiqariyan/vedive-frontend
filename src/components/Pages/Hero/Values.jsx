@@ -5,7 +5,7 @@ const CoreValues = () => {
   return (
     <div className="parent-container">
     <div className="main-heading-text">
-      <h2 className='text-[64px] font-semibold'>Why Choose Us Over Other Tools</h2>
+      <h2 className='text-primary text-[38px] sm:text-[48px] md:text-[65px] text-center font-semibold'>Why Choose Us Over Other Tools</h2>
       <p>
 Vedive.com offers a complete communication and lead generation platform
 that goes far beyond what other tools provide. While most platforms focus on

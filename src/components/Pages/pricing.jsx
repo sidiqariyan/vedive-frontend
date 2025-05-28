@@ -1,14 +1,98 @@
-import React, { useState, useEffect } from "react";
-import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import React, { memo, useState, useEffect, useCallback, useMemo } from "react";
+import { NavLink } from "react-router-dom";
+import { Helmet } from 'react-helmet';
 import "./mainstyles.css"; 
 import Navbar from "./Hero/Navbar";
 import Footer from "./Hero/Footer";
 import CoreValues from "./Hero/Values";
 import bgImage1 from "./assets/pricing-image-1.jpg";
-import { Helmet } from 'react-helmet';
 
-// Add this CSS to your mainstyles.css file
-const cssToAdd = `
+// Constants for better maintainability
+const COMPANY_INFO = {
+  name: "Vedive"
+};
+
+const GEOLOCATION_API = 'https://ipapi.co/json/';
+
+const CONTENT = {
+  hero: {
+    title: "Pricing",
+    subtitle: "Free, Reliable Messaging and Scraping Services."
+  },
+  benefits: {
+    title: "What's Included & Benefits",
+    description: "Every Vedive plan comes packed with powerful features designed to help you scale faster and communicate smarter. Enjoy AI-powered email deliverability, bulk WhatsApp messaging, and real-time tracking — all from one intuitive dashboard. Whether you're on a starter or premium plan, you'll benefit from enterprise-grade security, responsive customer support, and access to our email and mobile scraping tools. No hidden fees, no confusing limits — just reliable, high-performance tools built for growth. From marketers to large-scale teams, Vedive gives you everything you need to run successful campaigns and drive real results."
+  }
+};
+
+// Features configuration
+const FEATURES_CONFIG = [
+  { name: "Unlimited Mail Sending", id: "mail_sending" },
+  { name: "Scrap Unlimited Mails", id: "mail_scraping" },
+  { name: "Unlimited WhatsApp Message Sending", id: "whatsapp_sending" },
+  { name: "Unlimited Mail & WhatsApp Template", id: "templates" }
+];
+
+// Plans configuration factory
+const createPricingPlans = (isIndia) => [
+  {
+    id: "free",
+    title: "Free",
+    price: 0,
+    currency: isIndia ? "₹" : "$",
+    duration: "1-day",
+    features: {
+      mail_sending: true,
+      mail_scraping: false,
+      whatsapp_sending: true,
+      templates: false
+    }
+  },
+  {
+    id: "starter", 
+    title: "Starter",
+    price: isIndia ? 99 : 4.99,
+    currency: isIndia ? "₹" : "$",
+    duration: "1-day",
+    features: {
+      mail_sending: true,
+      mail_scraping: true,
+      whatsapp_sending: true,
+      templates: true
+    }
+  },
+  {
+    id: "business",
+    title: "Business", 
+    price: isIndia ? 599 : 29.99,
+    currency: isIndia ? "₹" : "$",
+    duration: "1-week",
+    highlight: true,
+    recommended: true,
+    features: {
+      mail_sending: true,
+      mail_scraping: true,
+      whatsapp_sending: true,
+      templates: true
+    }
+  },
+  {
+    id: "enterprise",
+    title: "Enterprise",
+    price: isIndia ? 1999 : 99,
+    currency: isIndia ? "₹" : "$", 
+    duration: "1-month",
+    features: {
+      mail_sending: true,
+      mail_scraping: true,
+      whatsapp_sending: true,
+      templates: true
+    }
+  }
+];
+
+// CSS styles as a constant
+const PRICING_STYLES = `
 .card-wrapper {
   position: relative;
   margin-top: 15px;
@@ -36,7 +120,66 @@ const cssToAdd = `
 }
 `;
 
-const PricingCard = ({ title, price, currency, duration, features, highlight, recommended }) => {
+// Custom hook for location detection
+const useLocationDetection = () => {
+  const [isIndia, setIsIndia] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const detectLocation = useCallback(async () => {
+    try {
+      const response = await fetch(GEOLOCATION_API);
+      const data = await response.json();
+      setIsIndia(data.country_code === 'IN');
+    } catch (error) {
+      console.error('Error detecting location:', error);
+      // Default to Indian pricing if there's an error
+      setIsIndia(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    detectLocation();
+  }, [detectLocation]);
+
+  return { isIndia, isLoading };
+};
+
+// SEO Head component
+const SEOHead = memo(({ isIndia }) => (
+  <Helmet>
+    <title>{COMPANY_INFO.name} Pricing: Affordable Email & WhatsApp Tools {isIndia ? 'India' : 'Global'}</title>
+    <meta 
+      name="description" 
+      content={`Discover ${COMPANY_INFO.name}'s affordable pricing for bulk email sender, email scraper, and WhatsApp bulk sender tools. Start with flexible plans or a free trial!`}
+    />
+  </Helmet>
+));
+
+SEOHead.displayName = 'SEOHead';
+
+// Hero Section component
+const HeroSection = memo(() => (
+  <div className="top-section">
+    <h1>{CONTENT.hero.title}</h1>
+    <h2>
+      Free, Reliable <span>Messaging</span> and <span>Scraping</span> Services.
+    </h2>
+  </div>
+));
+
+HeroSection.displayName = 'HeroSection';
+
+// Pricing Card component
+const PricingCard = memo(({ plan }) => {
+  const { title, price, currency, duration, highlight, recommended, features } = plan;
+  
+  const buttonStyle = useMemo(() => 
+    highlight ? { backgroundColor: "#1E90FF" } : {}, 
+    [highlight]
+  );
+
   return (
     <div className="card-wrapper">
       <div className="pricing-card">
@@ -50,14 +193,17 @@ const PricingCard = ({ title, price, currency, duration, features, highlight, re
           <NavLink
             to="/plans"
             className="btn"
-            style={highlight ? { backgroundColor: "#1E90FF" } : {}}
+            style={buttonStyle}
           >
             Start for free now
           </NavLink>
         </div>
         <ul className="features">
-          {features.map((feature, index) => (
-            <li key={index} className={feature.available ? "tick" : "cross"}>
+          {FEATURES_CONFIG.map((feature) => (
+            <li 
+              key={feature.id} 
+              className={features[feature.id] ? "tick" : "cross"}
+            >
               <span className="feature-text">{feature.name}</span>
             </li>
           ))}
@@ -66,133 +212,100 @@ const PricingCard = ({ title, price, currency, duration, features, highlight, re
       {recommended && <div className="recommended-badge">Recommended</div>}
     </div>
   );
-};
+});
 
-const Pricing = () => {
-  const [isIndia, setIsIndia] = useState(true);
+PricingCard.displayName = 'PricingCard';
+
+// Pricing Grid component
+const PricingGrid = memo(({ plans }) => (
+  <div className="pricing-container">
+    <h2 className="pricing-grid text-[64px] font-semibold">
+      {plans.map((plan) => (
+        <PricingCard key={plan.id} plan={plan} />
+      ))}
+    </h2>
+  </div>
+));
+
+PricingGrid.displayName = 'PricingGrid';
+
+// Benefits Section component
+const BenefitsSection = memo(() => (
+  <div className="desktop-view">
+    <div
+      style={{ background: "transparent" }}
+      className="about-us-container about-us-container-1"
+    >
+      <h2 className="text-primary text-[38px] sm:text-[48px] md:text-[65px] text-center font-semibold">{CONTENT.benefits.title}</h2>
+      <p>{CONTENT.benefits.description}</p>
+    </div>
+    <div className="about-us-container">
+      <img 
+        src={bgImage1} 
+        alt="Vedive pricing benefits and features illustration" 
+        loading="lazy"
+      />
+    </div>
+  </div>
+));
+
+BenefitsSection.displayName = 'BenefitsSection';
+
+// Loading component
+const LoadingSpinner = memo(() => (
+  <div className="loading-container" style={{ 
+    display: 'flex', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    minHeight: '200px' 
+  }}>
+    <div>Loading pricing...</div>
+  </div>
+));
+
+LoadingSpinner.displayName = 'LoadingSpinner';
+
+// Main Pricing component
+const Pricing = memo(() => {
+  const { isIndia, isLoading } = useLocationDetection();
   
-  useEffect(() => {
-    // Detect if user is in India
-    const detectLocation = async () => {
-      try {
-        // Using a free geolocation API
-        const response = await fetch('https://ipapi.co/json/');
-        const data = await response.json();
-        setIsIndia(data.country_code === 'IN');
-      } catch (error) {
-        console.error('Error detecting location:', error);
-        // Default to Indian pricing if there's an error
-        setIsIndia(true);
-      }
-    };
-    
-    detectLocation();
-  }, []);
+  const pricingPlans = useMemo(() => 
+    createPricingPlans(isIndia), 
+    [isIndia]
+  );
 
-  // Define pricing plans based on location
-  const pricingPlans = [
-    {
-      title: "Free",
-      price: 0,
-      currency: isIndia ? "₹" : "$",
-      duration: "1-day",
-      features: [
-        { name: "Unlimited Mail Sending", available: true },
-        { name: "Scrap Unlimited Mails", available: false },
-        { name: "Unlimited WhatsApp Message Sending", available: true },
-        { name: "Unlimited Mail & WhatsApp Template", available: false },
-      ],
-    },
-    {
-      title: "Starter",
-      price: isIndia ? 99 : 4.99,
-      currency: isIndia ? "₹" : "$",
-      duration: "1-day",
-      features: [
-        { name: "Unlimited Mail Sending", available: true },
-        { name: "Scrap Unlimited Mails", available: true },
-        { name: "Unlimited WhatsApp Message Sending", available: true },
-        { name: "Unlimited Mail & WhatsApp Template", available: true },
-      ],
-    },
-    {
-      title: "Business",
-      price: isIndia ? 599 : 29.99,
-      currency: isIndia ? "₹" : "$",
-      duration: "1-week",
-      highlight: true,
-      recommended: true,
-      features: [
-        { name: "Unlimited Mail Sending", available: true },
-        { name: "Scrap Unlimited Mails", available: true },
-        { name: "Unlimited WhatsApp Message Sending", available: true },
-        { name: "Unlimited Mail & WhatsApp Template", available: true },
-      ],
-    },
-    {
-      title: "Enterprise",
-      price: isIndia ? 1999 : 99,
-      currency: isIndia ? "₹" : "$",
-      duration: "1-month",
-      features: [
-        { name: "Unlimited Mail Sending", available: true },
-        { name: "Scrap Unlimited Mails", available: true },
-        { name: "Unlimited WhatsApp Message Sending", available: true },
-        { name: "Unlimited Mail & WhatsApp Template", available: true },
-      ],
-    },
-  ];
+  if (isLoading) {
+    return (
+      <div>
+        <SEOHead isIndia={isIndia} />
+        <Navbar />
+        <div className="main-body">
+          <HeroSection />
+          <LoadingSpinner />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div>
-      {/* This adds the CSS to the page - you can alternatively copy this to your CSS file */}
-      <style>{cssToAdd}</style>
-      <Helmet>
-        <title>Vedive Pricing: Affordable Email & WhatsApp Tools {isIndia ? 'India' : 'Global'}</title>
-        <meta name="description" content="Discover Vedive's affordable pricing for bulk email sender, email scraper, and WhatsApp bulk sender tools. Start with flexible plans or a free trial!"/>
-      </Helmet>
-      {/* Top Section */}
+      <style>{PRICING_STYLES}</style>
+      <SEOHead isIndia={isIndia} />
       <Navbar />
-
-      {/* Main Body Section */}
+      
       <div className="main-body">
-        <div className="top-section">
-          <h1>Pricing</h1>
-          <h2>
-            Free, Reliable <span>Messaging</span> and <span>Scraping</span>{" "}
-            Services.
-          </h2>
-        </div>
-        
-        {/* Pricing Cards Section */}
-        <div className="pricing-container">
-          <h2 className="pricing-grid text-[64px] font-semibold">
-            {pricingPlans.map((plan, index) => (
-              <PricingCard key={index} {...plan} />
-            ))}
-          </h2>
-        </div>
-
-        {/* About Us Sections */}
-        <div className="desktop-view">
-          <div
-            style={{ background: "transparent" }}
-            className="about-us-container about-us-container-1"
-          >
-            <h2 className="text-[64px] font-semibold">What's Included & Benefits</h2>
-            <p>
-            Every Vedive plan comes packed with powerful features designed to help you scale faster and communicate smarter. Enjoy AI-powered email deliverability, bulk WhatsApp messaging, and real-time tracking — all from one intuitive dashboard. Whether you're on a starter or premium plan, you'll benefit from enterprise-grade security, responsive customer support, and access to our email and mobile scraping tools. No hidden fees, no confusing limits — just reliable, high-performance tools built for growth. From marketers to large-scale teams, Vedive gives you everything you need to run successful campaigns and drive real results.
-            </p>
-          </div>
-        <div className="about-us-container"><img src={bgImage1} alt="" /></div>
-        </div>
-
+        <HeroSection />
+        <PricingGrid plans={pricingPlans} />
+        <BenefitsSection />
         <CoreValues />
       </div>
 
       <Footer />
     </div>
   );
-};
+});
+
+Pricing.displayName = 'Pricing';
 
 export default Pricing;
