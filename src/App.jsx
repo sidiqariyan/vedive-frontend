@@ -431,16 +431,6 @@ const AnimatedRoutes = () => {
             </Suspense>
           }
         />
-        {/* <Route
-          path="/plan"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <Plan />
-              </PageTransition>
-            </Suspense>
-          }
-        />          */}
         {/* Auth Routes */}
         <Route
           path="/login"
@@ -591,7 +581,7 @@ const AnimatedRoutes = () => {
             element={
               <Suspense fallback={<div>Loading...</div>}>
                 <PageTransition>
-                  <Plan />
+                  <Abouts />
                 </PageTransition>
               </Suspense>
             }
@@ -739,23 +729,7 @@ const App = () => {
   // };
 
   return (<>
-  
- {/* <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold text-center mb-6">Subscription Plans</h1>
-      {user && (
-        <div className="text-center mb-4">
-          <p>Current Plan: {user.currentPlan}</p>
-          {user.subscriptionEndDate && (
-            <p>Expires: {new Date(user.subscriptionEndDate).toLocaleDateString()}</p>
-          )}
-        </div>
-      )}
-      <div className="flex flex-wrap justify-center">
-        {plans.map(plan => (
-          <SubscriptionCard key={plan._id} plan={plan} onSubscribe={handleSubscribe} />
-        ))}
-      </div>
-    </div>    */}
+
 
     <AuthProvider>
       <style>{globalStyles}</style>
