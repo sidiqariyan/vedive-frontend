@@ -431,8 +431,8 @@ const AnimatedRoutes = () => {
             </Suspense>
           }
         />
-        <Route
-          path="/plans"
+        {/* <Route
+          path="/plan"
           element={
             <Suspense fallback={null}>
               <PageTransition>
@@ -440,8 +440,7 @@ const AnimatedRoutes = () => {
               </PageTransition>
             </Suspense>
           }
-        />
-        
+        />          */}
         {/* Auth Routes */}
         <Route
           path="/login"

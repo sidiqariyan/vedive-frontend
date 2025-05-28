@@ -134,42 +134,34 @@ const Plan = () => {
   ];
 
   useEffect(() => {
-    // Fetch subscription plans from API (for potential mapping)
-    axios
-      .get("https://vedive.com:3000/api/subscription/plans")
-      .then((res) => {
-        console.log("API Plans fetched:", res.data);
-        setApiPlans(res.data);
-      })
-      .catch((err) => {
-        console.error("Error fetching plans:", err);
-        toast.error("Failed to load subscription plans");
-      });
-
-    // Fetch user subscription info if authenticated
-    if (!token) {
-      setShowLoader(false);
-      return;
-    }
-
-    axios
-      .get("https://vedive.com:3000/api/dashboard", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        console.log("User info fetched:", res.data);
-        setUserInfo(res.data.subscriptionInfo);
-      })
-      .catch((err) => {
-        console.error("Error fetching user:", err);
-        toast.error("Failed to load user subscription info");
-      })
-      .finally(() => setShowLoader(false));
-  }, [token]);
+    const fetchData = async () => {
+      try {
+        const plansRes = await axios.get("https://vedive.com:3000/api/subscription/plans");
+        const sortedPlans = plansRes.data.sort((a, b) => planOrder[a.name.toLowerCase()] - planOrder[b.name.toLowerCase()]);
+        setApiPlans(sortedPlans);
+        if (token) {
+          const userRes = await axios.get("https://vedive.com:3000/api/dashboard", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setUserInfo(userRes.data.subscriptionInfo);
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        if (err.response?.status === 401) {
+          toast.error("Session expired. Please log in again.");
+          navigate("/login");
+        } else {
+          toast.error("Failed to load data");
+        }
+      } finally {
+        setShowLoader(false);
+      }
+    };
+    fetchData();
+  }, [token, navigate]);
 
   const findApiPlanId = (planName) => {
-    // Try to match API plan with our fixed plans
-    const apiPlan = apiPlans.find(plan => 
+    const apiPlan = apiPlans.find(plan =>
       plan.name.toLowerCase().includes(planName.toLowerCase()) ||
       planName.toLowerCase().includes(plan.name.toLowerCase())
     );
@@ -178,26 +170,25 @@ const Plan = () => {
 
   const handleBuyNowClick = (planId) => {
     if (planId === "free") return;
-    
+
     if (!token) {
       toast.info("You must be logged in to subscribe.");
       navigate("/login", { state: { redirectTo: "/plan" } });
       return;
     }
 
-    // Show phone modal
     setSelectedPlan(planId);
     setShowPhoneModal(true);
-    setPhone(""); // Reset phone input
+    setPhone("");
   };
 
   const handleSubscribe = async () => {
-    if (!phone.startsWith("+")) {
-      toast.error("Enter a valid phone number starting with '+'.");
+    const phoneRegex = /^\+\d{10,15}$/;
+    if (!phoneRegex.test(phone)) {
+      toast.error("Enter a valid phone number (e.g., +919876543210)");
       return;
     }
 
-    // Find corresponding API plan ID
     const apiPlanId = findApiPlanId(selectedPlan);
     if (!apiPlanId) {
       toast.error("Plan not found. Please try again.");
@@ -215,15 +206,13 @@ const Plan = () => {
       const { payment_session_id } = data;
       if (!payment_session_id) throw new Error("Payment session ID missing");
 
-      // Close modal before redirecting
       setShowPhoneModal(false);
 
-      // Initialize Cashfree payment
       if (typeof Cashfree !== 'undefined') {
         const cashfree = Cashfree({ mode: "production" });
-        cashfree.checkout({ 
-          paymentSessionId: payment_session_id, 
-          redirectTarget: "_self" 
+        cashfree.checkout({
+          paymentSessionId: payment_session_id,
+          redirectTarget: "_self"
         });
       } else {
         throw new Error("Cashfree SDK not loaded");
@@ -284,7 +273,7 @@ const Plan = () => {
         <title>Vedive Subscription Plans: Affordable Email & WhatsApp Tools</title>
         <meta name="description" content="Choose from Vedive's flexible subscription plans for bulk email sender, email scraper, and WhatsApp bulk sender tools. Find the perfect plan for your business needs!" />
       </Helmet>
-      
+
       <div className="w-full max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h1 className="text-3xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-blue-500">
@@ -293,7 +282,7 @@ const Plan = () => {
           <p className="text-gray-600 text-lg mt-4">
             Select the plan that best fits your needs and start growing your business today
           </p>
-          
+
           {userInfo?.currentPlan && (
             <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg inline-block">
               <div className="flex items-center justify-center">
@@ -334,7 +323,7 @@ const Plan = () => {
                     </span>
                   </div>
                 )}
-                
+
                 {plan.popular && !isCurrentPlan && (
                   <div className="absolute -top-5 inset-x-0 flex justify-center">
                     <span className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold px-6 py-2 rounded-full shadow-lg">
@@ -350,7 +339,7 @@ const Plan = () => {
                 </div>
 
                 <h3 className="text-xl font-semibold text-center mb-2">{plan.name}</h3>
-                
+
                 <div className="text-center mb-6">
                   <span className="text-4xl font-bold">
                     {getCurrencySymbol()}{plan.price}
@@ -414,11 +403,11 @@ const Plan = () => {
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <p className="text-gray-600 mb-6">
-              Please enter your phone number to proceed with the subscription
+              Please enter your phone number for payment verification and subscription notifications.
             </p>
-            
+
             <div className="relative mb-6">
               <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
@@ -430,11 +419,11 @@ const Plan = () => {
                 autoFocus
               />
             </div>
-            
+
             <p className="text-sm text-gray-500 mb-6 text-center">
               Phone number is required for subscription activation
             </p>
-            
+
             <div className="flex gap-4">
               <button
                 onClick={closeModal}
