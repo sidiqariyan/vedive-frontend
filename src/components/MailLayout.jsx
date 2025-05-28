@@ -5,14 +5,14 @@ import mailIcon from "./assets/mail.svg";
 import whatsappIcon from "./assets/whatsapp.svg";
 import numberIcon from "./assets/number.svg";
 import gmailIcon from "./assets/gmail.svg";
-import mailScraperIcon from "./assets/mail-scraper.svg";
+import mailScraperIcon from "./assets/mail-scraper.svg"; 
 
 // Constants
 const API_URL = "https://vedive.com:3000";
 const PROTECTED_ROUTES = ["/email-scraper", "/number-scraper"];
 const DESKTOP_BREAKPOINT = 1024;
 
-// Custom hooks
+// Custom hookss
 const useAuth = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);

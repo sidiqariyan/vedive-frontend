@@ -106,7 +106,7 @@ const ServicesGrid = memo(() => (
 const WhyChooseSection = memo(() => (
   <div className="desktop-view">
     <div className="about-us-container about-us-container-1" style={{ background: "transparent" }}>
-      <h2 className="text-primary text-[38px] sm:text-[48px] md:text-[65px] text-center font-semibold">Why Choose Vedive</h2>
+      <h2 className="text-primary text-[38px] sm:text-[48px] md:text-[65px] text-center md:text-left font-semibold">Why Choose Vedive</h2>
       <p>{WHY_CHOOSE_TEXT}</p>
     </div>
     <div className="about-us-container">
