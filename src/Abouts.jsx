@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Check, Sparkles, Rocket, Building2, X, Loader, Crown, Phone } from "lucide-react";
-import { useAuth } from "../Pages/Mailer/AuthContext.jsx";
+import { useAuth } from "./components/Pages/Mailer/AuthContext.jsx";
 import { toast } from "react-toastify";
 import { Helmet } from 'react-helmet';
 import axios from "axios";
 import "tailwindcss/tailwind.css";
 
-const Plan = () => {
+const Abouts = () => {
   const [apiPlans, setApiPlans] = useState([]);
   const [userInfo, setUserInfo] = useState(null);
   const [showLoader, setShowLoader] = useState(true);
@@ -453,4 +453,4 @@ const Plan = () => {
   );
 };
 
-export default Plan;
+export default Abouts;

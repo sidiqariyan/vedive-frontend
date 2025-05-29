@@ -9,6 +9,7 @@ const VerifyEmail = () => {
   const [isExpired, setIsExpired] = useState(false);
   const [resending, setResending] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [countdown, setCountdown] = useState(3);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -18,31 +19,55 @@ const VerifyEmail = () => {
       const token = urlParams.get("token");
       
       if (!token) {
-        setError("Invalid verification link.");
+        setError("Invalid verification link. Please check your email for the correct link.");
         setLoading(false);
         return;
       }
 
       try {
         const response = await fetch(
-          `${API_URL}/api/auth/verify-email?token=${token}`
+          `${API_URL}/api/auth/verify-email?token=${token}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
         );
+        
         const data = await response.json();
 
         if (!response.ok) {
+          console.log('Verification failed:', data); // Debug log
           setError(data.error || "Verification failed.");
-          if (data.expired) {
+          
+          // Check for expired token
+          if (data.expired || 
+              data.error?.includes("expired") || 
+              data.error?.includes("Verification link has expired")) {
             setIsExpired(true);
           }
         } else {
           setMessage(data.message);
           localStorage.setItem("token", data.token);
           
-          // Show success message for 3 seconds then redirect
-          setTimeout(() => navigate("/dashboard"), 3000);
+          // Start countdown
+          const timer = setInterval(() => {
+            setCountdown((prev) => {
+              if (prev <= 1) {
+                clearInterval(timer);
+                navigate("/dashboard");
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+
+          return () => clearInterval(timer);
         }
       } catch (err) {
-        setError("An unexpected error occurred. Please try again.");
+        console.error('Verification error:', err);
+        setError("Network error occurred. Please check your connection and try again.");
       } finally {
         setLoading(false);
       }
@@ -57,8 +82,16 @@ const VerifyEmail = () => {
       return;
     }
 
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(userEmail)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
     setResending(true);
     setError("");
+    setMessage("");
 
     try {
       const response = await fetch(`${API_URL}/api/auth/resend-verification`, {
@@ -66,7 +99,7 @@ const VerifyEmail = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: userEmail }),
+        body: JSON.stringify({ email: userEmail.trim().toLowerCase() }),
       });
 
       const data = await response.json();
@@ -74,13 +107,21 @@ const VerifyEmail = () => {
       if (!response.ok) {
         setError(data.error || "Failed to resend verification email.");
       } else {
-        setMessage("Verification email sent successfully! Please check your inbox.");
+        setMessage(data.message || "Verification email sent successfully! Please check your inbox and spam folder. The new link will expire in 15 minutes.");
         setIsExpired(false);
+        setUserEmail(""); // Clear email field
       }
     } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
+      console.error('Resend error:', err);
+      setError("Network error occurred. Please check your connection and try again.");
     } finally {
       setResending(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !resending && userEmail) {
+      handleResendVerification();
     }
   };
 
@@ -116,8 +157,10 @@ const VerifyEmail = () => {
               </div>
               <div className="ml-3">
                 <p className="text-green-800 font-medium">{message}</p>
-                {message.includes("successfully") && (
-                  <p className="text-green-600 text-sm mt-1">Redirecting to dashboard in 3 seconds...</p>
+                {message.includes("successfully") && !message.includes("sent") && (
+                  <p className="text-green-600 text-sm mt-1">
+                    Redirecting to dashboard in {countdown} seconds...
+                  </p>
                 )}
               </div>
             </div>
@@ -150,7 +193,8 @@ const VerifyEmail = () => {
               <div className="ml-3">
                 <p className="text-yellow-800 font-medium">Verification Link Expired</p>
                 <p className="text-yellow-700 text-sm mt-1">
-                  Your verification link has expired. Enter your email below to receive a new verification link.
+                  Your verification link has expired (links expire after 15 minutes for security). 
+                  Enter your email below to receive a new verification link.
                 </p>
               </div>
             </div>
@@ -165,17 +209,19 @@ const VerifyEmail = () => {
                   id="email"
                   value={userEmail}
                   onChange={(e) => setUserEmail(e.target.value)}
+                  onKeyPress={handleKeyPress}
                   placeholder="Enter your email address"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
                   required
+                  autoComplete="email"
                 />
               </div>
               
               <button
                 onClick={handleResendVerification}
-                disabled={resending || !userEmail}
+                disabled={resending || !userEmail.trim()}
                 className={`w-full py-2 px-4 rounded-lg font-medium transition-all ${
-                  resending || !userEmail
+                  resending || !userEmail.trim()
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 transform hover:scale-105'
                 }`}
@@ -186,9 +232,13 @@ const VerifyEmail = () => {
                     Sending...
                   </div>
                 ) : (
-                  'Resend Verification Email'
+                  'Resend Verification Email (15 min expiry)'
                 )}
               </button>
+              
+              <p className="text-xs text-gray-500 text-center">
+                The new verification link will expire in 15 minutes for security.
+              </p>
             </div>
           </div>
         )}
@@ -202,12 +252,19 @@ const VerifyEmail = () => {
             </div>
             <h3 className="text-lg font-semibold text-gray-800">Verification Failed</h3>
             <p className="text-gray-600">
-              We couldn't verify your email address. Please try clicking the verification link in your email again.
+              We couldn't verify your email address. The link may be invalid or expired.
+              Please try clicking the verification link in your email again, or request a new one.
             </p>
+            <button
+              onClick={() => setIsExpired(true)}
+              className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              Request New Verification Link
+            </button>
           </div>
         )}
 
-        {message && message.includes("successfully") && (
+        {message && message.includes("Email verified successfully") && (
           <div className="text-center space-y-4">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -216,11 +273,20 @@ const VerifyEmail = () => {
             </div>
             <h3 className="text-lg font-semibold text-gray-800">Email Verified Successfully!</h3>
             <p className="text-gray-600">
-              Your account has been verified. You'll be redirected to your dashboard shortly.
+              Your account has been verified. You'll be redirected to your dashboard in {countdown} seconds.
             </p>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full animate-pulse" style={{width: '100%'}}></div>
+              <div 
+                className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full transition-all duration-1000" 
+                style={{width: `${((3 - countdown) / 3) * 100}%`}}
+              ></div>
             </div>
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="mt-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+            >
+              Go to Dashboard Now
+            </button>
           </div>
         )}
 
@@ -230,6 +296,9 @@ const VerifyEmail = () => {
             <a href="mailto:info@vedive.com" className="text-purple-600 hover:text-purple-700 font-medium">
               info@vedive.com
             </a>
+          </p>
+          <p className="text-xs text-gray-400 mt-2">
+            Verification links expire after 15 minutes for your security.
           </p>
         </div>
       </div>

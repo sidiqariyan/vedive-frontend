@@ -247,8 +247,6 @@ const globalStyles = `
   }
 `;
 
-// Blog Layout Component for new blog routes
-
 // Modified AnimatedRoutes component with properly nested routes
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -288,18 +286,6 @@ const AnimatedRoutes = () => {
           }
         />
 
-{/* <Route
-  path="/create-blog"
-  element={
-    <ProtectedRoute>
-      <Suspense fallback={<div>Loading...</div>}>
-        <PageTransition>
-          <CreateBlogPost />
-        </PageTransition>
-      </Suspense>
-    </ProtectedRoute>
-  }
-/> */}
    {/* Admin-only routes */}
         <Route
           path="/create-blog"
@@ -344,22 +330,7 @@ const AnimatedRoutes = () => {
               </Suspense>
           }
           />,
-          {/* <Route
-  path="/admin/blog"
-  element={
-    <AdminRoute>
-      <BlogAdmin />
-    </AdminRoute>
-  }
-/>
-<Route
-  path="/admin/blog/edit/:id"
-  element={
-    <AdminRoute>
-      <EditBlogPost />
-    </AdminRoute>
-  }
-/> */}
+
         {/* Original Public Routes */}
         <Route
           path="/home"
@@ -389,16 +360,7 @@ const AnimatedRoutes = () => {
             </Suspense>
           }
         />
-        {/* <Route
-          path="/abouts"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-             
-              </PageTransition>
-            </Suspense>
-          }
-        /> */}
+       
         <Route
           path="/pricing"
           element={
@@ -483,16 +445,7 @@ const AnimatedRoutes = () => {
           }
         />
         {/* Template Routes */}
-        {/* <Route
-            path="post-form"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <PostForm />
-                </PageTransition>
-              </Suspense>
-            }
-          /> */}
+       
         <Route
             path="templates"
             element={
@@ -621,11 +574,10 @@ const AnimatedRoutes = () => {
           <Route
             path="email-sender"
             element={
-              // <Suspense fallback={<div>Loading...</div>}>
+             // <Suspense fallback={<div>Loading...</div>}>
               //   <PageTransition>
                   <SenderBody />
-              //   </PageTransition>
-              // </Suspense>
+              
             }
           />
           <Route
@@ -638,28 +590,9 @@ const AnimatedRoutes = () => {
               </Suspense>
             }
           />
-            {/* <Route
-            path="abouts"
-            element={
-              <Suspense fallback={<div>Loading…</div>}>
-                <Abouts />
-              </Suspense>
-            }
-          /> */}
-        
+            
           
-          {/* Template Routes */}
-          {/* <Route
-            path="post-form"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <PostForm />
-                </PageTransition>
-              </Suspense>
-            }
-          /> */}
-         
+          {/* Template Routes */}   
           <Route
             path="editor/:id"
             element={
@@ -724,9 +657,6 @@ const App = () => {
     .catch(error => alert("Error initiating payment: " + error.message));
   };
 
-  // const handleLoaderComplete = () => {
-  //   setShowLoader(false);
-  // };
 
   return (<>
 
