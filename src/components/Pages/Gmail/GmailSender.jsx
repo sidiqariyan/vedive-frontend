@@ -158,7 +158,7 @@ const GmailSender = () => {
           <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600">
             <HelpCircle size={16} className="text-third" />
             <span>Need help?</span>
-            <a href="#" className="text-third underline">
+            <a href="https://www.youtube.com/watch?v=Vh_2yfbIlJo&ab_channel=Vedive" className="text-third underline">
               Watch tutorial
             </a>
           </div>

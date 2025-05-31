@@ -30,32 +30,44 @@ const BlogPostDetail = () => {
         : `https://vedive.com:3000${img}`
       : '/placeholder.png';
 
-  // useEffect(() => {
-  //   const fetchPost = async () => {
-  //     try {
-  //       setLoading(true);
-  //       const response = await axios.get(
-  //         `https://vedive.com:3000/api/blog/blog-posts/${slug}`
-  //       );
-  //       setPost(response.data);
-  //       setError('');
-  //       try {
-  //         const rel = await axios.get(
-  //           `https://vedive.com:3000/api/blog/blog-posts/related/${slug}`
-  //         );
-  //         setRelatedPosts(Array.isArray(rel.data) ? rel.data.slice(0, 3) : []);
-  //       } catch {
-  //         setRelatedPosts([]);
-  //       }
-  //     } catch (err) {
-  //       console.error(err);
-  //       setError('Failed to load the blog post. It may have been removed or does not exist.');
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   if (slug) fetchPost();
-  // }, [slug]);
+  // FIXED: Uncommented and corrected the main blog post fetch
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        setLoading(true);
+        console.log('Fetching post with slug:', slug); // Debug log
+        
+        const response = await axios.get(
+          `https://vedive.com:3000/api/blog/blog-posts/${slug}`
+        );
+        
+        console.log('Post response:', response.data); // Debug log
+        setPost(response.data);
+        setError('');
+        
+        // Fetch related posts
+        try {
+          const rel = await axios.get(
+            `https://vedive.com:3000/api/blog/blog-posts/related/${slug}`
+          );
+          setRelatedPosts(Array.isArray(rel.data) ? rel.data.slice(0, 3) : []);
+        } catch (relatedError) {
+          console.warn('Could not fetch related posts:', relatedError);
+          setRelatedPosts([]);
+        }
+      } catch (err) {
+        console.error('Error fetching blog post:', err);
+        setError('Failed to load the blog post. It may have been removed or does not exist.');
+        setPost(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (slug) {
+      fetchPost();
+    }
+  }, [slug]);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -93,19 +105,45 @@ const BlogPostDetail = () => {
   };
 
   if (loading) return (
-    <div className="flex justify-center items-center h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    <div className="bg-primary min-h-screen">
+      <Navbar />
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+      <Footer />
     </div>
   );
 
   if (error) return (
-    <div className="w-full max-w-[1440px] mx-auto p-4 bg-red-100 text-red-700 rounded-lg">
-      <h2 className="text-2xl mb-2">Error</h2>
-      <p>{error}</p>
+    <div className="bg-primary min-h-screen">
+      <Navbar />
+      <div className="w-full max-w-[1440px] mx-auto p-4">
+        <div className="bg-red-100 text-red-700 rounded-lg p-8 text-center">
+          <h2 className="text-2xl mb-2">Error</h2>
+          <p>{error}</p>
+          <Link to="/" className="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded">
+            Go Back Home
+          </Link>
+        </div>
+      </div>
+      <Footer />
     </div>
   );
 
-  if (!post) return null;
+  if (!post) return (
+    <div className="bg-primary min-h-screen">
+      <Navbar />
+      <div className="w-full max-w-[1440px] mx-auto p-4">
+        <div className="text-center py-8">
+          <h2 className="text-2xl mb-2">Post not found</h2>
+          <Link to="/" className="bg-blue-600 text-white px-4 py-2 rounded">
+            Go Back Home
+          </Link>
+        </div>
+      </div>
+      <Footer />
+    </div>
+  );
 
   const sliderSettings = {
     dots: true,
@@ -154,7 +192,7 @@ const BlogPostDetail = () => {
             />
             <div>
               <h3 className="text-xl font-semibold">About the Author</h3>
-              <p className="text-gray-700">The admin is the site’s main author, pouring creativity and insight into every article with a deep passion for storytelling, clear expression, and meaningful content that resonates with readers.</p>
+              <p className="text-gray-700">The admin is the site's main author, pouring creativity and insight into every article with a deep passion for storytelling, clear expression, and meaningful content that resonates with readers.</p>
             </div>
           </div>
 
@@ -221,7 +259,7 @@ const BlogPostDetail = () => {
         </main>
 
         <aside className="sticky top-0 space-y-8 p-4">
-          {/* Sidebar unchanged... */}
+          {/* Search */}
           <div>
             <div className="relative">
               <input
@@ -258,7 +296,7 @@ const BlogPostDetail = () => {
             </ul>
           </div>
 
-          
+          {/* Hot Topics */}
           <div className="bg-gray-50 p-4 rounded-lg">
             <h3 className="text-2xl font-semibold mb-4">Hot Topics</h3>
             <ul className="space-y-4">
@@ -281,6 +319,7 @@ const BlogPostDetail = () => {
             </ul>
           </div>
 
+          {/* Categories */}
           <div className="bg-gray-50 p-4 rounded-lg">
             <h3 className="text-2xl font-semibold mb-4">Categories</h3>
             <div className="flex flex-wrap gap-2">
@@ -305,4 +344,3 @@ const BlogPostDetail = () => {
 };
 
 export default BlogPostDetail;
- 
