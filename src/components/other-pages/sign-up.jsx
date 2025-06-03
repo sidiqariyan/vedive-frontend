@@ -38,6 +38,12 @@ const Signup = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  
+  // Add the missing focus state variables
+  const [nameFocused, setNameFocused] = useState(false);
+  const [usernameFocused, setUsernameFocused] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
 
   useEffect(() => {
     if (checkAuthAndRedirect()) return;
@@ -75,13 +81,6 @@ const Signup = () => {
       if (!response.ok) {
         throw new Error(data?.error || "Registration failed.");
       }
-
-      // ✅ Store token and user in localStorage
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
-
       setMessage(data.message);
     } catch (err) {
       console.error("Signup failed:", err);

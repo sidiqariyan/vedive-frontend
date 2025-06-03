@@ -9,34 +9,17 @@ const OAuth2RedirectHandler = () => {
       try {
         console.log('OAuth callback handler started');
         console.log('Current URL:', window.location.href);
-        console.log('Search params:', window.location.search);
-        console.log('Hash:', window.location.hash);
         
-        // Get URL parameters from both search and hash
+        // Get URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
         
-        // Try to get token from multiple possible sources (Google OAuth typically uses search params)
-        let token = urlParams.get('token') || 
-                   urlParams.get('access_token') || 
-                   urlParams.get('jwt') ||
-                   hashParams.get('token') || 
-                   hashParams.get('access_token') ||
-                   hashParams.get('jwt');
-        
-        // Also check for error in both locations
-        const error = urlParams.get('error') || 
-                     hashParams.get('error') ||
-                     urlParams.get('error_description') ||
-                     hashParams.get('error_description');
-
-        // Check for success parameter (some OAuth implementations use this)
-        const success = urlParams.get('success') || hashParams.get('success');
+        // Get token and error from URL
+        const token = urlParams.get('token');
+        const error = urlParams.get('error');
         
         console.log('Extracted params:', { 
           token: token ? `present (${token.length} chars)` : 'missing', 
-          error: error || 'none',
-          success: success || 'none'
+          error: error || 'none'
         });
 
         if (error) {
@@ -49,53 +32,20 @@ const OAuth2RedirectHandler = () => {
 
         if (!token) {
           console.error('No token received in callback');
-          console.log('All URL params:', Object.fromEntries(urlParams.entries()));
-          console.log('All hash params:', Object.fromEntries(hashParams.entries()));
-          
-          // If no token but success=true, try to get user data from backend
-          if (success === 'true') {
-            console.log('Success flag found, attempting to get token from backend...');
-            try {
-              const response = await fetch('https://vedive.com:3000/api/auth/session', {
-                method: 'GET',
-                credentials: 'include', // Include cookies
-                headers: {
-                  'Content-Type': 'application/json',
-                }
-              });
-
-              if (response.ok) {
-                const data = await response.json();
-                token = data.token || data.access_token;
-                console.log('Token retrieved from session:', token ? 'present' : 'missing');
-              }
-            } catch (sessionError) {
-              console.error('Failed to get session:', sessionError);
-            }
-          }
-          
-          if (!token) {
-            setStatus('error');
-            setMessage('No authentication token received. Please try again.');
-            setTimeout(() => window.location.href = '/login', 3000);
-            return;
-          }
+          setStatus('error');
+          setMessage('No authentication token received. Please try again.');
+          setTimeout(() => window.location.href = '/login', 3000);
+          return;
         }
 
-        console.log('Token received, storing in localStorage...');
+        console.log('Token received, verifying with backend...');
         
-        // FIXED: Store the token in localStorage (not in-memory storage)
-        localStorage.setItem('token', token);
-        console.log('Token stored successfully in localStorage');
-        
-        // Verify the token is valid by calling the backend
-        console.log('Verifying token with backend...');
+        // Verify the token with backend
         try {
           const response = await fetch('https://vedive.com:3000/api/auth/verify-token', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ token })
           });
@@ -106,9 +56,10 @@ const OAuth2RedirectHandler = () => {
             const userData = await response.json();
             console.log('Token verification successful:', userData);
             
-            // FIXED: Store user data in localStorage (not window object)
-            localStorage.setItem('user', JSON.stringify(userData.user || userData));
-            console.log('User data stored successfully in localStorage');
+            // Store token and user data in localStorage
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(userData.user));
+            console.log('Authentication data stored successfully');
             
             setStatus('success');
             setMessage('Authentication successful! Redirecting to dashboard...');
@@ -120,25 +71,26 @@ const OAuth2RedirectHandler = () => {
           } else {
             const errorData = await response.json().catch(() => ({}));
             console.error('Token verification failed:', errorData);
-            throw new Error(errorData.error || errorData.message || 'Token validation failed');
+            throw new Error(errorData.error || 'Token validation failed');
           }
         } catch (fetchError) {
-          console.error('Network error during token verification:', fetchError);
+          console.error('Token verification error:', fetchError);
           
-          // If network fails but we have a token that looks valid (JWT format)
+          // Fallback: If token looks like a JWT, try to decode it
           if (token && token.split('.').length === 3) {
             try {
               const payload = JSON.parse(atob(token.split('.')[1]));
               const currentTime = Math.floor(Date.now() / 1000);
               
-              if (payload.exp && payload.exp > currentTime) {
-                console.log('Network error but token is valid JWT and not expired, proceeding to dashboard');
+              if (payload.exp && payload.exp > currentTime && payload._id) {
+                console.log('Using token without backend verification (network error fallback)');
                 
-                // Store basic user info from JWT payload
+                // Store token
+                localStorage.setItem('token', token);
+                
+                // Create basic user info from JWT payload
                 const basicUserInfo = {
-                  _id: payload._id || payload.id,
-                  email: payload.email,
-                  name: payload.name,
+                  _id: payload._id,
                   authProvider: 'google'
                 };
                 localStorage.setItem('user', JSON.stringify(basicUserInfo));
@@ -155,23 +107,12 @@ const OAuth2RedirectHandler = () => {
             }
           }
           
-          // If token looks valid (reasonable length), proceed anyway
-          if (token && token.length > 20) {
-            console.log('Network error but token looks valid, proceeding to dashboard');
-            setStatus('success');
-            setMessage('Authentication successful! Redirecting to dashboard...');
-            setTimeout(() => {
-              window.location.href = '/dashboard';
-            }, 1500);
-            return;
-          }
-          
           throw fetchError;
         }
       } catch (error) {
         console.error('OAuth callback error:', error);
         
-        // FIXED: Clear localStorage instead of window properties
+        // Clear any stored data on error
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         
@@ -181,7 +122,7 @@ const OAuth2RedirectHandler = () => {
       }
     };
 
-    // Add a small delay to ensure DOM is ready
+    // Start handling after a small delay
     const timer = setTimeout(handleOAuthCallback, 100);
     return () => clearTimeout(timer);
   }, []);
@@ -191,32 +132,19 @@ const OAuth2RedirectHandler = () => {
       'access_denied': 'You denied access to your Google account. Please try again.',
       'google_auth_failed': 'Google authentication failed. Please try again.',
       'authentication_failed': 'Authentication failed. Please try again.',
-      'callback_error': 'An error occurred during authentication. Please try again.',
       'google_oauth_failed': 'Google OAuth failed. Please try again.',
-      'token_missing': 'Authentication token is missing. Please try again.',
-      'user_creation_failed': 'Failed to create user account. Please try again.',
       'token_generation_failed': 'Failed to generate authentication token. Please try again.',
-      'invalid_request': 'Invalid authentication request. Please try again.',
-      'unauthorized_client': 'Unauthorized client. Please contact support.',
-      'unsupported_response_type': 'Unsupported response type. Please contact support.',
-      'invalid_scope': 'Invalid scope requested. Please contact support.',
-      'server_error': 'Server error occurred. Please try again later.',
-      'temporarily_unavailable': 'Service temporarily unavailable. Please try again later.'
+      'user_creation_failed': 'Failed to create user account. Please try again.',
     };
     
     return errorMessages[error] || `Authentication error: ${error}. Please try again.`;
   };
 
   const handleRetry = () => {
-    // FIXED: Clear localStorage instead of window properties
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     window.location.href = '/login';
   };
-
-  // Get current state for debug info
-  const currentToken = localStorage.getItem('token');
-  const currentUser = localStorage.getItem('user');
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white">
@@ -279,14 +207,12 @@ const OAuth2RedirectHandler = () => {
           </div>
         )}
         
-        {/* Debug info */}
+        {/* Debug info (remove in production) */}
         <div className="mt-6 text-xs text-gray-400 border-t border-white/10 pt-4 text-left">
           <p><strong>URL:</strong> {window.location.href}</p>
           <p><strong>Status:</strong> {status}</p>
-          <p><strong>Token in localStorage:</strong> {currentToken ? `Present (${currentToken.length} chars)` : 'Missing'}</p>
-          <p><strong>User in localStorage:</strong> {currentUser ? 'Present' : 'Missing'}</p>
-          <p><strong>Search Params:</strong> {window.location.search || 'None'}</p>
-          <p><strong>Hash:</strong> {window.location.hash || 'None'}</p>
+          <p><strong>Token in localStorage:</strong> {localStorage.getItem('token') ? `Present` : 'Missing'}</p>
+          <p><strong>User in localStorage:</strong> {localStorage.getItem('user') ? 'Present' : 'Missing'}</p>
         </div>
       </div>
     </div>
