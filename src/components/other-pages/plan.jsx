@@ -56,7 +56,6 @@ const Plan = () => {
     
     if (planName.includes('free')) return "0";
     
-    // First, try to get price from the API response (database)
     if (plan.prices && Array.isArray(plan.prices)) {
       const targetCurrency = isIndianUser ? "INR" : "USD";
       const priceObj = plan.prices.find(p => p.currency === targetCurrency);
@@ -65,7 +64,6 @@ const Plan = () => {
       }
     }
     
-    // Updated hardcoded pricing to match your requirements
     const pricingData = {
       starter: { inr: "99", usd: "4.99" },
       business: { inr: "599", usd: "29.99" },
@@ -78,7 +76,6 @@ const Plan = () => {
       }
     }
     
-    // Final fallback to single price property
     if (plan.price) {
       return plan.price.toString();
     }
@@ -91,13 +88,11 @@ const Plan = () => {
     
     const planName = plan.name.toLowerCase();
     
-    // Use index-based mapping for better accuracy
     if (index === 0 || planName.includes('free')) return "/1-day";
     if (index === 1 || planName.includes('starter')) return "/1-day";
     if (index === 2 || planName.includes('business')) return "/1-week";
     if (index === 3 || planName.includes('enterprise')) return "/1-month";
     
-    // Fallback based on plan name
     if (planName.includes('free')) return "/1-day";
     if (planName.includes('starter')) return "/1-day";
     if (planName.includes('business')) return "/1-week";
@@ -105,7 +100,6 @@ const Plan = () => {
     return "/month";
   };
 
-  // Get display name for plans
   const getDisplayName = (plan, index) => {
     if (!plan || !plan.name) return "Unknown";
     
@@ -113,39 +107,32 @@ const Plan = () => {
     
     if (planName.includes('free')) return "Free";
     
-    // Map the plan names to desired display names based on index
     if (index === 1) return "Starter";
     if (index === 2) return "Business"; 
     if (index === 3) return "Enterprise";
     
-    // Fallback to original name if no match
     return plan.name;
   };
 
-  // Icon mapping for different plan types
   const getIconForPlan = (planName, index) => {
     const name = planName?.toLowerCase() || '';
     
-    // Use index-based mapping for better consistency
     if (index === 0 || name.includes('free')) return Sparkles;
-    if (index === 1) return Rocket; // Starter
-    if (index === 2) return Building2; // Business
-    if (index === 3) return Crown; // Enterprise
+    if (index === 1) return Rocket;
+    if (index === 2) return Building2;
+    if (index === 3) return Crown;
     
-    // Fallback based on name
     if (name.includes('starter') || name.includes('basic')) return Rocket;
     if (name.includes('business') || name.includes('professional')) return Building2;
     if (name.includes('enterprise') || name.includes('premium')) return Crown;
     return Sparkles;
   };
 
-  // Determine if plan should be marked as popular
   const isPlanPopular = (planName, index) => {
     const name = planName?.toLowerCase() || '';
     return name.includes('business') || name.includes('professional') || index === 2;
   };
 
-  // Get features for each plan
   const getPlanFeatures = (planName) => {
     const name = planName?.toLowerCase() || '';
     
@@ -159,7 +146,6 @@ const Plan = () => {
       ];
     }
     
-    // All paid plans have full features
     return [
       { name: "Unlimited Mail Sending", restricted: false },
       { name: "Unlimited Gmail Sending", restricted: false },
@@ -169,7 +155,7 @@ const Plan = () => {
     ];
   };
 
-  // Coupon validation function
+  // 🔥 FIXED COUPON VALIDATION
   const validateCoupon = async () => {
     if (!couponCode.trim()) return;
     
@@ -177,14 +163,14 @@ const Plan = () => {
     setCouponLoading(true);
     
     try {
-      const response = await fetch('http://localhost:3000/api/coupon/validate', {
+      const response = await fetch('https://vedive.com:3000/api/coupon/validate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
-          code: couponCode,
+          code: couponCode.trim(),
           orderAmount: originalPrice,
           currency: isIndianUser ? 'INR' : 'USD',
           planId: selectedPlan
@@ -195,18 +181,23 @@ const Plan = () => {
       
       if (response.ok) {
         setAppliedCoupon(data.coupon);
-        setFinalPrice(data.finalAmount);
+        setFinalPrice(data.finalAmount || data.discountedAmount);
+        setCouponError('');
       } else {
         setCouponError(data.error || 'Invalid coupon code');
+        setAppliedCoupon(null);
+        setFinalPrice(originalPrice);
       }
     } catch (error) {
+      console.error('Coupon validation error:', error);
       setCouponError('Failed to validate coupon. Please try again.');
+      setAppliedCoupon(null);
+      setFinalPrice(originalPrice);
     } finally {
       setCouponLoading(false);
     }
   };
 
-  // Remove coupon function
   const removeCoupon = () => {
     setAppliedCoupon(null);
     setCouponCode('');
@@ -215,7 +206,6 @@ const Plan = () => {
   };
 
   useEffect(() => {
-    // Fetch subscription plans
     fetch("https://vedive.com:3000/api/subscription/plans")
       .then((res) => res.json())
       .then((data) => {
@@ -224,7 +214,6 @@ const Plan = () => {
           const bOrder = planOrder[b.name.toLowerCase()] ?? 999;
           return aOrder - bOrder;
         });
-        // Swap 3rd and 4th plans (index 2 and 3)
         if (sortedPlans.length >= 4) {
           [sortedPlans[2], sortedPlans[3]] = [sortedPlans[3], sortedPlans[2]];
         }
@@ -232,7 +221,6 @@ const Plan = () => {
       })
       .catch((err) => {
         console.error("Error fetching plans:", err);
-        // Fallback to mock data if API fails
         const mockPlans = [
           { _id: '1', name: 'Free', prices: [{ currency: 'INR', amount: 0 }, { currency: 'USD', amount: 0 }] },
           { _id: '2', name: 'Starter', prices: [{ currency: 'INR', amount: 99 }, { currency: 'USD', amount: 4.99 }] },
@@ -242,7 +230,6 @@ const Plan = () => {
         setApiPlans(mockPlans);
       });
 
-    // Fetch user data
     fetch("https://vedive.com:3000/api/dashboard", {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     })
@@ -252,7 +239,6 @@ const Plan = () => {
       })
       .catch((err) => {
         console.error("Error fetching user:", err);
-        // Set mock user data for testing
         setUser({ currentPlan: 'Free' });
       })
       .finally(() => setShowLoader(false));
@@ -265,48 +251,34 @@ const Plan = () => {
     setFinalPrice(price);
     setShowPhoneModal(true);
     setPhone("");
-    // Reset coupon state when opening modal
     setAppliedCoupon(null);
     setCouponCode('');
     setCouponError('');
   };
 
+  // 🔥 FIXED SUBSCRIPTION HANDLER
   const handleSubscribe = async () => {
-    // Validate phone using react-phone-number-input validation
     if (!phone || phone.length < 10) {
       alert("Please enter a valid phone number");
       return;
     }
-    const response = await fetch("https://vedive.com:3000/api/subscription/subscribe",  {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({ 
-        planId: selectedPlan, 
-        phone: phone,
-        couponCode: appliedCoupon?.code || null, // Pass coupon code
-      }),
-    });
+
     try {
       setLoading(true);
-      const response = await fetch(
-        "https://vedive.com:3000/api/subscription/subscribe",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({ 
-            planId: selectedPlan, 
-            phone: phone,
-            couponCode: appliedCoupon?.code || null,
-            finalAmount: finalPrice
-          }),
-        }
-      );
+      
+
+      const response = await fetch("https://vedive.com:3000/api/subscription/subscribe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ 
+          planId: selectedPlan, 
+          phone: phone,
+          couponCode: appliedCoupon?.code || null
+        }),
+      });
       
       const data = await response.json();
 
@@ -314,9 +286,17 @@ const Plan = () => {
         throw new Error(data.error || "Failed to initiate payment");
       }
 
-      const { payment_session_id } = data;
+      const { payment_session_id, final_amount, currency } = data;
       if (!payment_session_id) {
         throw new Error("Payment session ID not received");
+      }
+
+      // Verify amounts match
+      if (final_amount !== finalPrice) {
+        console.warn('⚠️ Amount mismatch between frontend and backend:', {
+          frontend: finalPrice,
+          backend: final_amount
+        });
       }
 
       setShowPhoneModal(false);
@@ -333,6 +313,7 @@ const Plan = () => {
       };
 
       cashfree.checkout(checkoutOptions);
+
     } catch (error) {
       console.error("Payment initiation error:", error);
       const errorMessage = error.message || "Failed to initiate payment";

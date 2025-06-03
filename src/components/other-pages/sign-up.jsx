@@ -1,20 +1,19 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import jwtDecode from "jwt-decode";
 import logoImg from "../assets/Vedive.png";
 import Google from "../assets/google-icon.svg";
 import backgroundImage from "../assets/background-login.png";
 import { Link } from 'react-router-dom';
 
-const API_URL = "https://vedive.com:3000";
+const API_URL = "https://vedive.com:3000"; 
 
-const checkAuthAndRedirect = (navigate) => {
+const checkAuthAndRedirect = () => {
   const token = localStorage.getItem("token");
   if (token) {
     try {
       const decoded = jwtDecode(token);
       if (decoded.exp * 1000 > Date.now()) {
-        if (navigate) navigate("/dashboard");
-        else window.location.href = "/dashboard";
+        window.location.href = "/dashboard";
         return true;
       } else {
         localStorage.removeItem("token");
@@ -40,28 +39,23 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // State for input focus
-  const [nameFocused, setNameFocused] = useState(false);
-  const [usernameFocused, setUsernameFocused] = useState(false);
-  const [emailFocused, setEmailFocused] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
-
   useEffect(() => {
     if (checkAuthAndRedirect()) return;
     setInitialized(true);
   }, []);
 
-  const handleChange = useCallback((e) => {
+  const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  }, []);
+  };
 
   useEffect(() => {
     let timer;
     if (message) {
+      // ✅ Delay redirect until token is stored
       timer = setTimeout(() => {
         window.location.href = "/dashboard";
         setFormData({ name: "", username: "", email: "", password: "" });
-      }, 3000);
+      }, 1500);
     }
     return () => clearTimeout(timer);
   }, [message]);
@@ -81,6 +75,13 @@ const Signup = () => {
       if (!response.ok) {
         throw new Error(data?.error || "Registration failed.");
       }
+
+      // ✅ Store token and user in localStorage
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
+
       setMessage(data.message);
     } catch (err) {
       console.error("Signup failed:", err);
@@ -90,9 +91,7 @@ const Signup = () => {
     }
   };
 
-  // Handle Google OAuth - Fixed function
   const handleGoogleSignup = () => {
-    // Redirect to backend's Google OAuth endpoint
     window.location.href = `${API_URL}/api/auth/google`;
   };
 
