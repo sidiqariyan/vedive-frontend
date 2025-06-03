@@ -40,12 +40,11 @@ const Footer = () => {
             <br />
             <p>Follow Us on Our Social Media:</p>
             <div className="social-icons">
-              <img src={facebookIcon} alt="Facebook" />
-              <img src={instagramIcon} alt="Instagram" />
-              <img src={linkedinIcon} alt="LinkedIn" />
-              <img src={threadsIcon} alt="Threads" />
-              <img src={twitterIcon} alt="Twitter/X" />
-              <img src={youtubeIcon} alt="YouTube" />
+              <a href='https://www.facebook.com/profile.php?id=61575644049362'><img src={facebookIcon} alt="Facebook" /></a>
+              <a href='https://www.instagram.com/official.vedive/'><img src={instagramIcon} alt="Instagram" /></a>
+              <a href='https://www.linkedin.com/company/vedive/'><img src={linkedinIcon} alt="LinkedIn" /></a>
+              <a href='https://x.com/vedive_official'><img src={twitterIcon} alt="Twitter/X" /></a>
+              <a href='https://www.youtube.com/@Vedivetool'><img src={youtubeIcon} alt="YouTube" /></a>
             </div>
           </div>
 

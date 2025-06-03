@@ -245,7 +245,7 @@ const GmailSender = () => {
               <div className="mt-2 text-sm text-green-700">
                 <p>• {processedRecipients.length} valid email addresses found</p>
                 {hasNameColumn && (
-                  <p>• Names detected - you can use {{`name`}} in your email template for personalization</p>
+                  <p>• Names detected - you can use {"{{name}}"} in your email template for personalization</p>
                 )}
                 <p>• File format validated and ready for sending</p>
               </div>
@@ -263,7 +263,7 @@ const GmailSender = () => {
                 <p className="text-sm text-gray-500 mt-1">Upload your HTML template</p>
                 {hasNameColumn && (
                   <p className="text-xs text-blue-600 mt-1">
-                    💡 Use {{`name`}} for personalization
+                    💡 Use {"{{name}}"} for personalization
                   </p>
                 )}
               </div>

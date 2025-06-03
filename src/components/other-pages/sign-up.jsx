@@ -1,9 +1,9 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import jwtDecode from "jwt-decode";
 import logoImg from "../assets/Vedive.png";
 import Google from "../assets/google-icon.svg";
 import backgroundImage from "../assets/background-login.png";
+import { Link } from 'react-router-dom';
 
 const API_URL = "https://vedive.com:3000";
 
@@ -13,7 +13,8 @@ const checkAuthAndRedirect = (navigate) => {
     try {
       const decoded = jwtDecode(token);
       if (decoded.exp * 1000 > Date.now()) {
-        navigate("/dashboard");
+        if (navigate) navigate("/dashboard");
+        else window.location.href = "/dashboard";
         return true;
       } else {
         localStorage.removeItem("token");
@@ -27,7 +28,6 @@ const checkAuthAndRedirect = (navigate) => {
 };
 
 const Signup = () => {
-  // State to delay rendering until auth check is complete
   const [initialized, setInitialized] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -39,7 +39,6 @@ const Signup = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
 
   // State for input focus
   const [nameFocused, setNameFocused] = useState(false);
@@ -48,9 +47,9 @@ const Signup = () => {
   const [passwordFocused, setPasswordFocused] = useState(false);
 
   useEffect(() => {
-    if (checkAuthAndRedirect(navigate)) return;
+    if (checkAuthAndRedirect()) return;
     setInitialized(true);
-  }, [navigate]);
+  }, []);
 
   const handleChange = useCallback((e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -60,12 +59,12 @@ const Signup = () => {
     let timer;
     if (message) {
       timer = setTimeout(() => {
-        navigate("/dashboard");
+        window.location.href = "/dashboard";
         setFormData({ name: "", username: "", email: "", password: "" });
       }, 3000);
     }
     return () => clearTimeout(timer);
-  }, [message, navigate]);
+  }, [message]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -91,22 +90,26 @@ const Signup = () => {
     }
   };
 
-  // Toggle password visibility
+  // Handle Google OAuth - Fixed function
+  const handleGoogleSignup = () => {
+    // Redirect to backend's Google OAuth endpoint
+    window.location.href = `${API_URL}/api/auth/google`;
+  };
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  // Do not render until initialization is complete (auth check done)
   if (!initialized) return null;
 
   return (
-<div 
-  className="min-h-screen flex flex-col text-white bg-[rgb(3,10,24)] bg-cover bg-center bg-no-repeat bg-blend-overlay"
-  style={{ backgroundImage: `url(${backgroundImage})` }}
->
+    <div 
+      className="min-h-screen flex flex-col text-white bg-[rgb(3,10,24)] bg-cover bg-center bg-no-repeat bg-blend-overlay"
+      style={{ backgroundImage: `url(${backgroundImage})` }}
+    >
       {/* Header Section */}
       <header className="p-2 ml-2.5">
-      <Link to="/">
+        <Link to="/">
           <img
             src={logoImg}
             alt="Vedive Logo"
@@ -114,8 +117,8 @@ const Signup = () => {
           />
         </Link>
       </header>
+
       <style>{`
-        /* Override autofill background and text color */
         input:-webkit-autofill,
         input:-webkit-autofill:hover, 
         input:-webkit-autofill:focus,
@@ -126,29 +129,36 @@ const Signup = () => {
         }
       `}</style>
 
-      {/* Center Container - Added flex-grow and flex centering */}
+      {/* Center Container */}
       <div className="flex-grow flex items-center justify-center">
-        {/* Signup Container */}
         <div className="max-w-lg w-full mx-4 md:mx-auto p-0 md:p-8 rounded-lg">
           <h2 className="font-[400] text-[30px] sm:text-[30px] md:text-[32px] lg:text-[34px] leading-[100%] tracking-[0] text-center mb-4 font-dmsans">
             Sign Up to Vedive
           </h2>
+          
           <div className="flex items-center my-6">
             <hr className="flex-grow border-t-[3px] border-third" />
           </div>
           
-          {/* Google Sign In Button */}
-          {/* <button className="flex items-center justify-center w-full py-3 h-[55px] px-4 mb-6 border-2 border-white rounded-md bg-transparent text-white hover:bg-blue-900/20 transition-colors">
-            <img src={Google} alt="Google logo" className="h-16 w-16 " />
-            <span className="font-poppins font-medium leading-[100%] tracking-[0] 
-                          sm:text-[20px] md:text-[20px] lg:text-[20px]">
+          {/* Google Sign Up Button */}
+          <button
+            onClick={handleGoogleSignup}
+            type="button"
+            className="flex items-center justify-center w-full py-3 h-[55px] px-4 mb-6 border-2 border-white rounded-md bg-transparent text-white hover:bg-blue-900/20 transition-colors"
+          >
+            <img src={Google} alt="Google logo" className="h-6 w-6 mr-2" />
+            <span className="font-poppins font-medium text-[20px]">
               Continue with Google
             </span>
-          </button> */}
+          </button>
 
-          {/* Signup Form */}
+          {/* Rest of your form code remains the same */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Full Name Input with Floating Label */}
+            <div className="flex items-center my-6">
+              <hr className="flex-grow border-t-[3px] border-third" />
+            </div>
+
+            {/* Full Name Input */}
             <div className="relative">
               <input
                 type="text"
@@ -165,17 +175,17 @@ const Signup = () => {
               />
               <label
                 htmlFor="name"
-                className={`absolute transition-all duration-200 pointer-events-none text-gray-400
-                  ${nameFocused || formData.name 
+                className={`absolute transition-all duration-200 pointer-events-none text-gray-400 ${
+                  nameFocused || formData.name 
                     ? 'text-xs top-2 left-4' 
-                    : 'text-base top-1/2 left-4 transform -translate-y-1/2'}
-                `}
+                    : 'text-base top-1/2 left-4 transform -translate-y-1/2'
+                }`}
               >
                 Full Name
               </label>
             </div>
 
-            {/* Username Input with Floating Label */}
+            {/* Username Input */}
             <div className="relative">
               <input
                 type="text"
@@ -192,17 +202,17 @@ const Signup = () => {
               />
               <label
                 htmlFor="username"
-                className={`absolute transition-all duration-200 pointer-events-none text-gray-400
-                  ${usernameFocused || formData.username 
+                className={`absolute transition-all duration-200 pointer-events-none text-gray-400 ${
+                  usernameFocused || formData.username 
                     ? 'text-xs top-2 left-4' 
-                    : 'text-base top-1/2 left-4 transform -translate-y-1/2'}
-                `}
+                    : 'text-base top-1/2 left-4 transform -translate-y-1/2'
+                }`}
               >
                 Username
               </label>
             </div>
 
-            {/* Email Input with Floating Label */}
+            {/* Email Input */}
             <div className="relative">
               <input
                 type="email"
@@ -219,17 +229,17 @@ const Signup = () => {
               />
               <label
                 htmlFor="email"
-                className={`absolute transition-all duration-200 pointer-events-none text-gray-400
-                  ${emailFocused || formData.email 
+                className={`absolute transition-all duration-200 pointer-events-none text-gray-400 ${
+                  emailFocused || formData.email 
                     ? 'text-xs top-2 left-4' 
-                    : 'text-base top-1/2 left-4 transform -translate-y-1/2'}
-                `}
+                    : 'text-base top-1/2 left-4 transform -translate-y-1/2'
+                }`}
               >
                 Email
               </label>
             </div>
 
-            {/* Password Input with Floating Label */}
+            {/* Password Input */}
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -246,11 +256,11 @@ const Signup = () => {
               />
               <label
                 htmlFor="password"
-                className={`absolute transition-all duration-200 pointer-events-none text-gray-400
-                  ${passwordFocused || formData.password 
+                className={`absolute transition-all duration-200 pointer-events-none text-gray-400 ${
+                  passwordFocused || formData.password 
                     ? 'text-xs top-2 left-4' 
-                    : 'text-base top-1/2 left-4 transform -translate-y-1/2'}
-                `}
+                    : 'text-base top-1/2 left-4 transform -translate-y-1/2'
+                }`}
               >
                 Password
               </label>
@@ -273,7 +283,7 @@ const Signup = () => {
               </button>
             </div>
 
-            {/* Display success or error messages */}
+            {/* Messages */}
             {message && <p className="text-green-400 text-sm">{message}</p>}
             {error && <p className="text-red-400 text-sm">{error}</p>}
 
@@ -291,7 +301,7 @@ const Signup = () => {
             </button>
           </form>
 
-          {/* Additional Links */}
+          {/* Login Link */}
           <div className="mt-6 text-center text-sm">
             <p className="font-poppins text-[16px] font-medium text-white/80">
               Already have an account?{" "}

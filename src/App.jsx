@@ -1,80 +1,82 @@
-import React, { Suspense, lazy, useState, useEffect } from "react";
+import React, { Suspense, lazy, useState, useEffect, useMemo, memo } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { AuthProvider } from "./components/Pages/Mailer/AuthContext.jsx";
 import ProtectedRoute from "./components/other-pages/ProtectedRoutes.jsx";
 import MainLayout from "./components/MailLayout.jsx";
 import "tailwindcss/tailwind.css";
+import "./VediveLoader.css"; 
 import ResetPassword from "./components/other-pages/ResetPassword.jsx";
 import Navbar from "./components/Pages/Hero/Navbar.jsx";
 import Footer from "./components/Pages/Hero/Footer.jsx";
 import AdminRoute from "./components/other-pages/AdminRoute.jsx";
 import EditBlogPost from "./components/other-pages/EditorBlogPost.jsx";
 import BlogAdmin from "./components/other-pages/BlogAdmin.jsx";
-import SubscriptionCard from "./components/SubscriptionRoute.jsx";
-// import Header from './components/Header'; // Imported from new code
-// import Footer from './components/Footer'; // Imported from new code
-import axios from "axios";
-const Abouts = lazy(() => import("./Abouts.jsx"));
+import OAuth2RedirectHandler from "./components/other-pages/OAuth2RedirectHandler.jsx";
 
-// Lazy-loaded pages - Public
-const CreateBlogPostPage = lazy(() => import("./components/other-pages/CreateBlogPost.jsx"));
-const PostDetail = lazy(() => import("./components/other-pages/BlogPostDetail.jsx"));
-const Hero = lazy(() => import("./components/Pages/Hero/Hero"));
-const ContactUs = lazy(() => import("./components/Pages/contact.jsx"));
-const AboutUs = lazy(() => import("./components/Pages/about.jsx"));
-const Pricing = lazy(() => import("./components/Pages/pricing.jsx"));
-const Services = lazy(() => import("./components/Pages/services.jsx"));
-const Login = lazy(() => import("./components/other-pages/login.jsx"));
-const Signup = lazy(() => import("./components/other-pages/sign-up.jsx"));
-const Passreset = lazy(() => import("./components/other-pages/pass-reset.jsx"));
-const VerifyEmail = lazy(() => import("./components/other-pages/VerifyEmail"));
-const PaymentStatus = lazy(() => import("./components/other-pages/PaymentStatus.jsx"));
+// Lazy-loaded components with better organization
+const lazyLoad = (importFunc, fallback = null) => 
+  lazy(() => importFunc().catch(() => ({ default: () => <div>Failed to load component</div> })));
 
-// New Blog components from the second code
-const BlogPostList = lazy(() => import("./components/other-pages/BlogPostList"));
-const BlogPostDetail = lazy(() => import("./components/other-pages/BlogPostDetail"));
-const CreateBlogPost = lazy(() => import("./components/other-pages/CreateBlogPost"));
+// Public Pages
+const Hero = lazyLoad(() => import("./components/Pages/Hero/Hero"));
+const ContactUs = lazyLoad(() => import("./components/Pages/contact.jsx"));
+const AboutUs = lazyLoad(() => import("./components/Pages/about.jsx"));
+const Pricing = lazyLoad(() => import("./components/Pages/pricing.jsx"));
+const Services = lazyLoad(() => import("./components/Pages/services.jsx"));
 
-// Lazy-loaded pages - Dashboard/Protected
-const Dashboard = lazy(() => import("./components/other-pages/dashboard.jsx"));
-const Account = lazy(() => import("./components/other-pages/account.jsx"));
-const Plan = lazy(() => import("./components/other-pages/plan.jsx"));
-const SenderBody = lazy(() => import("./components/Pages/Mailer/SenderBody.jsx"));
-const EmailScrapper = lazy(() => import("./components/Pages/Mailer/EmailScrapper.jsx"));
-const GmailSender = lazy(() => import("./components/Pages/Gmail/GmailSender.jsx"));
-const MessageForm = lazy(() => import("./components/Pages/Whatsapp/WhatsAppSender.jsx"));
-const NumberScraper = lazy(() => import("./components/Pages/Whatsapp/NumberScraper.jsx"));
-const SubscriptionHistory = lazy(() => import("./components/other-pages/SubscriptionHistory.jsx"));
-const PostForm = lazy(() => import("./components/other-pages/PostForm.jsx"));
-const PostList = lazy(() => import("./components/other-pages/PostList.jsx"));
-const TemplateEditorPage = lazy(() => import("./components/other-pages/TemplateEditor.jsx"));
+// Auth Pages
+const Login = lazyLoad(() => import("./components/other-pages/login.jsx"));
+const Signup = lazyLoad(() => import("./components/other-pages/sign-up.jsx"));
+const Passreset = lazyLoad(() => import("./components/other-pages/pass-reset.jsx"));
+const VerifyEmail = lazyLoad(() => import("./components/other-pages/VerifyEmail"));
+const PaymentStatus = lazyLoad(() => import("./components/other-pages/PaymentStatus.jsx"));
 
+// Blog Components
+const BlogPostList = lazyLoad(() => import("./components/other-pages/BlogPostList"));
+const BlogPostDetail = lazyLoad(() => import("./components/other-pages/BlogPostDetail"));
+const CreateBlogPost = lazyLoad(() => import("./components/other-pages/CreateBlogPost"));
+const PostDetail = lazyLoad(() => import("./components/other-pages/BlogPostDetail"));
+
+// Dashboard Pages
+const Dashboard = lazyLoad(() => import("./components/other-pages/dashboard.jsx"));
+const Account = lazyLoad(() => import("./components/other-pages/account.jsx"));
+const Plan = lazyLoad(() => import("./components/other-pages/plan.jsx"));
+const SenderBody = lazyLoad(() => import("./components/Pages/Mailer/SenderBody.jsx"));
+const EmailScrapper = lazyLoad(() => import("./components/Pages/Mailer/EmailScrapper.jsx"));
+const GmailSender = lazyLoad(() => import("./components/Pages/Gmail/GmailSender.jsx"));
+const MessageForm = lazyLoad(() => import("./components/Pages/Whatsapp/WhatsAppSender.jsx"));
+const NumberScraper = lazyLoad(() => import("./components/Pages/Whatsapp/NumberScraper.jsx"));
+const SubscriptionHistory = lazyLoad(() => import("./components/other-pages/SubscriptionHistory.jsx"));
+const PostForm = lazyLoad(() => import("./components/other-pages/PostForm.jsx"));
+const PostList = lazyLoad(() => import("./components/other-pages/PostList.jsx"));
+const TemplateEditorPage = lazyLoad(() => import("./components/other-pages/TemplateEditor.jsx"));
+
+// Optimized Loading Component
+const LoadingSpinner = memo(() => (
+  <div className="min-h-screen bg-[#04081d] flex items-center justify-center">
+    <div className="flex flex-col items-center space-y-4">
+      <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="text-blue-400 text-sm font-medium">Loading...</div>
+    </div>
+  </div>
+));
 
 // Optimized Page Transition Component
-const PageTransition = ({ children }) => {
-  const pageVariants = {
-    initial: {
-      opacity: 0,
-      x: -10,
-    },
-    animate: {
-      opacity: 1,
+const PageTransition = memo(({ children }) => {
+  const pageVariants = useMemo(() => ({
+    initial: { opacity: 0, x: -10 },
+    animate: { 
+      opacity: 1, 
       x: 0,
-      transition: {
-        duration: 0.25,
-        ease: "easeOut",
-      },
+      transition: { duration: 0.25, ease: "easeOut" }
     },
-    exit: {
-      opacity: 0,
+    exit: { 
+      opacity: 0, 
       x: 10,
-      transition: {
-        duration: 0.15,
-        ease: "easeIn",
-      },
+      transition: { duration: 0.15, ease: "easeIn" }
     },
-  };
+  }), []);
 
   return (
     <motion.div
@@ -87,10 +89,10 @@ const PageTransition = ({ children }) => {
       {children}
     </motion.div>
   );
-};
+});
 
-// Vedive Loader Component (simplified)
-const VediveLoader = ({ onComplete }) => {
+// Optimized Loader Component with CSS-in-JS moved to external styles
+const VediveLoader = memo(({ onComplete }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (onComplete) onComplete();
@@ -99,137 +101,27 @@ const VediveLoader = ({ onComplete }) => {
   }, [onComplete]);
 
   return (
-    <div className="h-screen bg-black flex items-center justify-center overflow-hidden relative">
-      <style>
-        {`
-          @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@200;300;400;700&display=swap');
-          @keyframes slideIn {
-            0% {
-              transform: translateX(100%);
-              opacity: 0;
-              letter-spacing: 0.35em;
-            }
-            30% {
-              opacity: 0.3;
-            }
-            100% {
-              transform: translateX(0);
-              opacity: 1;
-              letter-spacing: 0.15em;
-            }
-          }
-          @keyframes lightUp {
-            0% {
-              background-position: 200% 50%;
-              opacity: 0.3;
-            }
-            50% {
-              opacity: 0.7;
-            }
-            100% {
-              background-position: 0% 50%;
-              opacity: 1;
-            }
-          }
-          @keyframes borderLight {
-            0% {
-              background-position: 0% 50%;
-            }
-            100% {
-              background-position: 100% 50%;
-            }
-          }
-          .elegant-text {
-            font-weight: 700;
-            text-transform: uppercase;
-            transition: all 0.3s ease-in-out;
-            color: transparent;
-            -webkit-text-stroke: 2px rgba(30, 144, 255, 1);
-            text-stroke: 2px rgba(30, 144, 255, 1);
-            position: relative;
-          }
-          .elegant-text::before {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            color: transparent;
-            -webkit-text-stroke: 2px rgba(30, 144, 255, 1);
-            text-stroke: 2px rgba(30, 144, 255, 1);
-            background: linear-gradient(90deg, transparent, rgba(30,144,255,1), transparent);
-            background-size: 200%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            animation: borderLight 3s ease-in-out infinite normal;
-          }
-          .animate-slide {
-            animation: 
-              slideIn 2.8s cubic-bezier(0.22, 1, 0.36, 1) forwards,
-              lightUp 3s cubic-bezier(0.4, 0, 0.2, 1) 0.8s forwards;
-          }
-          .gradient-bg {
-            background: radial-gradient(
-              circle at right,
-              rgba(30, 144, 255, 0.15) 0%,
-              rgba(0, 0, 0, 1) 65%
-            );
-            transition: background 0.5s ease-in-out;
-          }
-          .light-beam {
-            position: absolute;
-            right: -50%;
-            top: -100%;
-            width: 200%;
-            height: 300%;
-            background: linear-gradient(
-              90deg,
-              transparent 0%,
-              rgba(30, 144, 255, 0.02) 40%,
-              rgba(30, 144, 255, 0.1) 50%,
-              rgba(30, 144, 255, 0.02) 60%,
-              transparent 100%
-            );
-            transform: rotate(-45deg);
-            pointer-events: none;
-            animation: lightBeam 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-          }
-          @keyframes lightBeam {
-            0%, 100% {
-              opacity: 0.8;
-              transform: rotate(-45deg) translateY(0);
-            }
-            50% {
-              opacity: 1;
-              transform: rotate(-45deg) translateY(-3%);
-            }
-          }
-        `}
-      </style>
-      <div className="absolute inset-0 gradient-bg">
-        <div className="light-beam" />
+    <div className="vedive-loader">
+      <div className="vedive-loader-bg">
+        <div className="vedive-light-beam" />
       </div>
-      <div className="relative text-center">
+      <div className="vedive-text-container">
         <h1 
           data-text="Vedive"
-          className="elegant-text animate-slide text-[10rem] md:text-[10rem] text-[6rem] opacity-0 tracking-wider drop-shadow-xl hover:scale-105 transition-transform duration-500"
-          style={{ fontFamily: 'Raleway, sans-serif' }}
+          className="vedive-text"
         >
           Vedive
         </h1>
       </div>
-      <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-        <div className="animate-pulse w-[200px] h-[200px] rounded-full bg-blue-500 opacity-10 blur-3xl" />
+      <div className="vedive-pulse-bg">
+        <div className="vedive-pulse" />
       </div>
     </div>
   );
-};
+});
 
-
-
-// Simplified ScrollToTop component
-const ScrollToTop = () => {
+// Optimized ScrollToTop component
+const ScrollToTop = memo(() => {
   const { pathname } = useLocation();
   
   useEffect(() => {
@@ -237,432 +129,139 @@ const ScrollToTop = () => {
   }, [pathname]);
   
   return null;
+});
+
+// Route configuration for better maintainability
+const routeConfig = {
+  public: [
+    { path: "/", component: Hero, exact: true },
+    { path: "/home", component: Hero },
+    { path: "/contact", component: ContactUs },
+    { path: "/about", component: AboutUs },
+    { path: "/pricing", component: Pricing },
+    { path: "/services", component: Services },
+    { path: "/login", component: Login },
+    { path: "/signup", component: Signup },
+    { path: "/oauth2/redirect", component: OAuth2RedirectHandler },
+    { path: "/pass-reset", component: Passreset },
+    { path: "/reset-password", component: ResetPassword, noLazy: true },
+    { path: "/verify-email", component: VerifyEmail },
+    { path: "/plans/payment-status", component: PaymentStatus },
+    { path: "/plans", component: Plan },
+    { path: "/blogs", component: BlogPostList },
+    { path: "/templates", component: PostList },
+    { path: "/editor/:id", component: TemplateEditorPage },
+  ],
+  blog: [
+    { path: "/blog/:slug", component: BlogPostDetail },
+    { path: "/:slug", component: BlogPostDetail },
+    { path: "/blog-posts/:identifier", component: PostDetail },
+    { path: "/blog/create", component: CreateBlogPost },
+  ],
+  admin: [
+    { path: "/create-blog", component: CreateBlogPost },
+    { path: "/admin/blog", component: BlogAdmin, noLazy: true },
+    { path: "/admin/blog/edit/:id", component: EditBlogPost, noLazy: true },
+    { path: "/post-form", component: PostForm },
+  ],
+  protected: [
+    { path: "dashboard", component: Dashboard },
+    { path: "account", component: Account },
+    { path: "plan", component: Plan },
+    { path: "gmail-sender", component: GmailSender },
+    { path: "email-scraper", component: EmailScrapper },
+    { path: "email-sender", component: SenderBody },
+    { path: "whatsapp-sender", component: MessageForm },
+    { path: "number-scraper", component: NumberScraper },
+  ]
 };
 
-// Global styles for transitions
-const globalStyles = `
-  .page-transition {
-    will-change: opacity, transform;
-    width: 100%;
-  }
-`;
+// Route renderer helper
+const renderRoute = (route, index, wrapper = null) => {
+  const Component = route.component;
+  const element = route.noLazy ? (
+    <PageTransition>
+      <Component />
+    </PageTransition>
+  ) : (
+    <Suspense fallback={<LoadingSpinner />}>
+      <PageTransition>
+        <Component />
+      </PageTransition>
+    </Suspense>
+  );
 
-// Modified AnimatedRoutes component with properly nested routes
-const AnimatedRoutes = () => {
+  const wrappedElement = wrapper ? wrapper(element) : element;
+
+  return (
+    <Route
+      key={`${route.path}-${index}`}
+      path={route.path}
+      element={wrappedElement}
+    />
+  );
+};
+
+// Optimized AnimatedRoutes component
+const AnimatedRoutes = memo(() => {
   const location = useLocation();
   
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        {/* New Blog Routes with BlogLayout */}
-        <Route
-          path="/"
-          element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <Hero />
-                </PageTransition>
-              </Suspense>
-          }
-        />
+        {/* Public Routes */}
+        {routeConfig.public.map((route, index) => renderRoute(route, index))}
         
+        {/* Blog Routes */}
+        {routeConfig.blog.map((route, index) => renderRoute(route, index))}
         
-        <Route
-          path="/blog/:slug"
-          element={
-              <Suspense fallback={<div className="bg-[#04081d]">Loading...</div>}>
-                  <BlogPostDetail />
-              </Suspense>
-          }
-        />
-                <Route
-          path="/:slug"
-          element={
-              <Suspense fallback={<div className="bg-[#04081d]"> Loading...</div>}>
-                <PageTransition className="bg-primary">
-                  <BlogPostDetail />
-                </PageTransition>
-              </Suspense>
-          }
-        />
-
-   {/* Admin-only routes */}
-        <Route
-          path="/create-blog"
-          element={
-            <AdminRoute>
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <CreateBlogPostPage />
-                </PageTransition>
-              </Suspense>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/blog"
-          element={
-            <AdminRoute>
-              <BlogAdmin />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/blog/edit/:id"
-          element={
-            <AdminRoute>
-              <EditBlogPost />
-            </AdminRoute>
-          }
-        />
-
-
-        {/* Admin-only Template & PostForm */}
-        <Route
-          path="/post-form"
-          element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                   <AdminRoute>
-                  <PostForm />
-                  </AdminRoute>
-                </PageTransition>
-              </Suspense>
-          }
-          />,
-
-        {/* Original Public Routes */}
-        <Route
-          path="/home"
-          element={
-            <PageTransition>
-              <Hero />
-            </PageTransition>
-          }
-        />
-        <Route
-          path="/contact"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <ContactUs />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/about"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <AboutUs />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-       
-        <Route
-          path="/pricing"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <Pricing />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/services"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <Services />
-              </PageTransition>
-            </Suspense>
-          }
-        />
+        {/* Admin Routes */}
+        {routeConfig.admin.map((route, index) => 
+          renderRoute(route, index, (element) => <AdminRoute>{element}</AdminRoute>)
+        )}
         
-        {/* Payment & Plan Routes - Public */}
-        <Route
-          path="/plans/payment-status"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <PaymentStatus />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        {/* Auth Routes */}
-        <Route
-          path="/login"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <Login />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <Signup />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/pass-reset"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <Passreset />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/reset-password"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <ResetPassword />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/verify-email"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <VerifyEmail />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        {/* Template Routes */}
-       
-        <Route
-            path="templates"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <PostList />
-                </PageTransition>
-              </Suspense>
-            }
-          />
-          <Route
-            path="editor/:id"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <TemplateEditorPage />
-                </PageTransition>
-              </Suspense>
-            }
-          />
-        
-        {/* Original Blog & Content Routes - Public */}
-        <Route
-          path="/blog-posts/:identifier"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <PostDetail />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/blog/create"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <CreateBlogPostPage />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        <Route
-          path="/blogs"
-          element={
-            <Suspense fallback={null}>
-              <PageTransition>
-                <BlogPostList />
-              </PageTransition>
-            </Suspense>
-          }
-        />
-        
-        {/* Protected Routes with MainLayout */}
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <MainLayout />
-            </ProtectedRoute>
-          }
-        >
-          {/* Dashboard Routes */}
-          <Route
-            path="dashboard"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <Dashboard />
-                </PageTransition>
-              </Suspense>
-            }
-          />
-          <Route
-            path="account"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <Account />
-                </PageTransition>
-              </Suspense>
-            }
-          />
-          <Route
-            path="plan"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <Abouts />
-                </PageTransition>
-              </Suspense>
-            }
-          />
-          <Route
-            path="dashboard/subscription"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <SubscriptionHistory />
-                </PageTransition>
-              </Suspense>
-            }
-          />
-          
-          {/* Email & Communication Routes */}
-          <Route
-            path="gmail-sender"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <GmailSender />
-                </PageTransition>
-              </Suspense>
-            }
-          />
-          <Route
-            path="email-scraper"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <EmailScrapper />
-                </PageTransition>
-              </Suspense>
-            }
-          />
-          <Route
-            path="email-sender"
-            element={
-             // <Suspense fallback={<div>Loading...</div>}>
-              //   <PageTransition>
-                  <SenderBody />
-              
-            }
-          />
-          <Route
-            path="whatsapp-sender"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <MessageForm />
-                </PageTransition>
-              </Suspense>
-            }
-          />
-            
-          
-          {/* Template Routes */}   
-          <Route
-            path="editor/:id"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <PageTransition>
-                  <TemplateEditorPage />
-                </PageTransition>
-              </Suspense>
-            }
-          />
+        {/* Protected Dashboard Routes */}
+        <Route path="/*" element={
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
+        }>
+          {routeConfig.protected.map((route, index) => renderRoute(route, index))}
         </Route>
         
-        {/* Fallback Route */}
+        {/* 404 Route */}
         <Route
           path="*"
           element={
             <PageTransition>
-              <h1 className="text-4xl font-bold text-center mt-10 text-primary">404 - Page Not Found</h1>
+              <div className="min-h-screen bg-[#04081d] flex items-center justify-center">
+                <div className="text-center">
+                  <h1 className="text-4xl font-bold text-white mb-4">404</h1>
+                  <p className="text-gray-400">Page Not Found</p>
+                </div>
+              </div>
             </PageTransition>
           }
         />
       </Routes>
     </AnimatePresence>
   );
-};
+});
 
+// Main App component
 const App = () => {
-  const [plans, setPlans] = useState([]);
-  const [user, setUser] = useState(null);
-  const [showLoader, setShowLoader] = useState(true);
+  const [showLoader, setShowLoader] = useState(() => {
+    // Check if we should show loader based on localStorage or sessionStorage
+    // Since we can't use localStorage in artifacts, we'll use a simple state
+    return true;
+  });
 
-  useEffect(() => {
-    // move your subscriptions fetch here
-    axios.get("https://vedive.com:3000/api/subscription/plans")
-      .then(res => {
-        setPlans(res.data);
-      })
-      .catch(err => console.error("Error fetching plans:", err));
+  const handleLoaderComplete = useMemo(() => 
+    () => setShowLoader(false), []
+  );
 
-    axios.get("https://vedive.com:3000/api/dashboard", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-    })
-      .then(res => {
-        setUser(res.data.subscriptionInfo);
-      })
-      .catch(err => console.error("Error fetching user:", err));
-  }, []);
-
-  const handleLoaderComplete = () => {
-    setShowLoader(false);
-  };
-
-  const handleSubscribe = (planId) => {
-    axios.post(
-      "https://vedive.com:3000/api/subscription/subscribe",
-      { planId },
-      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
-    )
-    .then(response => {
-      window.location.href = response.data.paymentUrl;
-    })
-    .catch(error => alert("Error initiating payment: " + error.message));
-  };
-
-
-  return (<>
-
-
+  return (
     <AuthProvider>
-      <style>{globalStyles}</style>
       {showLoader ? (
         <VediveLoader onComplete={handleLoaderComplete} />
       ) : (
@@ -672,7 +271,7 @@ const App = () => {
         </Router>
       )}
     </AuthProvider>
-</>  );
+  );
 };
 
 export default App;
