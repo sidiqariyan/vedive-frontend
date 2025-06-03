@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Check, Sparkles, Rocket, Building2, X, Loader, Crown, Phone, ChevronDown, Search } from "lucide-react";
+import { Check, Sparkles, Rocket, Building2, X, Loader, Crown, Phone, ChevronDown, Search, Tag, Percent } from "lucide-react";
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 
@@ -12,6 +12,14 @@ const Plan = () => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isIndianUser, setIsIndianUser] = useState(true);
+  
+  // Coupon related states
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [originalPrice, setOriginalPrice] = useState(0);
+  const [finalPrice, setFinalPrice] = useState(0);
 
   const planOrder = {
     free: 0,
@@ -161,6 +169,51 @@ const Plan = () => {
     ];
   };
 
+  // Coupon validation function
+  const validateCoupon = async () => {
+    if (!couponCode.trim()) return;
+    
+    setCouponError('');
+    setCouponLoading(true);
+    
+    try {
+      const response = await fetch('http://localhost:3000/api/coupon/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          code: couponCode,
+          orderAmount: originalPrice,
+          currency: isIndianUser ? 'INR' : 'USD',
+          planId: selectedPlan
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setAppliedCoupon(data.coupon);
+        setFinalPrice(data.finalAmount);
+      } else {
+        setCouponError(data.error || 'Invalid coupon code');
+      }
+    } catch (error) {
+      setCouponError('Failed to validate coupon. Please try again.');
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  // Remove coupon function
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode('');
+    setFinalPrice(originalPrice);
+    setCouponError('');
+  };
+
   useEffect(() => {
     // Fetch subscription plans
     fetch("https://vedive.com:3000/api/subscription/plans")
@@ -205,10 +258,17 @@ const Plan = () => {
       .finally(() => setShowLoader(false));
   }, []);
 
-  const handleBuyNowClick = (planId) => {
+  const handleBuyNowClick = (planId, plan) => {
     setSelectedPlan(planId);
+    const price = parseFloat(getPrice(plan));
+    setOriginalPrice(price);
+    setFinalPrice(price);
     setShowPhoneModal(true);
     setPhone("");
+    // Reset coupon state when opening modal
+    setAppliedCoupon(null);
+    setCouponCode('');
+    setCouponError('');
   };
 
   const handleSubscribe = async () => {
@@ -228,7 +288,12 @@ const Plan = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-          body: JSON.stringify({ planId: selectedPlan, phone: phone }),
+          body: JSON.stringify({ 
+            planId: selectedPlan, 
+            phone: phone,
+            couponCode: appliedCoupon?.code || null,
+            finalAmount: finalPrice
+          }),
         }
       );
 
@@ -270,6 +335,11 @@ const Plan = () => {
     setShowPhoneModal(false);
     setSelectedPlan(null);
     setPhone("");
+    setAppliedCoupon(null);
+    setCouponCode('');
+    setCouponError('');
+    setOriginalPrice(0);
+    setFinalPrice(0);
   };
 
   const renderButton = (plan, index) => {
@@ -297,7 +367,7 @@ const Plan = () => {
       <button
         onClick={() => {
           if (!disabled && !isFree) {
-            handleBuyNowClick(plan._id);
+            handleBuyNowClick(plan._id, plan);
           }
         }}
         disabled={disabled}
@@ -438,12 +508,12 @@ const Plan = () => {
         </div>
       </div>
 
-      {/* Phone Number Modal with react-phone-number-input */}
+      {/* Phone Number Modal with Coupon Component */}
       {showPhoneModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 min-h-screen flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-auto shadow-2xl">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg mx-auto shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-800">Enter Phone Number</h3>
+              <h3 className="text-xl font-bold text-gray-800">Complete Your Purchase</h3>
               <button
                 onClick={closeModal}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -452,11 +522,7 @@ const Plan = () => {
               </button>
             </div>
 
-            <p className="text-gray-600 mb-6">
-              Please enter your phone number for payment verification and subscription notifications.
-            </p>
-
-            {/* Phone Input using react-phone-number-input */}
+            {/* Phone Input Section */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Phone Number
@@ -472,12 +538,94 @@ const Plan = () => {
                   '--PhoneInput-color--focus': '#3b82f6'
                 }}
               />
+              <p className="text-sm text-gray-500 mt-2">
+                Phone number is required for subscription activation
+              </p>
             </div>
 
-            <p className="text-sm text-gray-500 mb-6 text-center">
-              Phone number is required for subscription activation
-            </p>
+            {/* Coupon Section */}
+            <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+              <div className="flex items-center mb-3">
+                <Tag className="w-5 h-5 text-blue-500 mr-2" />
+                <h4 className="text-lg font-semibold text-gray-800">Apply Coupon</h4>
+              </div>
+              
+              {!appliedCoupon ? (
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="Enter coupon code"
+                      className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      disabled={couponLoading}
+                    />
+                    <button
+                      onClick={validateCoupon}
+                      disabled={couponLoading || !couponCode.trim()}
+                      className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center"
+                    >
+                      {couponLoading ? (
+                        <Loader className="w-4 h-4 animate-spin" />
+                      ) : (
+                        'Apply'
+                      )}
+                    </button>
+                  </div>
+                  
+                  {couponError && (
+                    <p className="text-red-500 text-sm flex items-center">
+                      <X className="w-4 h-4 mr-1" />
+                      {couponError}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center">
+                        <Percent className="w-4 h-4 text-green-600 mr-2" />
+                        <span className="text-green-800 font-medium text-sm">{appliedCoupon.code}</span>
+                      </div>
+                      <p className="text-sm text-green-600 mt-1">{appliedCoupon.description}</p>
+                    </div>
+                    <button
+                      onClick={removeCoupon}
+                      className="text-red-500 hover:text-red-700 text-sm font-medium ml-2"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
+            {/* Price Breakdown */}
+            <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-white">
+              <h4 className="text-lg font-semibold text-gray-800 mb-3">Price Summary</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Original Price:</span>
+                  <span className="font-medium">{getCurrencySymbol()}{originalPrice}</span>
+                </div>
+                
+                {appliedCoupon && (
+                  <div className="flex justify-between text-sm text-green-600">
+                    <span>Discount:</span>
+                    <span className="font-medium">-{getCurrencySymbol()}{(originalPrice - finalPrice).toFixed(2)}</span>
+                  </div>
+                )}
+                
+                <div className="flex justify-between font-bold text-lg border-t pt-2 mt-3">
+                  <span className="text-gray-800">Final Price:</span>
+                  <span className="text-blue-600">{getCurrencySymbol()}{finalPrice}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
             <div className="flex gap-4">
               <button
                 onClick={closeModal}
@@ -488,11 +636,11 @@ const Plan = () => {
               <button
                 onClick={handleSubscribe}
                 disabled={loading || !phone}
-                className="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-semibold"
+                className="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-semibold flex items-center justify-center"
               >
                 {loading ? (
                   <>
-                    <Loader className="animate-spin mr-2 inline" size={16} />
+                    <Loader className="animate-spin mr-2" size={16} />
                     Processing...
                   </>
                 ) : (
