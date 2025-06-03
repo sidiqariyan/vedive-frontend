@@ -154,9 +154,6 @@ const Signup = () => {
 
           {/* Rest of your form code remains the same */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="flex items-center my-6">
-              <hr className="flex-grow border-t-[3px] border-third" />
-            </div>
 
             {/* Full Name Input */}
             <div className="relative">
