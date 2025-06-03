@@ -82,16 +82,11 @@ const OAuth2RedirectHandler = () => {
           }
         }
 
-        console.log('Token received, storing...');
+        console.log('Token received, storing in localStorage...');
         
-        // Store the token in memory (since localStorage is not supported in artifacts)
-        // In your actual app, this would be localStorage.setItem('token', token);
-        
-        // For demonstration, we'll use a simple state management approach
-        window.vediveToken = token;
-        window.vediveTokenTimestamp = new Date().toISOString();
-        
-        console.log('Token stored successfully');
+        // FIXED: Store the token in localStorage (not in-memory storage)
+        localStorage.setItem('token', token);
+        console.log('Token stored successfully in localStorage');
         
         // Verify the token is valid by calling the backend
         console.log('Verifying token with backend...');
@@ -111,9 +106,9 @@ const OAuth2RedirectHandler = () => {
             const userData = await response.json();
             console.log('Token verification successful:', userData);
             
-            // Store user data
-            window.vediveUser = JSON.stringify(userData.user || userData);
-            console.log('User data stored successfully');
+            // FIXED: Store user data in localStorage (not window object)
+            localStorage.setItem('user', JSON.stringify(userData.user || userData));
+            console.log('User data stored successfully in localStorage');
             
             setStatus('success');
             setMessage('Authentication successful! Redirecting to dashboard...');
@@ -138,6 +133,16 @@ const OAuth2RedirectHandler = () => {
               
               if (payload.exp && payload.exp > currentTime) {
                 console.log('Network error but token is valid JWT and not expired, proceeding to dashboard');
+                
+                // Store basic user info from JWT payload
+                const basicUserInfo = {
+                  _id: payload._id || payload.id,
+                  email: payload.email,
+                  name: payload.name,
+                  authProvider: 'google'
+                };
+                localStorage.setItem('user', JSON.stringify(basicUserInfo));
+                
                 setStatus('success');
                 setMessage('Authentication successful! Redirecting to dashboard...');
                 setTimeout(() => {
@@ -166,10 +171,9 @@ const OAuth2RedirectHandler = () => {
       } catch (error) {
         console.error('OAuth callback error:', error);
         
-        // Clear any stored token if verification failed
-        delete window.vediveToken;
-        delete window.vediveUser;
-        delete window.vediveTokenTimestamp;
+        // FIXED: Clear localStorage instead of window properties
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         
         setStatus('error');
         setMessage(error.message || 'Authentication failed. Please try again.');
@@ -204,12 +208,15 @@ const OAuth2RedirectHandler = () => {
   };
 
   const handleRetry = () => {
-    // Clear any existing tokens before retrying
-    delete window.vediveToken;
-    delete window.vediveUser;
-    delete window.vediveTokenTimestamp;
+    // FIXED: Clear localStorage instead of window properties
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     window.location.href = '/login';
   };
+
+  // Get current state for debug info
+  const currentToken = localStorage.getItem('token');
+  const currentUser = localStorage.getItem('user');
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white">
@@ -276,9 +283,8 @@ const OAuth2RedirectHandler = () => {
         <div className="mt-6 text-xs text-gray-400 border-t border-white/10 pt-4 text-left">
           <p><strong>URL:</strong> {window.location.href}</p>
           <p><strong>Status:</strong> {status}</p>
-          <p><strong>Token:</strong> {window.vediveToken ? `Present (${window.vediveToken.length} chars)` : 'Missing'}</p>
-          <p><strong>User:</strong> {window.vediveUser ? 'Present' : 'Missing'}</p>
-          <p><strong>Timestamp:</strong> {window.vediveTokenTimestamp || 'N/A'}</p>
+          <p><strong>Token in localStorage:</strong> {currentToken ? `Present (${currentToken.length} chars)` : 'Missing'}</p>
+          <p><strong>User in localStorage:</strong> {currentUser ? 'Present' : 'Missing'}</p>
           <p><strong>Search Params:</strong> {window.location.search || 'None'}</p>
           <p><strong>Hash:</strong> {window.location.hash || 'None'}</p>
         </div>
