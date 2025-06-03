@@ -12,6 +12,8 @@ import Footer from "./components/Pages/Hero/Footer.jsx";
 import AdminRoute from "./components/other-pages/AdminRoute.jsx";
 import EditBlogPost from "./components/other-pages/EditorBlogPost.jsx";
 import BlogAdmin from "./components/other-pages/BlogAdmin.jsx";
+import OAuth2RedirectHandler from "./components/other-pages/OAuth2RedirectHandler.jsx";
+
 
 // Lazy-loaded components with better organization
 const lazyLoad = (importFunc, fallback = null) => 
@@ -30,6 +32,7 @@ const Signup = lazyLoad(() => import("./components/other-pages/sign-up.jsx"));
 const Passreset = lazyLoad(() => import("./components/other-pages/pass-reset.jsx"));
 const VerifyEmail = lazyLoad(() => import("./components/other-pages/VerifyEmail"));
 const PaymentStatus = lazyLoad(() => import("./components/other-pages/PaymentStatus.jsx"));
+
 
 // Blog Components
 const BlogPostList = lazyLoad(() => import("./components/other-pages/BlogPostList"));
@@ -142,6 +145,7 @@ const routeConfig = {
     { path: "/services", component: Services },
     { path: "/login", component: Login },
     { path: "/signup", component: Signup },
+    { path: "/oauth2/redirect", component: OAuth2RedirectHandler },
     { path: "/pass-reset", component: Passreset },
     { path: "/reset-password", component: ResetPassword, noLazy: true },
     { path: "/verify-email", component: VerifyEmail },

@@ -277,7 +277,18 @@ const Plan = () => {
       alert("Please enter a valid phone number");
       return;
     }
-
+    const response = await fetch("https://vedive.com:3000/api/subscription/subscribe",  {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ 
+        planId: selectedPlan, 
+        phone: phone,
+        couponCode: appliedCoupon?.code || null, // Pass coupon code
+      }),
+    });
     try {
       setLoading(true);
       const response = await fetch(
@@ -296,7 +307,7 @@ const Plan = () => {
           }),
         }
       );
-
+      
       const data = await response.json();
 
       if (!response.ok) {
