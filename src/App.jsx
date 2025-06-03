@@ -12,7 +12,6 @@ import Footer from "./components/Pages/Hero/Footer.jsx";
 import AdminRoute from "./components/other-pages/AdminRoute.jsx";
 import EditBlogPost from "./components/other-pages/EditorBlogPost.jsx";
 import BlogAdmin from "./components/other-pages/BlogAdmin.jsx";
-import OAuth2RedirectHandler from "./components/other-pages/OAuth2RedirectHandler.jsx";
 
 // Lazy-loaded components with better organization
 const lazyLoad = (importFunc, fallback = null) => 
@@ -49,6 +48,7 @@ const MessageForm = lazyLoad(() => import("./components/Pages/Whatsapp/WhatsAppS
 const NumberScraper = lazyLoad(() => import("./components/Pages/Whatsapp/NumberScraper.jsx"));
 const SubscriptionHistory = lazyLoad(() => import("./components/other-pages/SubscriptionHistory.jsx"));
 const PostForm = lazyLoad(() => import("./components/other-pages/PostForm.jsx"));
+const CouponManagement = lazyLoad(() => import("./components/other-pages/create-coupon.jsx"));
 const PostList = lazyLoad(() => import("./components/other-pages/PostList.jsx"));
 const TemplateEditorPage = lazyLoad(() => import("./components/other-pages/TemplateEditor.jsx"));
 
@@ -142,7 +142,6 @@ const routeConfig = {
     { path: "/services", component: Services },
     { path: "/login", component: Login },
     { path: "/signup", component: Signup },
-    { path: "/oauth2/redirect", component: OAuth2RedirectHandler },
     { path: "/pass-reset", component: Passreset },
     { path: "/reset-password", component: ResetPassword, noLazy: true },
     { path: "/verify-email", component: VerifyEmail },
@@ -161,7 +160,8 @@ const routeConfig = {
   admin: [
     { path: "/create-blog", component: CreateBlogPost },
     { path: "/admin/blog", component: BlogAdmin, noLazy: true },
-    { path: "/admin/blog/edit/:id", component: EditBlogPost, noLazy: true },
+    { path: "/admin/blog", component: BlogAdmin, noLazy: true },
+    { path: "/create-coupun", component: CouponManagement, noLazy: true },
     { path: "/post-form", component: PostForm },
   ],
   protected: [
