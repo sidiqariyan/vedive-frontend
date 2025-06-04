@@ -105,17 +105,21 @@ const Login = () => {
       setLoading(false);
     }
   };
+  const handleGoogleSignup = () => {
+    window.location.href = `${API_URL}/api/auth/google`;
+  };
 
   // Toggle password visibility
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+  
 
   return (
-<div 
+  <div 
   className="min-h-screen flex flex-col text-white bg-cover bg-center bg-no-repeat bg-blend-overlay"
   style={{ backgroundImage: `url(${backgroundImage})` }}
->
+  >
          {/* Header Section */}
           <header className="p-2 ml-2.5">
             <Link to="/">
@@ -150,15 +154,18 @@ const Login = () => {
           <hr className="flex-grow border-t-[3px] border-third" />
         </div>
         
-        {/* Google Sign In Button */}
-        {/* <button className="flex items-center justify-center w-full py-3 h-[55px] px-4 mb-6 border-2 border-white rounded-md bg-transparent text-white hover:bg-blue-900/20 transition-colors">
-          <img src={Google} alt="Google logo" className="h-16 w-16 " />
-          <span className="font-poppins font-medium leading-[100%] tracking-[0] 
-                          sm:text-[20px] md:text-[20px] lg:text-[20px]">
-            Continue with Google
-          </span>
-        </button> */}
-
+          {/* Google Sign In Button */}
+          <button
+            onClick={handleGoogleSignup}
+            type="button"
+            className="flex items-center justify-center w-full py-3 h-[55px] px-4 mb-6 border-2 border-white rounded-md bg-transparent text-white hover:bg-blue-900/20 transition-colors"
+          >
+            <img src={Google} alt="Google logo" className="h-12 w-12 mr-2" />
+            <span className="font-poppins font-medium text-[20px]">
+              Continue with Google
+            </span>
+          </button>
+          
         {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-6">
           {/* Email/Username Input with Floating Label */}

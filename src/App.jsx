@@ -13,7 +13,7 @@ import AdminRoute from "./components/other-pages/AdminRoute.jsx";
 import EditBlogPost from "./components/other-pages/EditorBlogPost.jsx";
 import BlogAdmin from "./components/other-pages/BlogAdmin.jsx";
 import OAuth2RedirectHandler from "./components/other-pages/OAuth2RedirectHandler.jsx";
-
+// import BlogPostList from "./components/other-pages/BlogPostList.jsx";
 
 // Lazy-loaded components with better organization
 const lazyLoad = (importFunc, fallback = null) => 
@@ -156,6 +156,9 @@ const routeConfig = {
     { path: "/editor/:id", component: TemplateEditorPage },
   ],
   blog: [
+    {path: "/search", component: BlogPostList    },
+    {path: "/category/:category", component: BlogPostList},
+    {path: "/tag/:tag", component: BlogPostList},
     { path: "/blog/:slug", component: BlogPostDetail },
     { path: "/:slug", component: BlogPostDetail },
     { path: "/blog-posts/:identifier", component: PostDetail },

@@ -7,8 +7,6 @@ const OAuth2RedirectHandler = () => {
   useEffect(() => {
     const handleOAuthCallback = async () => {
       try {
-        console.log('OAuth callback handler started');
-        console.log('Current URL:', window.location.href);
         
         // Get URL parameters
         const urlParams = new URLSearchParams(window.location.search);
@@ -17,10 +15,6 @@ const OAuth2RedirectHandler = () => {
         const token = urlParams.get('token');
         const error = urlParams.get('error');
         
-        console.log('Extracted params:', { 
-          token: token ? `present (${token.length} chars)` : 'missing', 
-          error: error || 'none'
-        });
 
         if (error) {
           console.error('OAuth error from URL:', error);
@@ -38,7 +32,6 @@ const OAuth2RedirectHandler = () => {
           return;
         }
 
-        console.log('Token received, verifying with backend...');
         
         // Verify the token with backend
         try {
@@ -50,16 +43,13 @@ const OAuth2RedirectHandler = () => {
             body: JSON.stringify({ token })
           });
 
-          console.log('Token verification response status:', response.status);
 
           if (response.ok) {
             const userData = await response.json();
-            console.log('Token verification successful:', userData);
             
             // Store token and user data in localStorage
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(userData.user));
-            console.log('Authentication data stored successfully');
             
             setStatus('success');
             setMessage('Authentication successful! Redirecting to dashboard...');
@@ -84,7 +74,6 @@ const OAuth2RedirectHandler = () => {
               const currentTime = Math.floor(Date.now() / 1000);
               
               if (payload.exp && payload.exp > currentTime && payload._id) {
-                console.log('Using token without backend verification (network error fallback)');
                 
                 // Store token
                 localStorage.setItem('token', token);
@@ -208,13 +197,6 @@ const OAuth2RedirectHandler = () => {
           </div>
         )}
         
-        {/* Debug info (remove in production) */}
-        <div className="mt-6 text-xs text-gray-400 border-t border-white/10 pt-4 text-left">
-          <p><strong>URL:</strong> {window.location.href}</p>
-          <p><strong>Status:</strong> {status}</p>
-          <p><strong>Token in localStorage:</strong> {localStorage.getItem('token') ? `Present` : 'Missing'}</p>
-          <p><strong>User in localStorage:</strong> {localStorage.getItem('user') ? 'Present' : 'Missing'}</p>
-        </div>
       </div>
     </div>
   );

@@ -144,7 +144,7 @@ const Signup = () => {
             type="button"
             className="flex items-center justify-center w-full py-3 h-[55px] px-4 mb-6 border-2 border-white rounded-md bg-transparent text-white hover:bg-blue-900/20 transition-colors"
           >
-            <img src={Google} alt="Google logo" className="h-6 w-6 mr-2" />
+            <img src={Google} alt="Google logo" className="h-12 w-12 mr-2" />
             <span className="font-poppins font-medium text-[20px]">
               Continue with Google
             </span>
