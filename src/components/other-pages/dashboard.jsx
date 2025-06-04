@@ -74,68 +74,83 @@ const Dashboard = () => {
   }, []);
 
   // Combined fetch function to reduce duplicate API calls
-  const fetchAllData = useCallback(async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
+// Replace the fetchAllData function in your Dashboard component
+const fetchAllData = useCallback(async () => {
+  try {
+    // Add retry logic for token check
+    let token = localStorage.getItem("token");
+    let retryCount = 0;
+    
+    // Retry mechanism for token availability
+    while (!token && retryCount < 5) {
+      console.log(`Token not found, retry ${retryCount + 1}/5`);
+      await new Promise(resolve => setTimeout(resolve, 200)); // Wait 200ms
+      token = localStorage.getItem("token");
+      retryCount++;
+    }
+    
+    if (!token) {
+      console.log("No token found after retries, redirecting to login");
+      navigate("/login");
+      return;
+    }
+
+    console.log("Token found, proceeding with API calls");
+
+    // Parallel API calls for better performance
+    const [userResponse, dashboardResponse, subscriptionResponse] = await Promise.all([
+      fetch(`${API_URL}/api/auth/user`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }),
+      fetch(`${API_URL}/api/dashboard`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }),
+      fetch(`${API_URL}/api/subscription/status`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      })
+    ]);
+
+    // Handle authentication errors
+    if (!userResponse.ok) {
+      if (userResponse.status === 401) {
+        console.log("Token invalid, clearing localStorage and redirecting");
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
         navigate("/login");
         return;
       }
-
-      // Parallel API calls for better performance
-      const [userResponse, dashboardResponse, subscriptionResponse] = await Promise.all([
-        fetch(`${API_URL}/api/auth/user`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
-        }),
-        fetch(`${API_URL}/api/dashboard`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        fetch(`${API_URL}/api/subscription/status`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
-        })
-      ]);
-
-      // Handle authentication errors
-      if (!userResponse.ok) {
-        if (userResponse.status === 401) {
-          localStorage.removeItem("token");
-          navigate("/login");
-          return;
-        }
-        throw new Error(`Authentication failed: ${userResponse.status}`);
-      }
-
-      // Process user data
-      const userData = await userResponse.json();
-      
-      // Process subscription data if available
-      if (subscriptionResponse.ok) {
-        const subscriptionData = await subscriptionResponse.json();
-        userData.currentPlan = subscriptionData.currentPlan.charAt(0).toUpperCase() + 
-                               subscriptionData.currentPlan.slice(1);
-      }
-
-      // Process dashboard data
-      if (dashboardResponse.ok) {
-        const dashboardData = await dashboardResponse.json();
-        setStats(dashboardData.stats || {});
-        setChartData(dashboardData.chartData || []);
-        setRecentActivities(dashboardData.recentActivities || []);
-        setCurrentPlan(dashboardData.userPlan || userData.currentPlan || "Free");
-      }
-
-      setUser(userData);
-    } catch (err) {
-      console.error("Error fetching data:", err);
-      setError(err.message);
+      throw new Error(`Authentication failed: ${userResponse.status}`);
     }
-  }, [navigate, API_URL]);
+
+    // Rest of your existing code...
+    const userData = await userResponse.json();
+    
+    if (subscriptionResponse.ok) {
+      const subscriptionData = await subscriptionResponse.json();
+      userData.currentPlan = subscriptionData.currentPlan.charAt(0).toUpperCase() + 
+                             subscriptionData.currentPlan.slice(1);
+    }
+
+    if (dashboardResponse.ok) {
+      const dashboardData = await dashboardResponse.json();
+      setStats(dashboardData.stats || {});
+      setChartData(dashboardData.chartData || []);
+      setRecentActivities(dashboardData.recentActivities || []);
+      setCurrentPlan(dashboardData.userPlan || userData.currentPlan || "Free");
+    }
+
+    setUser(userData);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    setError(err.message);
+  }
+}, [navigate, API_URL]);
 
   useEffect(() => {
     fetchAllData();

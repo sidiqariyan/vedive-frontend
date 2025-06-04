@@ -64,10 +64,11 @@ const OAuth2RedirectHandler = () => {
             setStatus('success');
             setMessage('Authentication successful! Redirecting to dashboard...');
             
-            // Redirect to dashboard after a short delay
+            // Add a longer delay and use window.location.replace instead of href
             setTimeout(() => {
-              window.location.href = '/dashboard';
-            }, 1500);
+              // Force a page reload to ensure localStorage is accessible
+              window.location.replace('/dashboard');
+            }, 2000); // Increased delay to 2 seconds
           } else {
             const errorData = await response.json().catch(() => ({}));
             console.error('Token verification failed:', errorData);
