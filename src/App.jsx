@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { AuthProvider } from "./components/Pages/Mailer/AuthContext.jsx";
 import ProtectedRoute from "./components/other-pages/ProtectedRoutes.jsx";
 import MainLayout from "./components/MailLayout.jsx";
-import "tailwindcss/tailwind.css";
 import "./VediveLoader.css"; 
 import ResetPassword from "./components/other-pages/ResetPassword.jsx";
 import Navbar from "./components/Pages/Hero/Navbar.jsx";
@@ -13,37 +12,47 @@ import AdminRoute from "./components/other-pages/AdminRoute.jsx";
 import EditBlogPost from "./components/other-pages/EditorBlogPost.jsx";
 import BlogAdmin from "./components/other-pages/BlogAdmin.jsx";
 import OAuth2RedirectHandler from "./components/other-pages/OAuth2RedirectHandler.jsx";
-// import BlogPostList from "./components/other-pages/BlogPostList.jsx";
 
-// Lazy-loaded components with better organization
-const lazyLoad = (importFunc, fallback = null) => 
-  lazy(() => importFunc().catch(() => ({ default: () => <div>Failed to load component</div> })));
+// Enhanced lazy loading with preloading capabilities
+const lazyLoad = (importFunc, preload = false) => {
+  const LazyComponent = lazy(() => 
+    importFunc().catch(() => ({ 
+      default: () => <div className="p-4 text-red-500">Failed to load component</div> 
+    }))
+  );
+  
+  // Preload component on route hover/focus
+  if (preload) {
+    LazyComponent.preload = importFunc;
+  }
+  
+  return LazyComponent;
+};
 
-// Public Pages
-const Hero = lazyLoad(() => import("./components/Pages/Hero/Hero"));
+// Critical components (loaded immediately)
+const Hero = lazyLoad(() => import("./components/Pages/Hero/Hero"), true);
+
+// High priority components (likely to be visited)
+const Login = lazyLoad(() => import("./components/other-pages/login.jsx"), true);
+const Signup = lazyLoad(() => import("./components/other-pages/sign-up.jsx"), true);
+const Dashboard = lazyLoad(() => import("./components/other-pages/dashboard.jsx"), true);
+
+// Medium priority components
 const ContactUs = lazyLoad(() => import("./components/Pages/contact.jsx"));
 const AboutUs = lazyLoad(() => import("./components/Pages/about.jsx"));
 const Pricing = lazyLoad(() => import("./components/Pages/pricing.jsx"));
 const Services = lazyLoad(() => import("./components/Pages/services.jsx"));
+const BlogPostList = lazyLoad(() => import("./components/other-pages/BlogPostList"));
+const Plan = lazyLoad(() => import("./components/other-pages/plan.jsx"));
 
-// Auth Pages
-const Login = lazyLoad(() => import("./components/other-pages/login.jsx"));
-const Signup = lazyLoad(() => import("./components/other-pages/sign-up.jsx"));
+// Low priority components (loaded on demand)
 const Passreset = lazyLoad(() => import("./components/other-pages/pass-reset.jsx"));
 const VerifyEmail = lazyLoad(() => import("./components/other-pages/VerifyEmail"));
 const PaymentStatus = lazyLoad(() => import("./components/other-pages/PaymentStatus.jsx"));
-
-
-// Blog Components
-const BlogPostList = lazyLoad(() => import("./components/other-pages/BlogPostList"));
 const BlogPostDetail = lazyLoad(() => import("./components/other-pages/BlogPostDetail"));
 const CreateBlogPost = lazyLoad(() => import("./components/other-pages/CreateBlogPost"));
 const PostDetail = lazyLoad(() => import("./components/other-pages/BlogPostDetail"));
-
-// Dashboard Pages
-const Dashboard = lazyLoad(() => import("./components/other-pages/dashboard.jsx"));
 const Account = lazyLoad(() => import("./components/other-pages/account.jsx"));
-const Plan = lazyLoad(() => import("./components/other-pages/plan.jsx"));
 const SenderBody = lazyLoad(() => import("./components/Pages/Mailer/SenderBody.jsx"));
 const EmailScrapper = lazyLoad(() => import("./components/Pages/Mailer/EmailScrapper.jsx"));
 const GmailSender = lazyLoad(() => import("./components/Pages/Gmail/GmailSender.jsx"));
@@ -55,29 +64,24 @@ const CouponManagement = lazyLoad(() => import("./components/other-pages/create-
 const PostList = lazyLoad(() => import("./components/other-pages/PostList.jsx"));
 const TemplateEditorPage = lazyLoad(() => import("./components/other-pages/TemplateEditor.jsx"));
 
-// Optimized Loading Component
+// Minimal Loading Component
 const LoadingSpinner = memo(() => (
   <div className="min-h-screen bg-[#04081d] flex items-center justify-center">
-    <div className="flex flex-col items-center space-y-4">
-      <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-      <div className="text-blue-400 text-sm font-medium">Loading...</div>
-    </div>
+    <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
   </div>
 ));
 
-// Optimized Page Transition Component
+// Optimized Page Transition with reduced motion for performance
 const PageTransition = memo(({ children }) => {
   const pageVariants = useMemo(() => ({
-    initial: { opacity: 0, x: -10 },
+    initial: { opacity: 0 },
     animate: { 
-      opacity: 1, 
-      x: 0,
-      transition: { duration: 0.25, ease: "easeOut" }
+      opacity: 1,
+      transition: { duration: 0.2, ease: "easeOut" }
     },
     exit: { 
-      opacity: 0, 
-      x: 10,
-      transition: { duration: 0.15, ease: "easeIn" }
+      opacity: 0,
+      transition: { duration: 0.1, ease: "easeIn" }
     },
   }), []);
 
@@ -87,19 +91,19 @@ const PageTransition = memo(({ children }) => {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="page-transition w-full"
+      className="w-full"
     >
       {children}
     </motion.div>
   );
 });
 
-// Optimized Loader Component with CSS-in-JS moved to external styles
+// Simplified Loader Component
 const VediveLoader = memo(({ onComplete }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (onComplete) onComplete();
-    }, 3000);
+    }, 2000); // Reduced from 3000ms to 2000ms
     return () => clearTimeout(timer);
   }, [onComplete]);
 
@@ -128,37 +132,44 @@ const ScrollToTop = memo(() => {
   const { pathname } = useLocation();
   
   useEffect(() => {
-    window.scrollTo(0, 0);
+    // Use requestAnimationFrame for smoother scrolling
+    requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+    });
   }, [pathname]);
   
   return null;
 });
 
-// Route configuration for better maintainability
+// Route configuration with priority levels
 const routeConfig = {
-  public: [
+  critical: [
     { path: "/", component: Hero, exact: true },
     { path: "/home", component: Hero },
+    { path: "/login", component: Login },
+    { path: "/signup", component: Signup },
+  ],
+  high: [
     { path: "/contact", component: ContactUs },
     { path: "/about", component: AboutUs },
     { path: "/pricing", component: Pricing },
     { path: "/services", component: Services },
-    { path: "/login", component: Login },
-    { path: "/signup", component: Signup },
+    { path: "/blogs", component: BlogPostList },
+    { path: "/plans", component: Plan },
+  ],
+  medium: [
     { path: "/oauth2/redirect", component: OAuth2RedirectHandler },
     { path: "/pass-reset", component: Passreset },
     { path: "/reset-password", component: ResetPassword, noLazy: true },
     { path: "/verify-email", component: VerifyEmail },
     { path: "/plans/payment-status", component: PaymentStatus },
-    { path: "/plans", component: Plan },
-    { path: "/blogs", component: BlogPostList },
     { path: "/templates", component: PostList },
     { path: "/editor/:id", component: TemplateEditorPage },
   ],
   blog: [
-    {path: "/search", component: BlogPostList    },
-    {path: "/category/:category", component: BlogPostList},
-    {path: "/tag/:tag", component: BlogPostList},
+    { path: "/search", component: BlogPostList },
+    { path: "/category/:category", component: BlogPostList },
+    { path: "/tag/:tag", component: BlogPostList },
     { path: "/blog/:slug", component: BlogPostDetail },
     { path: "/:slug", component: BlogPostDetail },
     { path: "/blog-posts/:identifier", component: PostDetail },
@@ -175,7 +186,7 @@ const routeConfig = {
   protected: [
     { path: "dashboard", component: Dashboard },
     { path: "account", component: Account },
-    { path: "plan", component: Plan },
+    { path: "plan", component: Plan }, 
     { path: "gmail-sender", component: GmailSender },
     { path: "email-scraper", component: EmailScrapper },
     { path: "email-sender", component: SenderBody },
@@ -184,9 +195,16 @@ const routeConfig = {
   ]
 };
 
-// Route renderer helper
+// Enhanced route renderer with preloading
 const renderRoute = (route, index, wrapper = null) => {
   const Component = route.component;
+  
+  const handleMouseEnter = () => {
+    if (Component.preload) {
+      Component.preload();
+    }
+  };
+
   const element = route.noLazy ? (
     <PageTransition>
       <Component />
@@ -205,7 +223,7 @@ const renderRoute = (route, index, wrapper = null) => {
     <Route
       key={`${route.path}-${index}`}
       path={route.path}
-      element={wrappedElement}
+      element={<div onMouseEnter={handleMouseEnter}>{wrappedElement}</div>}
     />
   );
 };
@@ -217,8 +235,14 @@ const AnimatedRoutes = memo(() => {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        {/* Public Routes */}
-        {routeConfig.public.map((route, index) => renderRoute(route, index))}
+        {/* Critical Routes (no lazy loading) */}
+        {routeConfig.critical.map((route, index) => renderRoute(route, index))}
+        
+        {/* High Priority Routes */}
+        {routeConfig.high.map((route, index) => renderRoute(route, index))}
+        
+        {/* Medium Priority Routes */}
+        {routeConfig.medium.map((route, index) => renderRoute(route, index))}
         
         {/* Blog Routes */}
         {routeConfig.blog.map((route, index) => renderRoute(route, index))}
@@ -256,17 +280,45 @@ const AnimatedRoutes = memo(() => {
   );
 });
 
-// Main App component
+// Main App component with performance optimizations
 const App = () => {
   const [showLoader, setShowLoader] = useState(() => {
-    // Check if we should show loader based on localStorage or sessionStorage
-    // Since we can't use localStorage in artifacts, we'll use a simple state
-    return true;
+    // Show loader only on page refresh (F5 or browser refresh)
+    if (typeof window !== 'undefined') {
+      // Check if it's a page refresh
+      const isPageRefresh = (
+        window.performance.navigation.type === 1 || // TYPE_RELOAD
+        window.performance.getEntriesByType('navigation')[0]?.type === 'reload'
+      );
+      
+      return isPageRefresh;
+    }
+    return false;
   });
 
   const handleLoaderComplete = useMemo(() => 
     () => setShowLoader(false), []
   );
+
+  // Preload critical resources
+  useEffect(() => {
+    const preloadCriticalRoutes = () => {
+      // Preload Hero component after initial load
+      setTimeout(() => {
+        if (Hero.preload) Hero.preload();
+      }, 100);
+      
+      // Preload auth components after 1 second
+      setTimeout(() => {
+        if (Login.preload) Login.preload();
+        if (Signup.preload) Signup.preload();
+      }, 1000);
+    };
+
+    if (!showLoader) {
+      preloadCriticalRoutes();
+    }
+  }, [showLoader]);
 
   return (
     <AuthProvider>
