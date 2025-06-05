@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { Link, useSearchParams } from 'react-router-dom';
 import { 
@@ -17,43 +17,85 @@ import {
 import Navbar from '../Pages/Hero/Navbar';
 import Footer from '../Pages/Hero/Footer';
 
-// Utility functions
+// Create axios instance with optimizations
+const apiClient = axios.create({
+  baseURL: 'https://vedive.com:3000/api/blog',
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  }
+});
+
+// Cache for API responses
+const cache = new Map();
+
+// Utility functions (moved outside component to prevent recreations)
 const stripHtml = (html = '') => html.replace(/<[^>]*>/g, '');
 const buildImageUrl = (imageUrl) => {
   if (!imageUrl || typeof imageUrl !== 'string') return '';
   return imageUrl.startsWith('http') ? imageUrl : `https://vedive.com:3000${imageUrl}`;
 };
 
-// Enhanced PostCard with modern professional design
-const PostCard = React.memo(({ post }) => {
+// Optimized debounce hook
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  const timerRef = useRef();
+
+  useEffect(() => {
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timerRef.current);
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
+// Virtualized PostCard with optimizations
+const PostCard = React.memo(({ post, priority = false }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+  
   const imageUrl = useMemo(() => buildImageUrl(post.coverImage), [post.coverImage]);
   const excerpt = useMemo(() => stripHtml(post.content).slice(0, 120), [post.content]);
   const formattedDate = useMemo(() => {
+    if (post._formattedDate) return post._formattedDate;
     const date = new Date(post.createdAt);
     return date.toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric' 
     });
-  }, [post.createdAt]);
+  }, [post.createdAt, post._formattedDate]);
+
+  const handleImageLoad = useCallback(() => setImageLoaded(true), []);
+  const handleImageError = useCallback(() => setImageFailed(true), []);
 
   return (
     <Link
       to={`/${post.slug}`}
-      className="block bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 group border border-gray-100 dark:border-gray-700"
+      className="block bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 group border border-gray-100 dark:border-gray-700"
     >
-      <div className="relative w-full h-56 overflow-hidden">
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={post.title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-            loading="lazy"
-            onError={e => { e.target.style.display = 'none'; }}
-          />
+      <div className="relative w-full h-56 overflow-hidden bg-gray-100 dark:bg-gray-700">
+        {!imageFailed && imageUrl ? (
+          <>
+            {!imageLoaded && (
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 animate-pulse" />
+            )}
+            <img
+              src={imageUrl}
+              alt={post.title}
+              className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+              loading={priority ? 'eager' : 'lazy'}
+              decoding="async"
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+            />
+          </>
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center">
-            <span className="text-white text-5xl opacity-70">📄</span>
+            <span className="text-white text-4xl opacity-70">📄</span>
           </div>
         )}
         <div className="absolute top-4 left-4">
@@ -81,7 +123,7 @@ const PostCard = React.memo(({ post }) => {
           )}
         </div>
         
-        <h3 className="text-xl font-bold mb-3 line-clamp-2 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+        <h3 className="text-xl font-bold mb-3 line-clamp-2 text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors duration-200">
           {post.title}
         </h3>
         
@@ -93,26 +135,39 @@ const PostCard = React.memo(({ post }) => {
   );
 });
 
-// Enhanced FeaturedBanner with improved responsiveness
+// Optimized FeaturedBanner
 const FeaturedBanner = React.memo(({ post }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
   const imageUrl = useMemo(() => buildImageUrl(post.coverImage), [post.coverImage]);
   const excerpt = useMemo(() => stripHtml(post.content).substring(0, 150), [post.content]);
   const formattedDate = useMemo(() => {
+    if (post._formattedDate) return post._formattedDate;
     const date = new Date(post.createdAt);
     return date.toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric' 
     });
-  }, [post.createdAt]);
+  }, [post.createdAt, post._formattedDate]);
 
   return (
     <Link
       to={`/${post.slug}`}
-      className="block relative h-96 sm:h-[28rem] md:h-[32rem] lg:h-[32rem] xl:h-[36rem] bg-cover bg-center rounded-3xl overflow-hidden hover:scale-[1.02] transition-transform duration-500 group shadow-2xl"
-      style={{ backgroundImage: `linear-gradient(135deg, rgba(0,0,0,0.6), rgba(0,0,0,0.3)), url(${imageUrl})` }}
+      className="block relative h-96 md:h-[32rem] xl:h-[36rem] bg-cover bg-center rounded-3xl overflow-hidden hover:scale-[1.01] transition-transform duration-300 group shadow-2xl"
     >
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent group-hover:from-black/70 transition-all duration-500 flex flex-col justify-end p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12">
+      {!imageLoaded && (
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-400 to-gray-600 animate-pulse" />
+      )}
+      <img
+        src={imageUrl}
+        alt={post.title}
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+          imageLoaded ? 'opacity-100' : 'opacity-0'
+        }`}
+        loading="eager"
+        onLoad={() => setImageLoaded(true)}
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent group-hover:from-black/70 transition-all duration-300 flex flex-col justify-end p-4 sm:p-6 md:p-8 lg:p-10">
         <div className="mb-3 sm:mb-4 flex items-center gap-2 sm:gap-3">
           <span className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs sm:text-sm font-semibold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-lg flex items-center gap-1 sm:gap-2">
             <FaStar className="w-3 h-3" />
@@ -123,26 +178,26 @@ const FeaturedBanner = React.memo(({ post }) => {
           </span>
         </div>
         
-        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-3 sm:mb-4 md:mb-6 text-white group-hover:text-blue-300 transition-colors duration-300 leading-tight line-clamp-3 sm:line-clamp-none">
+        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 text-white group-hover:text-blue-300 transition-colors duration-200 leading-tight line-clamp-3">
           {post.title}
         </h1>
         
-        <p className="mb-4 sm:mb-6 text-gray-200 text-sm sm:text-base md:text-lg hidden sm:block leading-relaxed line-clamp-2 md:line-clamp-3">
+        <p className="mb-4 sm:mb-6 text-gray-200 text-sm sm:text-base hidden sm:block leading-relaxed line-clamp-2">
           {excerpt}…
         </p>
         
-        <div className="flex items-center flex-wrap gap-2 sm:gap-3 md:gap-4 text-xs sm:text-sm text-gray-300">
+        <div className="flex items-center flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm text-gray-300">
           <div className="flex items-center gap-1 sm:gap-2">
-            <FaUser className="w-3 h-3 sm:w-4 sm:h-4" />
+            <FaUser className="w-3 h-3" />
             <span>{post.authorName}</span>
           </div>
           <div className="flex items-center gap-1 sm:gap-2">
-            <FaCalendar className="w-3 h-3 sm:w-4 sm:h-4" />
+            <FaCalendar className="w-3 h-3" />
             <span>{formattedDate}</span>
           </div>
           {post.readTime && (
             <div className="flex items-center gap-1 sm:gap-2">
-              <FaClock className="w-3 h-3 sm:w-4 sm:h-4" />
+              <FaClock className="w-3 h-3" />
               <span>{post.readTime}</span>
             </div>
           )}
@@ -152,7 +207,7 @@ const FeaturedBanner = React.memo(({ post }) => {
   );
 });
 
-// Enhanced Search and Filter Component with tags
+// Optimized Search and Filter Component
 const SearchAndFilter = React.memo(({ 
   searchTerm, 
   onSearchChange, 
@@ -168,9 +223,10 @@ const SearchAndFilter = React.memo(({
 }) => {
   const [showFilters, setShowFilters] = useState(false);
 
+  const toggleFilters = useCallback(() => setShowFilters(prev => !prev), []);
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
-      {/* Search Bar */}
       <div className="p-6 pb-4">
         <div className="relative">
           <input
@@ -178,34 +234,31 @@ const SearchAndFilter = React.memo(({
             placeholder="Search articles, authors, topics..."
             value={searchTerm}
             onChange={onSearchChange}
-            className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-lg"
+            className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl pl-12 pr-4 py-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-lg"
           />
           <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
         </div>
       </div>
 
-      {/* Filter Toggle Button (Mobile) */}
       <div className="px-6 pb-4 md:hidden">
         <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl transition-colors duration-300 font-medium"
+          onClick={toggleFilters}
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl transition-colors duration-200 font-medium"
         >
           <FaFilter className="w-4 h-4" />
           Advanced Filters
-          <FaChevronDown className={`w-4 h-4 transition-transform duration-300 ${showFilters ? 'rotate-180' : ''}`} />
+          <FaChevronDown className={`w-4 h-4 transition-transform duration-200 ${showFilters ? 'rotate-180' : ''}`} />
         </button>
       </div>
 
-      {/* Filters */}
       <div className={`px-6 pb-6 ${showFilters ? 'block' : 'hidden md:block'}`}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Category Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
             <select
               value={selectedCategory}
               onChange={onCategoryChange}
-              className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+              className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
             >
               <option value="">All Categories</option>
               {categories.map((category) => (
@@ -216,13 +269,12 @@ const SearchAndFilter = React.memo(({
             </select>
           </div>
 
-          {/* Tag Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tag</label>
             <select
               value={selectedTag}
               onChange={onTagChange}
-              className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+              className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
             >
               <option value="">All Tags</option>
               {tags.map((tag) => (
@@ -233,13 +285,12 @@ const SearchAndFilter = React.memo(({
             </select>
           </div>
 
-          {/* Sort Order */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sort By</label>
             <select
               value={sortOrder}
               onChange={onSortChange}
-              className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+              className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
             >
               <option value="newest">Latest First</option>
               <option value="oldest">Oldest First</option>
@@ -247,11 +298,10 @@ const SearchAndFilter = React.memo(({
             </select>
           </div>
 
-          {/* Clear Filters */}
           <div className="flex items-end">
             <button
               onClick={onClearFilters}
-              className="w-full flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-4 py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors duration-300 font-medium"
+              className="w-full flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-4 py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors duration-200 font-medium"
             >
               <FaTimes className="w-4 h-4" />
               Clear All
@@ -263,7 +313,7 @@ const SearchAndFilter = React.memo(({
   );
 });
 
-// Enhanced Pagination with modern design
+// Optimized Pagination
 const Pagination = React.memo(({ pagination, onPageChange }) => {
   const { currentPage, totalPages, hasNextPage, hasPrevPage } = pagination;
 
@@ -302,7 +352,7 @@ const Pagination = React.memo(({ pagination, onPageChange }) => {
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={!hasPrevPage}
-        className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-medium shadow-sm"
+        className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-sm"
       >
         Previous
       </button>
@@ -312,7 +362,7 @@ const Pagination = React.memo(({ pagination, onPageChange }) => {
           key={index}
           onClick={() => typeof page === 'number' && onPageChange(page)}
           disabled={page === '...'}
-          className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 shadow-sm ${
+          className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 shadow-sm ${
             currentPage === page 
               ? 'bg-blue-600 text-white shadow-lg' 
               : page === '...' 
@@ -327,7 +377,7 @@ const Pagination = React.memo(({ pagination, onPageChange }) => {
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={!hasNextPage}
-        className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-medium shadow-sm"
+        className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-sm"
       >
         Next
       </button>
@@ -335,7 +385,19 @@ const Pagination = React.memo(({ pagination, onPageChange }) => {
   );
 });
 
-// Main BlogPostList Component
+// Optimized API functions with caching
+const fetchWithCache = async (url, cacheKey, ttl = 60000) => {
+  const cached = cache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < ttl) {
+    return cached.data;
+  }
+  
+  const response = await apiClient.get(url);
+  cache.set(cacheKey, { data: response.data, timestamp: Date.now() });
+  return response.data;
+};
+
+// Main optimized component
 const BlogPostList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [posts, setPosts] = useState([]);
@@ -353,18 +415,10 @@ const BlogPostList = () => {
   const [sortOrder, setSortOrder] = useState(searchParams.get('sort') || 'newest');
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page')) || 1);
 
-  // Debounced search
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  // Optimized debounced search
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
-  // Update URL params when filters change
+  // Update URL params
   useEffect(() => {
     const params = new URLSearchParams();
     if (debouncedSearchTerm) params.set('search', debouncedSearchTerm);
@@ -373,22 +427,21 @@ const BlogPostList = () => {
     if (sortOrder !== 'newest') params.set('sort', sortOrder);
     if (currentPage !== 1) params.set('page', currentPage.toString());
     
-    setSearchParams(params);
+    setSearchParams(params, { replace: true });
   }, [debouncedSearchTerm, selectedCategory, selectedTag, sortOrder, currentPage, setSearchParams]);
 
-  // Fetch latest post for banner (always shows latest regardless of filters)
+  // Optimized fetch functions
   const fetchLatestPost = useCallback(async () => {
     try {
-      const response = await axios.get(`https://vedive.com:3000/api/blog/blog-posts?limit=1&sort=newest`);
-      if (response.data.posts && response.data.posts.length > 0) {
-        setLatestPost(response.data.posts[0]);
+      const data = await fetchWithCache('/blog-posts?limit=1&sort=newest', 'latest-post', 30000);
+      if (data.posts && data.posts.length > 0) {
+        setLatestPost(data.posts[0]);
       }
     } catch (err) {
       console.error('Error fetching latest post:', err);
     }
   }, []);
 
-  // Fetch posts with filters
   const fetchPosts = useCallback(async () => {
     try {
       setLoading(true);
@@ -402,9 +455,11 @@ const BlogPostList = () => {
       if (selectedCategory) params.set('category', selectedCategory);
       if (selectedTag) params.set('tag', selectedTag);
 
-      const response = await axios.get(`https://vedive.com:3000/api/blog/blog-posts?${params}`);
-      setPosts(response.data.posts || []);
-      setPagination(response.data.pagination || {});
+      const cacheKey = `posts-${params.toString()}`;
+      const data = await fetchWithCache(`/blog-posts?${params}`, cacheKey, 15000);
+      
+      setPosts(data.posts || []);
+      setPagination(data.pagination || {});
       setError('');
     } catch (err) {
       console.error('Error fetching posts:', err);
@@ -414,34 +469,34 @@ const BlogPostList = () => {
     }
   }, [currentPage, sortOrder, debouncedSearchTerm, selectedCategory, selectedTag]);
 
-  // Fetch categories
-  const fetchCategories = useCallback(async () => {
+  const fetchCategoriesAndTags = useCallback(async () => {
     try {
-      const response = await axios.get('https://vedive.com:3000/api/blog/categories');
-      setCategories(response.data.categories || []);
+      const [categoriesData, tagsData] = await Promise.all([
+        fetchWithCache('/categories', 'categories', 300000),
+        fetchWithCache('/tags', 'tags', 300000)
+      ]);
+      
+      setCategories(categoriesData.categories || []);
+      setTags(tagsData.tags || []);
     } catch (err) {
-      console.error('Error fetching categories:', err);
+      console.error('Error fetching categories/tags:', err);
     }
   }, []);
 
-  // Fetch tags
-  const fetchTags = useCallback(async () => {
-    try {
-      const response = await axios.get('https://vedive.com:3000/api/blog/tags');
-      setTags(response.data.tags || []);
-    } catch (err) {
-      console.error('Error fetching tags:', err);
-    }
-  }, []);
-
+  // Initial load - parallel requests
   useEffect(() => {
-    fetchLatestPost();
-    fetchPosts();
-    fetchCategories();
-    fetchTags();
-  }, [fetchLatestPost, fetchPosts, fetchCategories, fetchTags]);
+    Promise.all([
+      fetchLatestPost(),
+      fetchCategoriesAndTags()
+    ]);
+  }, [fetchLatestPost, fetchCategoriesAndTags]);
 
-  // Event handlers
+  // Fetch posts when filters change
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+
+  // Optimized event handlers
   const handleSearchChange = useCallback((e) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
@@ -464,7 +519,9 @@ const BlogPostList = () => {
 
   const handlePageChange = useCallback((page) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   }, []);
 
   const handleClearFilters = useCallback(() => {
@@ -475,12 +532,20 @@ const BlogPostList = () => {
     setCurrentPage(1);
   }, []);
 
+  // Loading skeleton
   if (loading && posts.length === 0) {
     return (
       <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
         <Navbar />
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+        <div className="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="animate-pulse">
+            <div className="h-96 bg-gray-300 rounded-3xl mb-12"></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="bg-gray-300 h-80 rounded-2xl"></div>
+              ))}
+            </div>
+          </div>
         </div>
         <Footer />
       </div>
@@ -492,7 +557,7 @@ const BlogPostList = () => {
       <Navbar />
       
       <div className="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Featured Banner - Always shows latest post */}
+        {/* Featured Banner */}
         {latestPost && (
           <div className="mb-12">
             <FeaturedBanner post={latestPost} />
@@ -559,13 +624,12 @@ const BlogPostList = () => {
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {posts.map(post => (
-                  <PostCard key={post.id} post={post} />
+                {posts.map((post, index) => (
+                  <PostCard key={post.id} post={post} priority={index < 4} />
                 ))}
               </div>
             </section>
 
-            {/* Pagination */}
             <Pagination
               pagination={pagination}
               onPageChange={handlePageChange}
@@ -584,7 +648,7 @@ const BlogPostList = () => {
             {(!debouncedSearchTerm && !selectedCategory && !selectedTag) && (
               <Link 
                 to="/create-blog" 
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               >
                 Create Your First Article
                 <FaArrowRight className="w-4 h-4" />
