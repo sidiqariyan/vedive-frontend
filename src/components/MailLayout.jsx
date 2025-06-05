@@ -12,67 +12,77 @@ const API_URL = "https://vedive.com:3000";
 const PROTECTED_ROUTES = ["/email-scraper", "/number-scraper"];
 const DESKTOP_BREAKPOINT = 1024;
 
-// Custom hookss
+// Custom hooks
 const useAuth = () => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // Start with true
   const [error, setError] = useState(null);
+  const [initialized, setInitialized] = useState(false); // Track if auth has been initialized
   const navigate = useNavigate();
 
-const fetchUserData = useCallback(async () => {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-      return;
-    }
+  const fetchUserData = useCallback(async () => {
+    // Prevent multiple simultaneous calls
+    if (initialized && !loading) return;
     
-    const [userResponse, subscriptionResponse] = await Promise.all([
-      fetch(`${API_URL}/api/auth/user`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      }),
-      fetch(`${API_URL}/api/subscription/status`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      })
-    ]);
-    
-    if (!userResponse.ok) {
-      if (userResponse.status === 401) {
-        localStorage.removeItem("token");
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) {
         navigate("/login");
         return;
       }
-      throw new Error(`Authentication failed: ${userResponse.status}`);
+      
+      const [userResponse, subscriptionResponse] = await Promise.all([
+        fetch(`${API_URL}/api/auth/user`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }),
+        fetch(`${API_URL}/api/subscription/status`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        })
+      ]);
+      
+      if (!userResponse.ok) {
+        if (userResponse.status === 401) {
+          localStorage.removeItem("token");
+          navigate("/login");
+          return;
+        }
+        throw new Error(`Authentication failed: ${userResponse.status}`);
+      }
+      
+      const userData = await userResponse.json();
+      
+      if (subscriptionResponse.ok) {
+        const subscriptionData = await subscriptionResponse.json();
+        userData.currentPlan = subscriptionData.currentPlan.charAt(0).toUpperCase() + 
+                               subscriptionData.currentPlan.slice(1);
+      }
+      
+      setUser(userData);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+      setInitialized(true);
     }
-    
-    const userData = await userResponse.json();
-    
-    if (subscriptionResponse.ok) {
-      const subscriptionData = await subscriptionResponse.json();
-      userData.currentPlan = subscriptionData.currentPlan.charAt(0).toUpperCase() + 
-                             subscriptionData.currentPlan.slice(1);
+  }, [navigate, initialized, loading]);
+
+  useEffect(() => {
+    // Only fetch user data once when component mounts
+    if (!initialized) {
+      fetchUserData();
     }
-    
-    setUser(userData);
-  } catch (err) {
-    console.error("Error fetching user data:", err);
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-}, []); // Remove navigate dependency
+  }, [fetchUserData, initialized]);
 
-useEffect(() => {
-  fetchUserData();
-}, []); // Empty dependency array - only run once
-
-  return { user, loading, error };
+  return { user, loading, error, refetchUser: fetchUserData };
 };
 
 const useResponsiveSidebar = () => {
@@ -225,8 +235,8 @@ const ProtectedNavigationItem = ({ item, hasAccess, navigate, onNavigate }) => (
   </div>
 );
 
-// User avatar component
-const UserAvatar = ({ user }) => {
+// User avatar component - Memoized to prevent unnecessary re-renders
+const UserAvatar = React.memo(({ user }) => {
   const initials = useMemo(() => {
     return user?.name?.split(" ").map(n => n[0]).join("") || "U";
   }, [user?.name]);
@@ -246,7 +256,7 @@ const UserAvatar = ({ user }) => {
       </div>
     </div>
   );
-};
+});
 
 // Loading component
 const LoadingSpinner = () => (
@@ -269,7 +279,7 @@ const MainLayout = () => {
   const { user, loading, error } = useAuth();
   const { sidebarOpen, toggleSidebar, closeSidebarOnMobile } = useResponsiveSidebar();
 
-  // Check if user has access to paid features
+  // Memoize hasAccess function to prevent unnecessary re-renders
   const hasAccess = useCallback((feature) => {
     if (feature === "paid-tools") {
       return user?.currentPlan && user.currentPlan.toLowerCase() !== "free";
@@ -301,7 +311,7 @@ const MainLayout = () => {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Memoized to prevent unnecessary re-renders */}
       <aside
         className={`
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
