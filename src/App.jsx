@@ -13,7 +13,11 @@ import EditBlogPost from "./components/other-pages/EditorBlogPost.jsx";
 import BlogAdmin from "./components/other-pages/BlogAdmin.jsx";
 import OAuth2RedirectHandler from "./components/other-pages/OAuth2RedirectHandler.jsx";
 
-// Enhanced lazy loading with preloading capabilities
+// Performance tracking
+const PERFORMANCE_KEY = 'vedive_app_loaded';
+const LOADER_DURATION = 2000; // Perfect 2 seconds for branding + preloading
+
+// Enhanced lazy loading with instant preloading
 const lazyLoad = (importFunc, preload = false) => {
   const LazyComponent = lazy(() => 
     importFunc().catch(() => ({ 
@@ -21,23 +25,24 @@ const lazyLoad = (importFunc, preload = false) => {
     }))
   );
   
-  // Preload component on route hover/focus
   if (preload) {
     LazyComponent.preload = importFunc;
+    // Immediate preload on module definition
+    setTimeout(() => importFunc(), 0);
   }
   
   return LazyComponent;
 };
 
-// Critical components (loaded immediately)
+// Critical components (loaded immediately with aggressive preloading)
 const Hero = lazyLoad(() => import("./components/Pages/Hero/Hero"), true);
 
-// High priority components (likely to be visited)
+// High priority components (preloaded instantly)
 const Login = lazyLoad(() => import("./components/other-pages/login.jsx"), true);
 const Signup = lazyLoad(() => import("./components/other-pages/sign-up.jsx"), true);
 const Dashboard = lazyLoad(() => import("./components/other-pages/dashboard.jsx"), true);
 
-// Medium priority components
+// Medium priority components (smart preloading)
 const ContactUs = lazyLoad(() => import("./components/Pages/contact.jsx"));
 const AboutUs = lazyLoad(() => import("./components/Pages/about.jsx"));
 const Pricing = lazyLoad(() => import("./components/Pages/pricing.jsx"));
@@ -45,7 +50,7 @@ const Services = lazyLoad(() => import("./components/Pages/services.jsx"));
 const BlogPostList = lazyLoad(() => import("./components/other-pages/BlogPostList"));
 const Plan = lazyLoad(() => import("./components/other-pages/plan.jsx"));
 
-// Low priority components (loaded on demand)
+// Low priority components (on-demand loading)
 const Passreset = lazyLoad(() => import("./components/other-pages/pass-reset.jsx"));
 const VerifyEmail = lazyLoad(() => import("./components/other-pages/VerifyEmail"));
 const PaymentStatus = lazyLoad(() => import("./components/other-pages/PaymentStatus.jsx"));
@@ -64,23 +69,23 @@ const CouponManagement = lazyLoad(() => import("./components/other-pages/create-
 const PostList = lazyLoad(() => import("./components/other-pages/PostList.jsx"));
 const TemplateEditorPage = lazyLoad(() => import("./components/other-pages/TemplateEditor.jsx"));
 
-// Minimal Loading Component
+// Ultra-minimal Loading Component (only shows when Vedive loader is not active)
 const LoadingSpinner = memo(() => (
   <div className="min-h-screen bg-[#04081d] flex items-center justify-center">
-    <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    <div className="w-4 h-4 border border-blue-400 border-t-transparent rounded-full animate-spin"></div>
   </div>
 ));
 
-// Optimized Page Transition with reduced motion for performance
+// Optimized Page Transition with minimal motion
 const PageTransition = memo(({ children }) => {
   const pageVariants = useMemo(() => ({
-    initial: { opacity: 0 },
+    initial: { opacity: 0.8 },
     animate: { 
       opacity: 1,
-      transition: { duration: 0.2, ease: "easeOut" }
+      transition: { duration: 0.15, ease: "easeOut" }
     },
     exit: { 
-      opacity: 0,
+      opacity: 0.8,
       transition: { duration: 0.1, ease: "easeIn" }
     },
   }), []);
@@ -98,12 +103,54 @@ const PageTransition = memo(({ children }) => {
   );
 });
 
-// Simplified Loader Component
+// Ultra-fast Loader Component with Maximum Preloading
 const VediveLoader = memo(({ onComplete }) => {
   useEffect(() => {
+    // Phase 1: Immediate critical preloading (0ms)
+    const criticalPreloads = [];
+    if (Hero.preload) criticalPreloads.push(Hero.preload());
+    if (Login.preload) criticalPreloads.push(Login.preload());
+    if (Signup.preload) criticalPreloads.push(Signup.preload());
+    if (Dashboard.preload) criticalPreloads.push(Dashboard.preload());
+    
+    // Phase 2: High priority preloading (300ms)
+    setTimeout(() => {
+      ContactUs.preload?.();
+      AboutUs.preload?.();
+      Pricing.preload?.();
+      Services.preload?.();
+      BlogPostList.preload?.();
+      Plan.preload?.();
+    }, 300);
+    
+    // Phase 3: Medium priority preloading (800ms)
+    setTimeout(() => {
+      Passreset.preload?.();
+      VerifyEmail.preload?.();
+      PaymentStatus.preload?.();
+      Account.preload?.();
+      BlogPostDetail.preload?.();
+      CreateBlogPost.preload?.();
+    }, 800);
+    
+    // Phase 4: Low priority preloading (1200ms)
+    setTimeout(() => {
+      SenderBody.preload?.();
+      EmailScrapper.preload?.();
+      GmailSender.preload?.();
+      MessageForm.preload?.();
+      NumberScraper.preload?.();
+      PostForm.preload?.();
+      CouponManagement.preload?.();
+      PostList.preload?.();
+      TemplateEditorPage.preload?.();
+    }, 1200);
+    
+    // Complete loader after 2 seconds
     const timer = setTimeout(() => {
       if (onComplete) onComplete();
-    }, 2000); // Reduced from 3000ms to 2000ms
+    }, LOADER_DURATION);
+    
     return () => clearTimeout(timer);
   }, [onComplete]);
 
@@ -132,10 +179,8 @@ const ScrollToTop = memo(() => {
   const { pathname } = useLocation();
   
   useEffect(() => {
-    // Use requestAnimationFrame for smoother scrolling
-    requestAnimationFrame(() => {
-      window.scrollTo(0, 0);
-    });
+    // Instant scroll without requestAnimationFrame for speed
+    window.scrollTo(0, 0);
   }, [pathname]);
   
   return null;
@@ -195,11 +240,18 @@ const routeConfig = {
   ]
 };
 
-// Enhanced route renderer with preloading
+// Enhanced route renderer with conditional loading
 const renderRoute = (route, index, wrapper = null) => {
   const Component = route.component;
   
   const handleMouseEnter = () => {
+    if (Component.preload) {
+      Component.preload();
+    }
+  };
+
+  // Aggressive preloading on link focus/hover
+  const handleFocus = () => {
     if (Component.preload) {
       Component.preload();
     }
@@ -223,7 +275,14 @@ const renderRoute = (route, index, wrapper = null) => {
     <Route
       key={`${route.path}-${index}`}
       path={route.path}
-      element={<div onMouseEnter={handleMouseEnter}>{wrappedElement}</div>}
+      element={
+        <div 
+          onMouseEnter={handleMouseEnter}
+          onFocus={handleFocus}
+        >
+          {wrappedElement}
+        </div>
+      }
     />
   );
 };
@@ -280,45 +339,81 @@ const AnimatedRoutes = memo(() => {
   );
 });
 
-// Main App component with performance optimizations
-const App = () => {
-  const [showLoader, setShowLoader] = useState(() => {
-    // Show loader only on page refresh (F5 or browser refresh)
-    if (typeof window !== 'undefined') {
-      // Check if it's a page refresh
-      const isPageRefresh = (
-        window.performance.navigation.type === 1 || // TYPE_RELOAD
-        window.performance.getEntriesByType('navigation')[0]?.type === 'reload'
-      );
-      
-      return isPageRefresh;
+// Smart loader detection function
+const shouldShowLoader = () => {
+  if (typeof window === 'undefined') return false;
+  
+  try {
+    // Check if this is a fresh session (no previous app load)
+    const hasLoadedBefore = sessionStorage.getItem(PERFORMANCE_KEY);
+    const isDirectNavigation = !document.referrer || 
+                              !document.referrer.includes(window.location.hostname);
+    
+    // Check navigation type
+    const navigation = window.performance.getEntriesByType('navigation')[0];
+    const isReload = navigation?.type === 'reload';
+    const isDirectLoad = navigation?.type === 'navigate' && isDirectNavigation;
+    const isPageRefresh = window.performance.navigation?.type === 1;
+    
+    // Show loader for: direct URL visits, page refreshes, or first-time loads
+    const shouldShow = !hasLoadedBefore || isReload || isDirectLoad || isPageRefresh;
+    
+    if (shouldShow) {
+      // Mark as loaded for this session
+      sessionStorage.setItem(PERFORMANCE_KEY, 'true');
     }
-    return false;
-  });
+    
+    return shouldShow;
+  } catch (error) {
+    // Fallback: show loader if we can't determine navigation type
+    return true;
+  }
+};
+
+// Main App component with conditional loading states
+const App = () => {
+  const [showLoader, setShowLoader] = useState(() => shouldShowLoader());
 
   const handleLoaderComplete = useMemo(() => 
     () => setShowLoader(false), []
   );
 
-  // Preload critical resources
+  // Aggressive resource preloading (only after Vedive loader completes)
   useEffect(() => {
-    const preloadCriticalRoutes = () => {
-      // Preload Hero component after initial load
-      setTimeout(() => {
-        if (Hero.preload) Hero.preload();
-      }, 100);
-      
-      // Preload auth components after 1 second
-      setTimeout(() => {
-        if (Login.preload) Login.preload();
-        if (Signup.preload) Signup.preload();
-      }, 1000);
-    };
-
     if (!showLoader) {
-      preloadCriticalRoutes();
+      // Immediate preloading after Vedive loader
+      const preloadCritical = () => {
+        // Preload any remaining critical routes
+        const criticalPreloads = [Hero, Login, Signup, Dashboard]
+          .filter(comp => comp.preload)
+          .map(comp => comp.preload());
+        
+        // Since most components are already preloaded during Vedive loader,
+        // this is just a safety net for any missed components
+        setTimeout(() => {
+          [ContactUs, AboutUs, Pricing, Services, BlogPostList, Plan]
+            .forEach(comp => comp.preload?.());
+        }, 50);
+      };
+      
+      // Start safety preloading immediately after Vedive loader
+      requestAnimationFrame(preloadCritical);
     }
   }, [showLoader]);
+
+  // Performance optimization: prefetch DNS for external resources
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.rel = 'dns-prefetch';
+    link.href = '//fonts.googleapis.com';
+    document.head.appendChild(link);
+    
+    return () => {
+      if (document.head.contains(link)) {
+        document.head.removeChild(link);
+      }
+    };
+  }, []);
 
   return (
     <AuthProvider>

@@ -1,58 +1,71 @@
-/* Load font with display=swap for better performance */
-@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@700&display=swap');
+/* Preload critical font with optimal loading strategy */
+@font-face {
+  font-family: 'Raleway';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/raleway/v28/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVvaorCIPrE.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
-/* Vedive Loader Styles - Optimized for performance */
+/* Vedive Loader - Highly Optimized for Performance */
 .vedive-loader {
   height: 100vh;
-  background: black;
+  background: #000;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   position: relative;
-  /* Optimize for animations */
-  will-change: transform;
+  /* Critical performance optimizations */
+  will-change: auto; /* Only animate when needed */
   transform: translateZ(0); /* Force hardware acceleration */
+  backface-visibility: hidden; /* Reduce repaints */
+  perspective: 1000px; /* Enable 3D rendering */
 }
 
 .vedive-loader-bg {
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    circle at right,
-    rgba(30, 144, 255, 0.15) 0%,
-    rgba(0, 0, 0, 1) 65%
+    circle at 75% 25%,
+    rgba(30, 144, 255, 0.12) 0%,
+    rgba(0, 0, 0, 0.95) 50%,
+    #000 100%
   );
-  /* Remove transition for better performance */
-  will-change: transform;
+  /* Optimized for composition */
+  will-change: auto;
+  contain: layout style paint;
 }
 
 .vedive-light-beam {
   position: absolute;
-  right: -50%;
-  top: -100%;
-  width: 200%;
-  height: 300%;
+  right: -30%;
+  top: -50%;
+  width: 150%;
+  height: 200%;
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(30, 144, 255, 0.02) 40%,
-    rgba(30, 144, 255, 0.1) 50%,
-    rgba(30, 144, 255, 0.02) 60%,
+    rgba(30, 144, 255, 0.015) 45%,
+    rgba(30, 144, 255, 0.08) 50%,
+    rgba(30, 144, 255, 0.015) 55%,
     transparent 100%
   );
-  transform: rotate(-45deg);
+  transform: rotate(-45deg) translateZ(0);
   pointer-events: none;
-  /* Optimize animation performance */
+  /* Performance optimizations */
   will-change: transform, opacity;
-  animation: lightBeam 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  contain: layout;
+  animation: lightBeam 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
 }
 
 .vedive-text-container {
   position: relative;
   text-align: center;
-  /* Optimize for text rendering */
-  will-change: transform;
+  /* Optimize text rendering */
+  will-change: auto;
+  contain: layout style;
 }
 
 .vedive-text {
@@ -78,8 +91,8 @@
 }
 
 .vedive-text:hover {
-  transform: scale(1.02) translateZ(0);
-  transition: transform 0.3s ease;
+  transform: scale(1.01) translateZ(0);
+  transition: transform 0.2s ease-out;
 }
 
 .vedive-text::before {
@@ -90,14 +103,22 @@
   width: 100%;
   height: 100%;
   color: transparent;
-  -webkit-text-stroke: 2px rgba(30, 144, 255, 1);
-  text-stroke: 2px rgba(30, 144, 255, 1);
-  background: linear-gradient(90deg, transparent, rgba(30,144,255,1), transparent);
-  background-size: 200%;
+  -webkit-text-stroke: 1.5px rgba(30, 144, 255, 1);
+  text-stroke: 1.5px rgba(30, 144, 255, 1);
+  background: linear-gradient(
+    90deg, 
+    transparent 0%, 
+    rgba(30,144,255,0.8) 30%, 
+    rgba(30,144,255,1) 50%, 
+    rgba(30,144,255,0.8) 70%, 
+    transparent 100%
+  );
+  background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   will-change: background-position;
-  animation: borderLight 2.5s ease-in-out infinite;
+  animation: borderLight 2s ease-in-out infinite;
+  contain: layout style;
 }
 
 .vedive-pulse-bg {
@@ -107,40 +128,41 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  contain: layout;
 }
 
 .vedive-pulse {
-  width: 200px;
-  height: 200px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
-  background: rgb(59, 130, 246);
-  opacity: 0.1;
-  filter: blur(48px);
+  background: rgba(59, 130, 246, 0.1);
+  filter: blur(40px);
   will-change: opacity, transform;
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  contain: layout style;
 }
 
-/* Optimized Animations */
+/* Highly Optimized Animations */
 @keyframes slideIn {
   0% {
-    transform: translateX(100%) translateZ(0);
+    transform: translateX(80px) translateZ(0);
     opacity: 0;
-    letter-spacing: 0.35em;
+    letter-spacing: 0.3em;
   }
-  50% {
-    opacity: 0.5;
+  60% {
+    opacity: 0.7;
   }
   100% {
     transform: translateX(0) translateZ(0);
     opacity: 1;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.12em;
   }
 }
 
 @keyframes lightUp {
   0% {
-    background-position: 200% 50%;
-    opacity: 0.3;
+    background-position: 300% 50%;
+    opacity: 0.4;
   }
   100% {
     background-position: 0% 50%;
@@ -153,95 +175,176 @@
     background-position: 0% 50%;
   }
   100% {
-    background-position: 100% 50%;
+    background-position: 300% 50%;
   }
 }
 
 @keyframes lightBeam {
   0%, 100% {
-    opacity: 0.6;
+    opacity: 0.4;
     transform: rotate(-45deg) translateY(0) translateZ(0);
   }
   50% {
-    opacity: 0.8;
-    transform: rotate(-45deg) translateY(-1%) translateZ(0);
+    opacity: 0.7;
+    transform: rotate(-45deg) translateY(-0.5%) translateZ(0);
   }
 }
 
 @keyframes pulse {
   0%, 100% {
-    opacity: 0.1;
+    opacity: 0.08;
     transform: scale(1) translateZ(0);
   }
   50% {
-    opacity: 0.15;
-    transform: scale(1.01) translateZ(0);
+    opacity: 0.12;
+    transform: scale(1.005) translateZ(0);
   }
 }
 
-/* Performance optimizations */
+/* Critical CSS optimizations */
 .page-transition {
-  will-change: opacity;
+  will-change: auto;
   width: 100%;
+  contain: layout style;
 }
 
-/* Reduce animations on slower devices */
+/* Respect user preferences for reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .vedive-text {
-    animation: none;
-    opacity: 1;
+    animation: fadeIn 0.5s ease-out forwards;
     transform: none;
   }
   
   .vedive-text::before {
     animation: none;
+    background: rgba(30, 144, 255, 1);
+    -webkit-background-clip: text;
+    background-clip: text;
   }
   
   .vedive-light-beam {
     animation: none;
-    opacity: 0.1;
+    opacity: 0.05;
   }
   
   .vedive-pulse {
     animation: none;
-    opacity: 0.1;
-  }
-}
-
-/* Responsive optimizations */
-@media (max-width: 768px) {
-  .vedive-text {
-    font-size: 6rem;
-    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+    opacity: 0.08;
   }
   
-  .vedive-pulse {
-    width: 150px;
-    height: 150px;
-    filter: blur(32px);
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 }
 
+/* Mobile-first responsive optimizations */
 @media (max-width: 480px) {
   .vedive-text {
-    font-size: 4rem;
-    filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.3));
+    font-size: 3.5rem;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    -webkit-text-stroke: 1px rgba(30, 144, 255, 1);
+    text-stroke: 1px rgba(30, 144, 255, 1);
+  }
+  
+  .vedive-text::before {
+    -webkit-text-stroke: 1px rgba(30, 144, 255, 1);
+    text-stroke: 1px rgba(30, 144, 255, 1);
   }
   
   .vedive-pulse {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     filter: blur(24px);
   }
   
   .vedive-light-beam {
-    animation-duration: 4s;
+    animation-duration: 3s;
+    right: -20%;
+    width: 120%;
   }
 }
 
-/* Critical CSS for above-the-fold content */
+@media (max-width: 768px) {
+  .vedive-text {
+    font-size: 5rem;
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.3));
+  }
+  
+  .vedive-pulse {
+    width: 140px;
+    height: 140px;
+    filter: blur(32px);
+  }
+}
+
+/* High-DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .vedive-text {
+    -webkit-text-stroke: 1px rgba(30, 144, 255, 1);
+    text-stroke: 1px rgba(30, 144, 255, 1);
+  }
+  
+  .vedive-text::before {
+    -webkit-text-stroke: 1px rgba(30, 144, 255, 1);
+    text-stroke: 1px rgba(30, 144, 255, 1);
+  }
+}
+
+/* Desktop optimizations */
 @media (min-width: 1024px) {
   .vedive-loader {
-    background: radial-gradient(circle at center, rgba(0, 0, 0, 0.9) 0%, black 100%);
+    background: radial-gradient(
+      circle at center, 
+      rgba(0, 0, 0, 0.9) 0%, 
+      #000 100%
+    );
   }
+  
+  .vedive-text {
+    font-size: 10rem;
+  }
+  
+  .vedive-pulse {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+/* Print styles (hide loader) */
+@media print {
+  .vedive-loader {
+    display: none;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-contrast: high) {
+  .vedive-text {
+    -webkit-text-stroke: 2px rgba(30, 144, 255, 1);
+    text-stroke: 2px rgba(30, 144, 255, 1);
+    filter: drop-shadow(0 0 10px rgba(30, 144, 255, 0.5));
+  }
+  
+  .vedive-text::before {
+    -webkit-text-stroke: 2px rgba(30, 144, 255, 1);
+    text-stroke: 2px rgba(30, 144, 255, 1);
+  }
+}
+
+/* Force hardware acceleration for better performance */
+.vedive-loader,
+.vedive-text,
+.vedive-light-beam,
+.vedive-pulse {
+  -webkit-transform: translateZ(0);
+  -moz-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Optimize rendering layers */
+.vedive-loader * {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
