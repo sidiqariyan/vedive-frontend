@@ -12,8 +12,8 @@ import BlogAdmin from "./components/other-pages/BlogAdmin.jsx";
 import OAuth2RedirectHandler from "./components/other-pages/OAuth2RedirectHandler.jsx";
 
 // CRITICAL: Minimal loader duration for better performance
-const LOADER_DURATION = 800;
-const PERFORMANCE_KEY = 'vedive_app_loaded';
+// const LOADER_DURATION = 800;
+// const PERFORMANCE_KEY = 'vedive_app_loaded';
 
 // Optimize lazy loading with aggressive chunking
 const lazyLoad = (importFunc, preload = false) => {
@@ -83,49 +83,49 @@ const PageTransition = memo(({ children }) => {
 });
 
 // Optimized Loader with minimal animations
-const VediveLoader = memo(({ onComplete }) => {
-  useEffect(() => {
-    const criticalPreloads = [];
-    if (Login.preload) criticalPreloads.push(Login.preload());
-    if (Signup.preload) criticalPreloads.push(Signup.preload());
-    if (Dashboard.preload) criticalPreloads.push(Dashboard.preload());
+// const VediveLoader = memo(({ onComplete }) => {
+//   useEffect(() => {
+//     const criticalPreloads = [];
+//     if (Login.preload) criticalPreloads.push(Login.preload());
+//     if (Signup.preload) criticalPreloads.push(Signup.preload());
+//     if (Dashboard.preload) criticalPreloads.push(Dashboard.preload());
     
-    const delayedPreload = setTimeout(() => {
-      ContactUs.preload?.();
-      AboutUs.preload?.();
-      Pricing.preload?.();
-      Services.preload?.();
-    }, 400);
+//     const delayedPreload = setTimeout(() => {
+//       ContactUs.preload?.();
+//       AboutUs.preload?.();
+//       Pricing.preload?.();
+//       Services.preload?.();
+//     }, 400);
     
-    const timer = setTimeout(() => {
-      if (onComplete) onComplete();
-    }, LOADER_DURATION);
+//     const timer = setTimeout(() => {
+//       if (onComplete) onComplete();
+//     }, LOADER_DURATION);
     
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(delayedPreload);
-    };
-  }, [onComplete]);
+//     return () => {
+//       clearTimeout(timer);
+//       clearTimeout(delayedPreload);
+//     };
+//   }, [onComplete]);
 
-  return (
-    <div className="vedive-loader">
-      <div className="vedive-loader-bg">
-        <div className="vedive-light-beam" />
-      </div>
-      <div className="vedive-text-container">
-        <h1 
-          data-text="Vedive"
-          className="vedive-text"
-        >
-          Vedive
-        </h1>
-      </div>
-      <div className="vedive-pulse-bg">
-        <div className="vedive-pulse" />
-      </div>
-    </div>
-   );
-});
+//   return (
+//     <div className="vedive-loader">
+//       <div className="vedive-loader-bg">
+//         <div className="vedive-light-beam" />
+//       </div>
+//       <div className="vedive-text-container">
+//         <h1 
+//           data-text="Vedive"
+//           className="vedive-text"
+//         >
+//           Vedive
+//         </h1>
+//       </div>
+//       <div className="vedive-pulse-bg">
+//         <div className="vedive-pulse" />
+//       </div>
+//     </div>
+//    );
+// });
 
 // Optimized ScrollToTop
 const ScrollToTop = memo(() => {
@@ -426,36 +426,36 @@ const AnimatedRoutes = memo(() => {
 });
 
 // Smart loader detection
-const shouldShowLoader = () => {
-  if (typeof window === 'undefined') return false;
+// const shouldShowLoader = () => {
+//   if (typeof window === 'undefined') return false;
   
-  try {
-    const navigation = window.performance.getEntriesByType('navigation')[0];
-    const isReload = navigation?.type === 'reload';
-    return isReload;
-  } catch (error) {
-    return false;
-  }
-};
+//   try {
+//     const navigation = window.performance.getEntriesByType('navigation')[0];
+//     const isReload = navigation?.type === 'reload';
+//     return isReload;
+//   } catch (error) {
+//     return false;
+//   }
+// };
 
 // Main App component with performance optimizations
 const App = () => {
-  const [showLoader, setShowLoader] = useState(() => shouldShowLoader());
+  // const [showLoader, setShowLoader] = useState(() => shouldShowLoader());
 
-  const handleLoaderComplete = useMemo(() => 
-    () => setShowLoader(false), []
-  );
+  // const handleLoaderComplete = useMemo(() => 
+  //   () => setShowLoader(false), []
+  // );
 
-  useEffect(() => {
-    if (!showLoader) {
-      if (typeof requestIdleCallback !== 'undefined') {
-        requestIdleCallback(() => {
-          ContactUs.preload?.();
-          AboutUs.preload?.();
-        });
-      }
-    }
-  }, [showLoader]);
+  // useEffect(() => {
+  //   if (!showLoader) {
+  //     if (typeof requestIdleCallback !== 'undefined') {
+  //       requestIdleCallback(() => {
+  //         ContactUs.preload?.();
+  //         AboutUs.preload?.();
+  //       });
+  //     }
+  //   }
+  // }, [showLoader]);
 
   useEffect(() => {
     const preconnectLinks = [
@@ -473,14 +473,14 @@ const App = () => {
 
   return (
     <AuthProvider>
-      {showLoader ? (
+      {/* {showLoader ? (
         <VediveLoader onComplete={handleLoaderComplete} />
-      ) : (
+      ) : ( */}
         <Router>
           <ScrollToTop />
           <AnimatedRoutes />
         </Router>
-      )}
+      {/* )} */}
     </AuthProvider>
   );
 };
