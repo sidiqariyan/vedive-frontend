@@ -6,7 +6,7 @@ import Navbar from '../Pages/Hero/Navbar';
 import Footer from '../Pages/Hero/Footer';
 import AdminImage from "./admin.png";
 import bgImage from '../assets/top-section-background.svg';
-
+import "./BlogPostDetail.css";
 // Input sanitization function
 const sanitizeInput = (input) => {
   if (!input || typeof input !== 'string') return '';

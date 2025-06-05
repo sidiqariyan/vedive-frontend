@@ -167,7 +167,8 @@ const routeConfig = {
   admin: [
     { path: "/create-blog", component: CreateBlogPost },
     { path: "/admin/blog", component: BlogAdmin, noLazy: true },
-    { path: "/admin/blog", component: BlogAdmin, noLazy: true },
+    { path: "/admin/blog/create", component: CreateBlogPost }, 
+    { path: "/admin/blog/edit/:id", component: EditBlogPost, noLazy: true },
     { path: "/create-coupun", component: CouponManagement, noLazy: true },
     { path: "/post-form", component: PostForm },
   ],
