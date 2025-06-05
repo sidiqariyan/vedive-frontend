@@ -151,7 +151,7 @@ const Hero = () => {
       </div>
 
       {/* Improved consent popup with glass morphism and animations */}
-      {/* {showPopup && (
+      {showPopup && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/80 backdrop-blur-md animate-fadeIn">
           <div className="bg-slate-900/90 backdrop-blur-xl p-8 rounded-xl max-w-2xl mx-4 border border-slate-800/50 shadow-2xl animate-scaleIn relative overflow-hidden">
             <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-blue-600/20 blur-3xl"></div>
@@ -197,7 +197,7 @@ const Hero = () => {
             </div>
           </div>
         </div>
-      )} */}
+      )}
 
       {/* Navbar */}
       <div className="relative z-30">
