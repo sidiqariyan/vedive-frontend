@@ -1,11 +1,11 @@
 import React, { useContext, useState, useRef } from "react";
 import axios from "axios";
 import { Mail, Upload, HelpCircle, FileText, CheckCircle } from "lucide-react";
-import { AuthContext } from "../Mailer/AuthContext.jsx";
+// import { AuthContext } from "../Mailer/AuthContext.jsx";
 import { Helmet } from 'react-helmet';
 
 const GmailSender = () => {
-  const { isLoggedIn } = useContext(AuthContext);
+  // const { isLoggedIn } = useContext(AuthContext);
 
   const [gmail, setGmail] = useState("");
   const [appPassword, setAppPassword] = useState("");
@@ -87,11 +87,11 @@ const GmailSender = () => {
   const handleSendEmail = async (e) => {
     e.preventDefault();
 
-    if (!isLoggedIn) {
-      alert("Please log in first to send emails.");
-      window.location.href = "/login";
-      return;
-    }
+    // if (!isLoggedIn) {
+    //   alert("Please log in first to send emails.");
+    //   window.location.href = "/login";
+    //   return;
+    // }
 
     const campaignNameInput = prompt("Please name your campaign:");
     if (!campaignNameInput || campaignNameInput.trim() === "") {

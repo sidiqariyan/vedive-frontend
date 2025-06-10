@@ -59,6 +59,8 @@ const BlogPostDetail = lazyLoad(() => import("./components/other-pages/BlogPostD
 const CreateBlogPost = lazyLoad(() => import("./components/other-pages/CreateBlogPost"));
 const PostDetail = lazyLoad(() => import("./components/other-pages/BlogPostDetail"));
 const Account = lazyLoad(() => import("./components/other-pages/account.jsx"));
+const GmailAnalytics = lazyLoad(() => import("./components/other-pages/GmailAnalytics.jsx"));
+const LinkTrackingDashboard = lazyLoad(() => import("./components/other-pages/Gmaillink.jsx"));
 const SenderBody = lazyLoad(() => import("./components/Pages/Mailer/SenderBody.jsx"));
 const EmailScrapper = lazyLoad(() => import("./components/Pages/Mailer/EmailScrapper.jsx"));
 const GmailSender = lazyLoad(() => import("./components/Pages/Gmail/GmailSender.jsx"));
@@ -371,6 +373,20 @@ const AnimatedRoutes = memo(() => {
         <Route index element={
           <Suspense fallback={<LoadingSpinner />}>
             <GmailSender />
+          </Suspense>
+        } />      
+      </Route>
+      <Route path="/gmail-analytics" element={<ProtectedLayout />}>
+        <Route index element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <GmailAnalytics />
+          </Suspense>
+        } />
+      </Route>
+      <Route path="/gmail-link" element={<ProtectedLayout />}>
+        <Route index element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <LinkTrackingDashboard />
           </Suspense>
         } />
       </Route>
