@@ -37,7 +37,7 @@ const GmailSender = () => {
         formData.append('file', file);
 
         const response = await axios.post(
-          "https://vedive.com:3000/api/process-file",
+          "http://localhost:3000/api/process-file",
           formData,
           {
             headers: {
@@ -125,7 +125,7 @@ const GmailSender = () => {
       formData.append('campaignName', campaignNameInput);
 
       const response = await axios.post(
-        "https://vedive.com:3000/api/send-gmail",
+        "http://localhost:3000/api/send-gmail",
         formData,
         {
           headers: {

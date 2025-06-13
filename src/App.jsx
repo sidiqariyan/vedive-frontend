@@ -42,6 +42,7 @@ import Hero from "./components/Pages/Hero/Hero";
 const Login = lazyLoad(() => import("./components/other-pages/login.jsx"), true);
 const Signup = lazyLoad(() => import("./components/other-pages/sign-up.jsx"), true);
 const Dashboard = lazyLoad(() => import("./components/other-pages/dashboard.jsx"), true);
+const MailDashboard = lazyLoad(() => import("./components/other-pages/Emaildashboard.jsx"), true);
 
 // Medium priority components (smart preloading)
 const ContactUs = lazyLoad(() => import("./components/Pages/contact.jsx"));
@@ -61,6 +62,7 @@ const PostDetail = lazyLoad(() => import("./components/other-pages/BlogPostDetai
 const Account = lazyLoad(() => import("./components/other-pages/account.jsx"));
 const GmailAnalytics = lazyLoad(() => import("./components/other-pages/GmailAnalytics.jsx"));
 const LinkTrackingDashboard = lazyLoad(() => import("./components/other-pages/Gmaillink.jsx"));
+const AnalyticsDashboard = lazyLoad(() => import("./components/other-pages/whatsapp-dash.jsx"));
 const SenderBody = lazyLoad(() => import("./components/Pages/Mailer/SenderBody.jsx"));
 const EmailScrapper = lazyLoad(() => import("./components/Pages/Mailer/EmailScrapper.jsx"));
 const GmailSender = lazyLoad(() => import("./components/Pages/Gmail/GmailSender.jsx"));
@@ -394,6 +396,20 @@ const AnimatedRoutes = memo(() => {
         <Route index element={
           <Suspense fallback={<LoadingSpinner />}>
             <EmailScrapper />
+          </Suspense>
+        } />
+      </Route>
+      <Route path="/mail-dash" element={<ProtectedLayout />}>
+        <Route index element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <MailDashboard />
+          </Suspense>
+        } />
+      </Route>
+      <Route path="/whatsapp-dash" element={<ProtectedLayout />}>
+        <Route index element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <AnalyticsDashboard />
           </Suspense>
         } />
       </Route>

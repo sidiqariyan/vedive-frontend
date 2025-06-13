@@ -18,7 +18,7 @@ const LinkTrackingDashboard = () => {
     const fetchCampaigns = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://vedive.com:3000/api/campaigns-with-analytics', {
+        const response = await fetch('http://localhost:3000/api/campaigns-with-analytics', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ const LinkTrackingDashboard = () => {
   const fetchLinkAnalytics = async (campaignId) => {
     setLoading(true);
     try {
-      const response = await fetch(`https://vedive.com:3000/api/link-analytics/${campaignId}`, {
+      const response = await fetch(`http://localhost:3000/api/link-analytics/${campaignId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ const LinkTrackingDashboard = () => {
   const fetchLinkDetails = async (campaignId, originalUrl) => {
     try {
       setLoading(true);
-      const response = await fetch(`https://vedive.com:3000/api/link-details/${campaignId}/${originalUrl}`, {
+      const response = await fetch(`http://localhost:3000/api/link-details/${campaignId}/${originalUrl}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json',
