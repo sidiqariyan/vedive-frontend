@@ -36,7 +36,7 @@ import {
 import axios from 'axios';
 
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'https://vedive.com:3000/api';
 
 const MailDashboard = () => {
   const [analyticsData, setAnalyticsData] = useState(null);

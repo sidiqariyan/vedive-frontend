@@ -72,7 +72,7 @@ function SenderBody() {
         throw new Error('Authentication token not found. Please login again.');
       }
       const response = await axios.post(
-        'http://localhost:3000/api/send-bulk-mail',
+        'https://vedive.com:3000/api/send-bulk-mail',
         form,
         {
           headers: {

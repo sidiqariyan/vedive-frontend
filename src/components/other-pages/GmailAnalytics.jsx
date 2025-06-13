@@ -15,7 +15,7 @@ const EmailAnalytics = () => {
   const fetchCampaigns = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3000/api/campaigns-with-analytics?toolType=gmail-sender', {
+      const response = await axios.get('https://vedive.com:3000/api/campaigns-with-analytics?toolType=gmail-sender', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
@@ -32,7 +32,7 @@ const EmailAnalytics = () => {
   const fetchCampaignAnalytics = async (campaignId) => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:3000/api/analytics/${campaignId}`, {
+      const response = await axios.get(`https://vedive.com:3000/api/analytics/${campaignId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
