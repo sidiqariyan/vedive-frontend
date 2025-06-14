@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 const Dashboard = () => {
   const API_URL = "https://vedive.com:3000";
   const [currentPlan, setCurrentPlan] = useState("Free");
-  const [loading, setLoading] = useState(false); // Changed to false to remove loading
+  const [loading, setLoading] = useState(true); // Set to true initially
   const [error, setError] = useState(null);
   const [stats, setStats] = useState({});
   const [chartData, setChartData] = useState([]);
@@ -73,94 +73,131 @@ const Dashboard = () => {
     return classMap[type] || "bg-gray-500/20 text-gray-300";
   }, []);
 
-  // Combined fetch function to reduce duplicate API calls
-// Replace the fetchAllData function in your Dashboard component
-const fetchAllData = useCallback(async () => {
-  try {
-    // Add retry logic for token check
-    let token = localStorage.getItem("token");
-    let retryCount = 0;
+  // Improved token waiting function
+  const waitForToken = useCallback(async (maxWaitTime = 5000) => {
+    const startTime = Date.now();
     
-    // Retry mechanism for token availability
-    while (!token && retryCount < 5) {
-      console.log(`Token not found, retry ${retryCount + 1}/5`);
-      await new Promise(resolve => setTimeout(resolve, 200)); // Wait 200ms
-      token = localStorage.getItem("token");
-      retryCount++;
+    while (Date.now() - startTime < maxWaitTime) {
+      const token = localStorage.getItem("token");
+      if (token && token.trim() !== '') {
+        console.log("Token found:", token.substring(0, 20) + "...");
+        return token;
+      }
+      
+      // Wait 100ms before checking again
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
     
-    if (!token) {
-      console.log("No token found after retries, redirecting to login");
-      navigate("/login");
-      return;
-    }
+    return null;
+  }, []);
 
-    console.log("Token found, proceeding with API calls");
-
-    // Parallel API calls for better performance
-    const [userResponse, dashboardResponse, subscriptionResponse] = await Promise.all([
-      fetch(`${API_URL}/api/auth/user`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      }),
-      fetch(`${API_URL}/api/dashboard`, {
-        headers: { Authorization: `Bearer ${token}` }
-      }),
-      fetch(`${API_URL}/api/subscription/status`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      })
-    ]);
-
-    // Handle authentication errors
-    if (!userResponse.ok) {
-      if (userResponse.status === 401) {
-        console.log("Token invalid, clearing localStorage and redirecting");
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+  // Combined fetch function with improved token handling
+  const fetchAllData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Wait for token to be available
+      const token = await waitForToken();
+      
+      if (!token) {
+        console.log("No token found after waiting, redirecting to login");
         navigate("/login");
         return;
       }
-      throw new Error(`Authentication failed: ${userResponse.status}`);
-    }
 
-    // Rest of your existing code...
-    const userData = await userResponse.json();
-    
-    if (subscriptionResponse.ok) {
-      const subscriptionData = await subscriptionResponse.json();
-      userData.currentPlan = subscriptionData.currentPlan.charAt(0).toUpperCase() + 
-                             subscriptionData.currentPlan.slice(1);
-    }
+      console.log("Token found, proceeding with API calls");
 
-    if (dashboardResponse.ok) {
-      const dashboardData = await dashboardResponse.json();
-      setStats(dashboardData.stats || {});
-      setChartData(dashboardData.chartData || []);
-      setRecentActivities(dashboardData.recentActivities || []);
-      setCurrentPlan(dashboardData.userPlan || userData.currentPlan || "Free");
-    }
+      // Create headers object
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
 
-    setUser(userData);
-  } catch (err) {
-    console.error("Error fetching data:", err);
-    setError(err.message);
-  }
-}, [navigate, API_URL]);
+      // Parallel API calls for better performance
+      const [userResponse, dashboardResponse, subscriptionResponse] = await Promise.all([
+        fetch(`${API_URL}/api/auth/user`, { headers }),
+        fetch(`${API_URL}/api/dashboard`, { headers }),
+        fetch(`${API_URL}/api/subscription/status`, { headers })
+      ]);
+
+      // Handle authentication errors
+      if (!userResponse.ok) {
+        if (userResponse.status === 401) {
+          console.log("Token invalid, clearing localStorage and redirecting");
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          navigate("/login");
+          return;
+        }
+        throw new Error(`Authentication failed: ${userResponse.status}`);
+      }
+
+      const userData = await userResponse.json();
+      console.log("User data received:", userData);
+      
+      if (subscriptionResponse.ok) {
+        const subscriptionData = await subscriptionResponse.json();
+        userData.currentPlan = subscriptionData.currentPlan.charAt(0).toUpperCase() + 
+                               subscriptionData.currentPlan.slice(1);
+      }
+
+      if (dashboardResponse.ok) {
+        const dashboardData = await dashboardResponse.json();
+        console.log("Dashboard data received:", dashboardData);
+        setStats(dashboardData.stats || {});
+        setChartData(dashboardData.chartData || []);
+        setRecentActivities(dashboardData.recentActivities || []);
+        setCurrentPlan(dashboardData.userPlan || userData.currentPlan || "Free");
+      } else {
+        console.warn("Dashboard data fetch failed:", dashboardResponse.status);
+      }
+
+      setUser(userData);
+    } catch (err) {
+      console.error("Error fetching data:", err);
+      setError(err.message);
+      
+      // If it's an auth error, redirect to login
+      if (err.message.includes('401') || err.message.includes('Authentication')) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        navigate("/login");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [navigate, API_URL, waitForToken]);
 
   useEffect(() => {
     fetchAllData();
   }, [fetchAllData]);
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4"></div>
+          <div className="text-xl">Loading Dashboard...</div>
+        </div>
+      </div>
+    );
+  }
+
   // Early return for error state
   if (error) {
     return (
       <div className="flex items-center justify-center h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white">
-        <div className="text-xl">Error: {error}</div>
+        <div className="text-center">
+          <div className="text-xl mb-4">Error: {error}</div>
+          <button 
+            onClick={fetchAllData}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }

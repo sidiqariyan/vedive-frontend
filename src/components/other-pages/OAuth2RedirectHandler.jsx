@@ -7,14 +7,12 @@ const OAuth2RedirectHandler = () => {
   useEffect(() => {
     const handleOAuthCallback = async () => {
       try {
-        
         // Get URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         
         // Get token and error from URL
         const token = urlParams.get('token');
         const error = urlParams.get('error');
-        
 
         if (error) {
           console.error('OAuth error from URL:', error);
@@ -32,7 +30,6 @@ const OAuth2RedirectHandler = () => {
           return;
         }
 
-        
         // Verify the token with backend
         try {
           const response = await fetch('https://vedive.com:3000/api/auth/verify-token', {
@@ -42,7 +39,6 @@ const OAuth2RedirectHandler = () => {
             },
             body: JSON.stringify({ token })
           });
-
 
           if (response.ok) {
             const userData = await response.json();
@@ -54,11 +50,18 @@ const OAuth2RedirectHandler = () => {
             setStatus('success');
             setMessage('Authentication successful! Redirecting to dashboard...');
             
-            // Add a longer delay and use window.location.replace instead of href
+            // Use a longer delay and ensure localStorage is written before redirect
             setTimeout(() => {
-              // Force a page reload to ensure localStorage is accessible
-              window.location.replace('/dashboard');
-            }, 2000); // Increased delay to 2 seconds
+              // Double-check that token is stored before redirect
+              if (localStorage.getItem('token')) {
+                window.location.replace('/dashboard');
+              } else {
+                // Fallback: try storing again
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(userData.user));
+                setTimeout(() => window.location.replace('/dashboard'), 500);
+              }
+            }, 2000);
           } else {
             const errorData = await response.json().catch(() => ({}));
             console.error('Token verification failed:', errorData);
@@ -74,8 +77,7 @@ const OAuth2RedirectHandler = () => {
               const currentTime = Math.floor(Date.now() / 1000);
               
               if (payload.exp && payload.exp > currentTime && payload._id) {
-                
-                // Store token
+                // Store token with verification
                 localStorage.setItem('token', token);
                 
                 // Create basic user info from JWT payload
@@ -87,8 +89,17 @@ const OAuth2RedirectHandler = () => {
                 
                 setStatus('success');
                 setMessage('Authentication successful! Redirecting to dashboard...');
+                
+                // Ensure data is stored before redirect
                 setTimeout(() => {
-                  window.location.href = '/dashboard';
+                  if (localStorage.getItem('token')) {
+                    window.location.replace('/dashboard');
+                  } else {
+                    // Retry storage
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('user', JSON.stringify(basicUserInfo));
+                    setTimeout(() => window.location.replace('/dashboard'), 500);
+                  }
                 }, 1500);
                 return;
               }
@@ -196,7 +207,6 @@ const OAuth2RedirectHandler = () => {
             </div>
           </div>
         )}
-        
       </div>
     </div>
   );
