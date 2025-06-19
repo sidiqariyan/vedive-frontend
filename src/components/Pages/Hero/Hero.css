@@ -325,3 +325,89 @@
     transform: none;
   }
 }
+/* Add this to your CSS file */
+.responsive-bg {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%; /* Default */
+}
+
+@media (max-width: 1024px) {
+  .responsive-bg {
+    background-size: 100% 50%;
+  }
+}
+.responsive-mask-image {
+  position: absolute;
+  z-index: 10;
+  object-fit: cover;
+  opacity: 0.8;
+  
+  /* Mobile - default */
+  max-height: 60%;
+  transform: translateY(0px);
+  top: 45%;
+  left: -5%;
+}
+
+/* Tablets and iPads */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .responsive-mask-image {
+    max-height: 70%;
+    transform: translateY(0px);
+    top: 40%;
+    left: 0;
+  }
+}
+
+/* Desktops */
+@media (min-width: 1024px) {
+  .responsive-mask-image {
+    left: 0;
+    top: 120px; /* equivalent to top-30 */
+    height: 100%;
+    max-height: 100%;
+    transform: none;
+  }
+}
+
+
+
+.responsive-mask2-image {
+  position: absolute;
+  z-index: 10;
+  object-fit: cover;
+  opacity: 0.8;
+  
+  /* Mobile - default */
+  max-height: 60%;
+  transform: translateY(0px);
+  bottom: 55%;
+  right: -5%;
+}
+
+/* Tablets and iPads */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .responsive-mask2-image {
+    max-height: 70%;
+    transform: translateY(0px);
+    bottom: 35%;
+    right: 0;
+  }
+}
+
+/* Desktops */
+@media (min-width: 1024px) {
+  .responsive-mask2-image {
+    right: 0;
+    top: 0;
+    transform: none;
+  }
+}
+
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .testimonials-swiper .swiper-slide {
+    margin-right: 16px !important;
+  }
+}

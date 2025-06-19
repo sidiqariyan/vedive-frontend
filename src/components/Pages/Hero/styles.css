@@ -14,7 +14,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
-  background-color: #04081d;
+  background-color: transparent;
   color: white;
 }
 
@@ -42,7 +42,7 @@
   .nav-links a:hover,
   .nav-links a:focus,
   .nav-links a:active {
-    color: #1e90ff;
+    color: #00043f;
   }
   
   /* Buttons */
@@ -413,6 +413,6 @@
   .nav-links li .active,
 .buttons .active,
 .mobile-menu .active {
-  color: #1E90FF; /* Active link color */
+  color: #00043f; /* Active link color */
   /* Add any additional active styling here */
 }

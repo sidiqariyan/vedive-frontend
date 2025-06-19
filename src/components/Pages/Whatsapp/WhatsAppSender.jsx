@@ -17,7 +17,8 @@ import {
   Download,
   RefreshCw,
   AlertCircle,
-  Loader
+  Loader,
+  Lock
 } from 'lucide-react';
 
 const API_BASE_URL = 'http://localhost:3000';
@@ -31,6 +32,8 @@ const MessageForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  
+
 
   // Campaign form state
   const [campaignForm, setCampaignForm] = useState({
@@ -40,19 +43,30 @@ const MessageForm = () => {
     mediaFile: null
   });
 
-  // API helper function
+  // API helper function with auth headers
   const apiCall = async (endpoint, options = {}) => {
     try {
+      // Get token from localStorage
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        throw new Error('No authentication token found. Please log in.');
+      }
+      
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         ...options,
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Authentication failed. Please check your token or log in again.');
+        }
         const errorData = await response.json();
-        throw new Error(errorData.error || 'API request failed');
+        throw new Error(errorData.error || `API request failed with status ${response.status}`);
       }
 
       return await response.json();
@@ -61,26 +75,41 @@ const MessageForm = () => {
       throw error;
     }
   };
-
+// Add this helper function after the existing helper functions
+const isAnyAccountAuthenticated = () => {
+  return currentAccount && accounts.some(acc => acc.phoneNumber === currentAccount && acc.isAuthenticated);
+};
+// Add this useEffect to handle tab switching with authentication check
+useEffect(() => {
+  if (activeTab === 'analytics' && !isAnyAccountAuthenticated()) {
+    setError('Please authenticate a WhatsApp account first to view analytics');
+    setActiveTab('accounts');
+  }
+}, [activeTab, currentAccount, accounts]);
   // Fetch QR code and existing accounts
-  const fetchQRCode = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const data = await apiCall('/api/whatsapp/qr');
-      setQrCode(data.qrCode);
-      setAccounts(data.existingAccounts || []);
+// Fetch QR code and existing accounts
+const fetchQRCode = async () => {
+  setLoading(true);
+  setError('');
+  try {
+    const data = await apiCall('/api/whatsapp/qr');
+    setQrCode(data.qrCode);
+    setAccounts(data.existingAccounts || []);
+    
+    // Only update currentAccount if it's not already set or if the API explicitly provides one
+    if (!currentAccount || data.currentAccount) {
       setCurrentAccount(data.currentAccount);
-      if (data.message) {
-        setSuccess(data.message);
-      }
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
     }
-  };
-
+    
+    if (data.message) {
+      setSuccess(data.message);
+    }
+  } catch (error) {
+    setError(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
   // Switch WhatsApp account
   const switchAccount = async (phoneNumber) => {
     setLoading(true);
@@ -124,10 +153,17 @@ const MessageForm = () => {
 
       const response = await fetch(`${API_BASE_URL}/api/whatsapp/send`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          // Note: Don't set Content-Type for FormData, let browser set it
+        },
         body: formData
       });
       
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Authentication failed. Please check your token or log in again.');
+        }
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to send campaign');
       }
@@ -214,30 +250,43 @@ const MessageForm = () => {
       </header>
 
       {/* Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8">
-            {[
-              { id: 'accounts', label: 'Accounts', icon: Phone },
-              { id: 'send', label: 'Send Campaign', icon: Send },
-              { id: 'analytics', label: 'Analytics', icon: BarChart3 }
-            ].map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => setActiveTab(id)}
-                className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === id
-                    ? 'border-green-500 text-green-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{label}</span>
-              </button>
-            ))}
-          </div>
+<nav className="bg-white shadow-sm">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex space-x-8">
+      {[
+        { id: 'accounts', label: 'Accounts', icon: Phone, enabled: true },
+        { id: 'send', label: 'Send Campaign', icon: Send, enabled: true },
+        { id: 'analytics', label: 'Analytics', icon: BarChart3, enabled: isAnyAccountAuthenticated() }
+      ].map(({ id, label, icon: Icon, enabled }) => (
+        <div key={id} className="relative group">
+          <button
+            onClick={() => enabled ? setActiveTab(id) : null}
+            className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === id && enabled
+                ? 'border-green-500 text-green-600'
+                : enabled 
+                ? 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-gray-400 cursor-not-allowed'
+            }`}
+            disabled={!enabled}
+          >
+            <Icon className="w-4 h-4" />
+            <span>{label}</span>
+            {!enabled && id === 'analytics' && <Lock className="w-3 h-3 ml-1" />}
+          </button>
+          
+          {/* Tooltip for disabled analytics tab */}
+          {!enabled && id === 'analytics' && (
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+              Please authenticate WhatsApp first
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+            </div>
+          )}
         </div>
-      </nav>
+      ))}
+    </div>
+  </div>
+</nav>
 
       {/* Notifications */}
       {error && (
