@@ -19,7 +19,7 @@ const EmailScraper = () => {
   const dropdownRef = useRef(null);
   
   // API URL should come from environment or config
-  const API_URL = "https://vedive.com:3000";
+  const API_URL = "http://localhost:3000";
 
   // Handle click outside to close dropdown
   useEffect(() => {

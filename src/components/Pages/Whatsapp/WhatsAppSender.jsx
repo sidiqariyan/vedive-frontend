@@ -2,38 +2,62 @@ import React, { useState, useEffect } from 'react';
 import { 
   Phone, 
   Send, 
-  BarChart3, 
-  Settings, 
   Plus,
   CheckCircle,
   XCircle,
-  Clock,
   Users,
   MessageSquare,
-  Eye,
-  TrendingUp,
-  Smartphone,
-  Upload,
-  Download,
   RefreshCw,
   AlertCircle,
   Loader,
-  Lock
+  X,
+  Upload,
+  HelpCircle
 } from 'lucide-react';
 
 const API_BASE_URL = 'http://localhost:3000';
 
+// Your original API helper function - keeping it exactly as is
+const apiCall = async (endpoint, options = {}) => {
+  try {
+    // Get token from localStorage
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      throw new Error('No authentication token found. Please log in.');
+    }
+    
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      ...options,
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Authentication failed. Please check your token or log in again.');
+      }
+      const errorData = await response.json();
+      throw new Error(errorData.error || `API request failed with status ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
+};
+
 const MessageForm = () => {
-  const [activeTab, setActiveTab] = useState('accounts');
   const [accounts, setAccounts] = useState([]);
   const [currentAccount, setCurrentAccount] = useState(null);
   const [qrCode, setQrCode] = useState(null);
-  const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  
-
+  const [showQR, setShowQR] = useState(false);
 
   // Campaign form state
   const [campaignForm, setCampaignForm] = useState({
@@ -43,73 +67,35 @@ const MessageForm = () => {
     mediaFile: null
   });
 
-  // API helper function with auth headers
-  const apiCall = async (endpoint, options = {}) => {
+  // Helper function to check if any account is authenticated
+  const isAnyAccountAuthenticated = () => {
+    return currentAccount && accounts.some(acc => acc.phoneNumber === currentAccount && acc.isAuthenticated);
+  };
+
+  // Fetch QR code and existing accounts
+  const fetchQRCode = async () => {
+    setLoading(true);
+    setError('');
     try {
-      // Get token from localStorage
-      const token = localStorage.getItem('token');
+      const data = await apiCall('/api/whatsapp/qr');
+      setQrCode(data.qrCode);
+      setAccounts(data.existingAccounts || []);
       
-      if (!token) {
-        throw new Error('No authentication token found. Please log in.');
+      // Only update currentAccount if it's not already set or if the API explicitly provides one
+      if (!currentAccount || data.currentAccount) {
+        setCurrentAccount(data.currentAccount);
       }
       
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        ...options,
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error('Authentication failed. Please check your token or log in again.');
-        }
-        const errorData = await response.json();
-        throw new Error(errorData.error || `API request failed with status ${response.status}`);
+      if (data.message) {
+        setSuccess(data.message);
       }
-
-      return await response.json();
     } catch (error) {
-      console.error('API Error:', error);
-      throw error;
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
-// Add this helper function after the existing helper functions
-const isAnyAccountAuthenticated = () => {
-  return currentAccount && accounts.some(acc => acc.phoneNumber === currentAccount && acc.isAuthenticated);
-};
-// Add this useEffect to handle tab switching with authentication check
-useEffect(() => {
-  if (activeTab === 'analytics' && !isAnyAccountAuthenticated()) {
-    setError('Please authenticate a WhatsApp account first to view analytics');
-    setActiveTab('accounts');
-  }
-}, [activeTab, currentAccount, accounts]);
-  // Fetch QR code and existing accounts
-// Fetch QR code and existing accounts
-const fetchQRCode = async () => {
-  setLoading(true);
-  setError('');
-  try {
-    const data = await apiCall('/api/whatsapp/qr');
-    setQrCode(data.qrCode);
-    setAccounts(data.existingAccounts || []);
-    
-    // Only update currentAccount if it's not already set or if the API explicitly provides one
-    if (!currentAccount || data.currentAccount) {
-      setCurrentAccount(data.currentAccount);
-    }
-    
-    if (data.message) {
-      setSuccess(data.message);
-    }
-  } catch (error) {
-    setError(error.message);
-  } finally {
-    setLoading(false);
-  }
-};
+
   // Switch WhatsApp account
   const switchAccount = async (phoneNumber) => {
     setLoading(true);
@@ -132,8 +118,7 @@ const fetchQRCode = async () => {
   };
 
   // Send campaign
-  const sendCampaign = async (e) => {
-    e.preventDefault();
+  const sendCampaign = async () => {
     if (!campaignForm.campaignName || !campaignForm.message || !campaignForm.users) {
       setError('Please fill in all required fields');
       return;
@@ -176,7 +161,6 @@ const fetchQRCode = async () => {
         users: '',
         mediaFile: null
       });
-      fetchAnalytics(); // Refresh analytics
     } catch (error) {
       setError(error.message);
     } finally {
@@ -184,38 +168,24 @@ const fetchQRCode = async () => {
     }
   };
 
-  // Fetch analytics
-  const fetchAnalytics = async (phoneNumber = null) => {
-    setLoading(true);
-    try {
-      const queryParam = phoneNumber ? `?phoneNumber=${phoneNumber}` : '';
-      const data = await apiCall(`/api/whatsapp/analytics${queryParam}`);
-      setCampaigns(data.campaigns || []);
-      setAccounts(data.whatsappAccounts || []);
-      setCurrentAccount(data.currentAccount);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
+  // Handle add new account
+  const handleAddNewAccount = () => {
+    setShowQR(true);
+    fetchQRCode();
   };
 
   // Auto-refresh QR code every 30 seconds when needed
   useEffect(() => {
-    if (activeTab === 'accounts' && qrCode && !currentAccount) {
+    if (qrCode && !currentAccount && showQR) {
       const interval = setInterval(fetchQRCode, 30000);
       return () => clearInterval(interval);
     }
-  }, [activeTab, qrCode, currentAccount]);
+  }, [qrCode, currentAccount, showQR]);
 
   // Load initial data
   useEffect(() => {
-    if (activeTab === 'accounts') {
-      fetchQRCode();
-    } else if (activeTab === 'analytics') {
-      fetchAnalytics();
-    }
-  }, [activeTab]);
+    fetchQRCode();
+  }, []);
 
   // Auto-clear messages after 5 seconds
   useEffect(() => {
@@ -229,68 +199,39 @@ const fetchQRCode = async () => {
   }, [error, success]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 p-4">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-3">
-              <div className="bg-green-600 p-2 rounded-lg">
-                <MessageSquare className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">WhatsApp Bulk Sender</h1>
-                <p className="text-sm text-gray-500">
-                  {currentAccount ? `Connected: ${currentAccount}` : 'No account connected'}
-                </p>
-              </div>
+      <div className="max-w-6xl mx-auto mb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="bg-blue-500 p-2 rounded-lg">
+              <MessageSquare className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold text-gray-900">WhatsApp Bulk Sender</h1>
+              <p className="text-sm text-gray-500 flex items-center space-x-2">
+                <span>{currentAccount ? `Connected: ${currentAccount}` : 'No account connected'}</span>
+                <div className="flex items-center space-x-1">
+                  <HelpCircle className="w-4 h-4 text-blue-500" />
+                  <span className="text-blue-500 hover:underline cursor-pointer">Need help? Watch tutorial</span>
+                </div>
+              </p>
             </div>
           </div>
-        </div>
-      </header>
-
-      {/* Navigation */}
-<nav className="bg-white shadow-sm">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div className="flex space-x-8">
-      {[
-        { id: 'accounts', label: 'Accounts', icon: Phone, enabled: true },
-        { id: 'send', label: 'Send Campaign', icon: Send, enabled: true },
-        { id: 'analytics', label: 'Analytics', icon: BarChart3, enabled: isAnyAccountAuthenticated() }
-      ].map(({ id, label, icon: Icon, enabled }) => (
-        <div key={id} className="relative group">
           <button
-            onClick={() => enabled ? setActiveTab(id) : null}
-            className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-              activeTab === id && enabled
-                ? 'border-green-500 text-green-600'
-                : enabled 
-                ? 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                : 'border-transparent text-gray-400 cursor-not-allowed'
-            }`}
-            disabled={!enabled}
+            onClick={fetchQRCode}
+            disabled={loading}
+            className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
           >
-            <Icon className="w-4 h-4" />
-            <span>{label}</span>
-            {!enabled && id === 'analytics' && <Lock className="w-3 h-3 ml-1" />}
+            {loading ? <Loader className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+            <span>Refresh</span>
           </button>
-          
-          {/* Tooltip for disabled analytics tab */}
-          {!enabled && id === 'analytics' && (
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-              Please authenticate WhatsApp first
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-            </div>
-          )}
         </div>
-      ))}
-    </div>
-  </div>
-</nav>
+      </div>
 
       {/* Notifications */}
       {error && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <div className="max-w-6xl mx-auto mb-6">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
             <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
             <span className="text-red-800">{error}</span>
@@ -299,7 +240,7 @@ const fetchQRCode = async () => {
       )}
 
       {success && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <div className="max-w-6xl mx-auto mb-6">
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
             <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
             <span className="text-green-800">{success}</span>
@@ -308,345 +249,269 @@ const fetchQRCode = async () => {
       )}
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'accounts' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">WhatsApp Accounts</h2>
-              <button
-                onClick={fetchQRCode}
-                disabled={loading}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
-              >
-                {loading ? <Loader className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                <span>Refresh</span>
-              </button>
-            </div>
+      <div className="max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Left Column - Account Management */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <div className="flex items-center space-x-2 mb-4">
+                <Phone className="w-5 h-5 text-blue-500" />
+                <h2 className="text-lg font-semibold text-gray-900">WhatsApp Accounts</h2>
+              </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* QR Code Section */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-4">Add New Account</h3>
-                {qrCode ? (
-                  <div className="text-center">
-                    <img src={qrCode} alt="QR Code" className="mx-auto mb-4 border rounded-lg" />
-                    <p className="text-sm text-gray-600">Scan this QR code with WhatsApp</p>
-                  </div>
+              {/* Connected Accounts */}
+              <div className="space-y-3 mb-4">
+                {accounts.length > 0 ? (
+                  accounts.map((account) => (
+                    <div
+                      key={account.phoneNumber}
+                      className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                        currentAccount === account.phoneNumber
+                          ? 'border-blue-500 bg-blue-50 shadow-sm'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      }`}
+                      onClick={() => switchAccount(account.phoneNumber)}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center space-x-2">
+                          <div className={`w-2 h-2 rounded-full ${
+                            account.isAuthenticated ? 'bg-green-500' : 'bg-red-500'
+                          }`} />
+                          <p className="font-medium text-gray-900 text-sm">{account.phoneNumber}</p>
+                        </div>
+                        {account.isAuthenticated ? (
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <XCircle className="w-4 h-4 text-red-600" />
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        <p>{account.campaignCount} campaigns sent</p>
+                        <p>Last: {new Date(account.lastConnected).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  ))
                 ) : (
-                  <div className="text-center py-8">
-                    {currentAccount ? (
-                      <div>
-                        <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-4" />
-                        <p className="text-green-700 font-medium">{currentAccount} is connected!</p>
-                      </div>
-                    ) : (
-                      <div>
-                        <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-600">Click refresh to generate QR code</p>
-                      </div>
-                    )}
+                  <div className="text-center py-8 text-gray-500">
+                    <Phone className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm">No accounts connected</p>
                   </div>
                 )}
               </div>
 
-              {/* Accounts List */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-4">Connected Accounts</h3>
-                <div className="space-y-3">
-                  {accounts.length > 0 ? (
-                    accounts.map((account) => (
-                      <div
-                        key={account.phoneNumber}
-                        className={`p-4 rounded-lg border ${
-                          currentAccount === account.phoneNumber
-                            ? 'border-green-500 bg-green-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        } cursor-pointer transition-colors`}
-                        onClick={() => switchAccount(account.phoneNumber)}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className={`w-3 h-3 rounded-full ${
-                              account.isAuthenticated ? 'bg-green-500' : 'bg-red-500'
-                            }`} />
-                            <div>
-                              <p className="font-medium text-gray-900">{account.phoneNumber}</p>
-                              <p className="text-sm text-gray-500">
-                                {account.campaignCount} campaigns sent
-                              </p>
-                            </div>
-                          </div>
-                          {account.isAuthenticated ? (
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                          ) : (
-                            <XCircle className="w-5 h-5 text-red-600" />
-                          )}
-                        </div>
-                        <p className="text-xs text-gray-500 mt-2">
-                          Last connected: {new Date(account.lastConnected).toLocaleString()}
-                        </p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-500 text-center py-4">No accounts connected</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'send' && (
-          <div className="max-w-2xl">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Send Campaign</h2>
-            
-            {!currentAccount ? (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                <div className="flex items-center">
-                  <AlertCircle className="w-5 h-5 text-yellow-600 mr-3" />
-                  <span className="text-yellow-800">Please connect a WhatsApp account first</span>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={sendCampaign} className="bg-white rounded-lg shadow p-6 space-y-6">  
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Campaign Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={campaignForm.campaignName}
-                    onChange={(e) => setCampaignForm(prev => ({ ...prev, campaignName: e.target.value }))}
-                    className="w-full text-black p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Enter campaign name..."
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Message *
-                  </label>
-                  <textarea
-                    value={campaignForm.message}
-                    onChange={(e) => setCampaignForm(prev => ({ ...prev, message: e.target.value }))}
-                    rows={4}
-                    className="w-full text-black p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Enter your message..."
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Numbers * (one per line)
-                  </label>
-                  <textarea
-                    value={campaignForm.users}
-                    onChange={(e) => setCampaignForm(prev => ({ ...prev, users: e.target.value }))}
-                    rows={6}
-                    className="w-full text-black p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Enter phone numbers, one per line...&#10;+919876543210&#10;+918765432109"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Media File (optional)
-                  </label>
-                  <input
-                    type="file"
-                    onChange={(e) => setCampaignForm(prev => ({ ...prev, mediaFile: e.target.files[0] }))}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading || !currentAccount}
-                  className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? (
-                    <Loader className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <>
-                      <Send className="w-5 h-5" />
-                      <span>Send Campaign</span>
-                    </>
-                  )}
-                </button>
-              </form>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'analytics' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">Campaign Analytics</h2>
               <button
-                onClick={() => fetchAnalytics()}
-                disabled={loading}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
+                onClick={handleAddNewAccount}
+                className="w-full bg-blue-500 text-white py-2.5 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center space-x-2 text-sm font-medium"
               >
-                {loading ? <Loader className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                <span>Refresh</span>
+                <Plus className="w-4 h-4" />
+                <span>Add New Account</span>
               </button>
             </div>
+          </div>
 
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <MessageSquare className="w-6 h-6 text-blue-600" />
+          {/* Right Column - Campaign Configuration */}
+          <div className="lg:col-span-2">
+            {!currentAccount ? (
+              <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+                <AlertCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-medium text-gray-700 mb-2">Account Required</h3>
+                <p className="text-gray-500 mb-4">Please connect a WhatsApp account first to send campaigns</p>
+                <button
+                  onClick={handleAddNewAccount}
+                  className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Connect Account
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Campaign Configuration */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <div className="flex items-center space-x-2 mb-6">
+                    <Send className="w-5 h-5 text-blue-500" />
+                    <h2 className="text-lg font-semibold text-gray-900">Campaign Configuration</h2>
                   </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Campaigns</p>
-                    <p className="text-2xl font-semibold text-gray-900">{campaigns.length}</p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Campaign Name */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Campaign Name
+                      </label>
+                      <input
+                        type="text"
+                        value={campaignForm.campaignName}
+                        onChange={(e) => setCampaignForm(prev => ({ ...prev, campaignName: e.target.value }))}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                        placeholder="Enter campaign name..."
+                      />
+                    </div>
+
+                    {/* From Email equivalent - showing connected account */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        From Account
+                      </label>
+                      <input
+                        type="text"
+                        value={currentAccount}
+                        disabled
+                        className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Message */}
+                  <div className="mt-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Message
+                    </label>
+                    <textarea
+                      value={campaignForm.message}
+                      onChange={(e) => setCampaignForm(prev => ({ ...prev, message: e.target.value }))}
+                      rows={4}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
+                      placeholder="Enter your message..."
+                    />
+                  </div>
+                </div>
+
+                {/* File Uploads Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Media File */}
+                  <div className="bg-white rounded-xl border border-gray-200 p-6">
+                    <div className="text-center">
+                      <Upload className="w-8 h-8 text-blue-500 mx-auto mb-3" />
+                      <h3 className="font-medium text-gray-900 mb-2">Media File</h3>
+                      <p className="text-sm text-gray-500 mb-4">Upload images, videos, audio, or documents</p>
+                      <input
+                        type="file"
+                        onChange={(e) => setCampaignForm(prev => ({ ...prev, mediaFile: e.target.files[0] }))}
+                        className="w-full text-sm"
+                        accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
+                      />
+                    </div>
+                    {campaignForm.mediaFile && (
+                      <p className="text-sm text-green-600 mt-3 text-center">Selected: {campaignForm.mediaFile.name}</p>
+                    )}
+                  </div>
+
+                  {/* Recipients List */}
+                  <div className="bg-white rounded-xl border border-gray-200 p-6">
+                    <div className="text-center">
+                      <Users className="w-8 h-8 text-blue-500 mx-auto mb-3" />
+                      <h3 className="font-medium text-gray-900 mb-2">Recipients List</h3>
+                      <textarea
+                        value={campaignForm.users}
+                        onChange={(e) => setCampaignForm(prev => ({ ...prev, users: e.target.value }))}
+                        rows={4}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white text-sm"
+                        placeholder="Enter phone numbers, one per line...&#10;+919876543210&#10;+918765432109"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Reset and Send Buttons */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <div className="flex justify-between">
+                    <button
+                      onClick={() => setCampaignForm({
+                        campaignName: '',
+                        message: '',
+                        users: '',
+                        mediaFile: null
+                      })}
+                      className="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Reset
+                    </button>
+                    <button
+                      onClick={sendCampaign}
+                      disabled={loading || !currentAccount}
+                      className="bg-blue-500 text-white px-8 py-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      {loading ? (
+                        <Loader className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Send className="w-5 h-5" />
+                      )}
+                      <span>Send Messages</span>
+                    </button>
                   </div>
                 </div>
               </div>
+            )}
+          </div>
+        </div>
+      </div>
 
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <Users className="w-6 h-6 text-green-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Messages</p>
-                    <p className="text-2xl font-semibold text-gray-900">
-                      {campaigns.reduce((sum, campaign) => sum + campaign.totalMessages, 0)}
-                    </p>
-                  </div>
-                </div>
-              </div>
+// Replace the QR Code Modal section in your code with this:
 
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-yellow-100 rounded-lg">
-                    <TrendingUp className="w-6 h-6 text-yellow-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Avg Delivery Rate</p>
-                    <p className="text-2xl font-semibold text-gray-900">
-                      {campaigns.length > 0 
-                        ? Math.round(campaigns.reduce((sum, c) => sum + c.deliveryRate, 0) / campaigns.length) 
-                        : 0}%
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <Eye className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Avg Open Rate</p>
-                    <p className="text-2xl font-semibold text-gray-900">
-                      {campaigns.length > 0 
-                        ? Math.round(campaigns.reduce((sum, c) => sum + c.openRate, 0) / campaigns.length) 
-                        : 0}%
-                    </p>
-                  </div>
+{/* QR Code Modal */}
+{showQR && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-xl max-w-md w-full p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-900">Add WhatsApp Account</h3>
+        <button
+          onClick={() => setShowQR(false)}
+          className="text-gray-400 hover:text-gray-600"
+        >
+          <X className="w-6 h-6" />
+        </button>
+      </div>
+      
+      <div className="text-center">
+        {qrCode ? (
+          <div>
+            <div className="bg-gray-100 p-4 rounded-lg mb-4">
+              {/* FIXED: Actually display the QR code image */}
+              <img 
+                src={qrCode} 
+                alt="WhatsApp QR Code" 
+                className="w-48 h-48 mx-auto bg-white border-2 border-gray-300 rounded-lg"
+                onError={(e) => {
+                  console.error('QR Code image failed to load:', qrCode);
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+              {/* Fallback if image fails to load */}
+              <div 
+                className="w-48 h-48 bg-white border-2 border-dashed border-gray-300 rounded-lg mx-auto items-center justify-center hidden"
+                style={{ display: 'none' }}
+              >
+                <div className="text-center p-4">
+                  <AlertCircle className="w-8 h-8 text-red-500 mx-auto mb-2" />
+                  <span className="text-red-500 text-sm">QR Code failed to load</span>
+                  <button 
+                    onClick={fetchQRCode}
+                    className="block mt-2 text-blue-500 text-sm hover:underline"
+                  >
+                    Retry
+                  </button>
                 </div>
               </div>
             </div>
-
-            {/* Campaigns Table */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">Campaign History</h3>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Campaign
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Sender
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Messages
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Delivery Rate
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Open Rate
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {campaigns.length > 0 ? (
-                      campaigns.map((campaign) => (
-                        <tr key={campaign.campaignId} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
-                              {campaign.campaignName}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <div className={`w-2 h-2 rounded-full mr-2 ${
-                                campaign.connectionStatus?.isConnected ? 'bg-green-500' : 'bg-gray-400'
-                              }`} />
-                              <div className="text-sm text-gray-900">
-                                {campaign.senderPhoneNumber}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {campaign.totalMessages}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {campaign.deliveryRate}%
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {campaign.openRate}%
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              campaign.status === 'completed'
-                                ? 'bg-green-100 text-green-800'
-                                : campaign.status === 'failed'
-                                ? 'bg-red-100 text-red-800'
-                                : 'bg-yellow-100 text-yellow-800'
-                            }`}>
-                              {campaign.status}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {new Date(campaign.createdAt).toLocaleDateString()}
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
-                          No campaigns found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+            <div className="text-left space-y-2 text-sm text-gray-600">
+              <p><strong>1.</strong> Open WhatsApp on your phone</p>
+              <p><strong>2.</strong> Go to Settings → Linked Devices</p>
+              <p><strong>3.</strong> Tap "Link a Device"</p>
+              <p><strong>4.</strong> Scan this QR code</p>
             </div>
           </div>
+        ) : (
+          <div className="py-8">
+            <Loader className="w-12 h-12 text-blue-500 mx-auto mb-4 animate-spin" />
+            <p className="text-gray-600">Generating QR code...</p>
+          </div>
         )}
-      </main>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };

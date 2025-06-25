@@ -36,7 +36,106 @@ import {
 import axios from 'axios';
 
 
-const API_BASE_URL = 'https://vedive.com:3000/api';
+const API_BASE_URL = 'http://localhost:3000/api';
+const RecipientStatusTable = ({ recipients, recipientSearchTerm, setRecipientSearchTerm, filterStatus, setFilterStatus }) => {
+  if (!recipients || recipients.length === 0) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-8 text-center">
+        <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+        <p className="text-gray-500">No recipient data available</p>
+      </div>
+    );
+  }
+
+  const filteredRecipients = recipients.filter(recipient => {
+    const email = recipient.email || '';
+    const name = recipient.name || '';
+    const status = recipient.status || '';
+    
+    const matchesSearch = email.toLowerCase().includes(recipientSearchTerm.toLowerCase()) ||
+                         name.toLowerCase().includes(recipientSearchTerm.toLowerCase());
+    const matchesFilter = filterStatus === 'all' || status === filterStatus;
+    return matchesSearch && matchesFilter;
+  });
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'clicked': return 'bg-green-100 text-green-800';
+      case 'opened': return 'bg-blue-100 text-blue-800';
+      case 'not_opened': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-100">
+      <div className="p-4 border-b border-gray-100">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg text-black font-semibold">Recipient Activity</h3>
+          <div className="flex gap-2">
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search recipients..."
+                className="pl-9 pr-4 py-2 text-black border border-gray-200 rounded-lg text-sm"
+                value={recipientSearchTerm}
+                onChange={(e) => setRecipientSearchTerm(e.target.value)}
+              />
+            </div>
+            <select
+              className="px-3 py-2 text-black border border-gray-200 rounded-lg text-sm"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="all">All Status</option>
+              <option value="clicked">Clicked</option>
+              <option value="opened">Opened</option>
+              <option value="not_opened">Not Opened</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Recipient</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Opens</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Clicks</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Activity</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {filteredRecipients.map((recipient, index) => (
+              <tr key={index} className="hover:bg-gray-50">
+                <td className="px-4 py-3">
+                  <div>
+                    <p className="text-sm text-gray-500">{recipient.email || 'N/A'}</p>
+                  </div>
+                </td>
+                <td className="px-4 py-3">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(recipient.status)}`}>
+                    {recipient.status?.replace('_', ' ') || 'unknown'}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-900">{recipient.openCount || 0}</td>
+                <td className="px-4 py-3 text-sm text-gray-900">{recipient.clickCount || 0}</td>
+                <td className="px-4 py-3 text-sm text-gray-500">
+                  {recipient.lastClicked ? new Date(recipient.lastClicked).toLocaleDateString() : 
+                   recipient.lastOpened ? new Date(recipient.lastOpened).toLocaleDateString() : 
+                   'No activity'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
 
 const MailDashboard = () => {
   const [analyticsData, setAnalyticsData] = useState(null);
@@ -48,7 +147,8 @@ const MailDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-
+  const [campaignSearchTerm, setCampaignSearchTerm] = useState(''); // Add this line
+  const [recipientSearchTerm, setRecipientSearchTerm] = useState(''); // Add this line
   // API helper function
   const apiRequest = async (endpoint, options = {}) => {
     try {
@@ -74,12 +174,8 @@ const MailDashboard = () => {
   // Fetch analytics summary - FIXED ENDPOINT
 const fetchAnalyticsSummary = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/analytics/summary`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-    setAnalyticsData(response.data);
+    const data = await apiRequest('/analytics/summary?toolType=mail-sender');
+    setAnalyticsData(data);
   } catch (error) {
     setError('Failed to fetch analytics summary');
     console.error('Analytics summary error:', error);
@@ -89,12 +185,8 @@ const fetchAnalyticsSummary = async () => {
 // Fetch all campaigns
 const fetchCampaigns = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/campaigns`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-    setCampaigns(response.data);
+    const data = await apiRequest('/campaigns?toolType=mail-sender');
+    setCampaigns(data);
   } catch (error) {
     setError('Failed to fetch campaigns');
     console.error('Campaigns fetch error:', error);
@@ -105,12 +197,8 @@ const fetchCampaigns = async () => {
 const fetchCampaignDetails = async (campaignId) => {
   try {
     setLoading(true);
-    const response = await axios.get(`${API_BASE_URL}/campaigns/${campaignId}/analytics`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-    setDetailedAnalytics(response.data);
+    const data = await apiRequest(`/campaigns/${campaignId}/analytics`);
+    setDetailedAnalytics(data);
   } catch (error) {
     setError('Failed to fetch campaign details');
     console.error('Campaign details error:', error);
@@ -118,6 +206,7 @@ const fetchCampaignDetails = async (campaignId) => {
     setLoading(false);
   }
 };
+
 
 // Initial data fetch
   useEffect(() => {
@@ -214,107 +303,6 @@ const fetchCampaignDetails = async (campaignId) => {
     </div>
   );
 
-const RecipientStatusTable = ({ recipients, searchTerm, filterStatus }) => {
-  if (!recipients || recipients.length === 0) {
-    return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-8 text-center">
-        <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <p className="text-gray-500">No recipient data available</p>
-      </div>
-    );
-  }
-
-  const filteredRecipients = recipients.filter(recipient => {
-    // Safe check for email and name fields
-    const email = recipient.email || '';
-    const name = recipient.name || '';
-    
-    const matchesSearch = email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || recipient.status === filterStatus;
-    return matchesSearch && matchesFilter;
-  });
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'clicked': return 'bg-green-100 text-green-800';
-      case 'opened': return 'bg-blue-100 text-blue-800';
-      case 'not_opened': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-      <div className="p-4 border-b border-gray-100">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Recipient Activity</h3>
-          <div className="flex gap-2">
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search recipients..."
-                className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <select
-              className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
-              <option value="all">All Status</option>
-              <option value="clicked">Clicked</option>
-              <option value="opened">Opened</option>
-              <option value="not_opened">Not Opened</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Recipient</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Opens</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Clicks</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Activity</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filteredRecipients.map((recipient, index) => (
-              <tr key={index} className="hover:bg-gray-50">
-                <td className="px-4 py-3">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{recipient.name || 'N/A'}</p>
-                    <p className="text-sm text-gray-500">{recipient.email || 'N/A'}</p>
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(recipient.status)}`}>
-                    {recipient.status?.replace('_', ' ') || 'unknown'}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-900">{recipient.openCount || 0}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{recipient.clickCount || 0}</td>
-                <td className="px-4 py-3 text-sm text-gray-500">
-                  {recipient.lastClicked ? new Date(recipient.lastClicked).toLocaleDateString() : 
-                   recipient.lastOpened ? new Date(recipient.lastOpened).toLocaleDateString() : 
-                   'No activity'}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-};
-
   const ErrorMessage = ({ message, onRetry }) => (
     <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
       <div className="flex items-center">
@@ -352,19 +340,6 @@ const RecipientStatusTable = ({ recipients, searchTerm, filterStatus }) => {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Mail Analytics Dashboard</h1>
               <p className="text-gray-600 mt-1">Track and analyze your email campaign performance</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                <Download className="w-4 h-4 mr-2" />
-                Export Data
-              </button>
-              <button 
-                onClick={refreshData}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Refresh
-              </button>
             </div>
           </div>
           
@@ -437,7 +412,7 @@ const RecipientStatusTable = ({ recipients, searchTerm, filterStatus }) => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                   {/* Performance Overview */}
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                    <h3 className="text-lg font-semibold mb-4">Performance Overview</h3>
+                    <h3 className="text-lg text-black font-semibold mb-4">Performance Overview</h3>
                     <ResponsiveContainer width="100%" height={300}>
                       <PieChart>
                         <Pie
@@ -458,7 +433,7 @@ const RecipientStatusTable = ({ recipients, searchTerm, filterStatus }) => {
 
                   {/* Top Performing Campaigns */}
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                    <h3 className="text-lg font-semibold mb-4">Top Performing Campaigns</h3>
+                    <h3 className="text-lg text-black font-semibold mb-4">Top Performing Campaigns</h3>
                     <div className="space-y-3">
                       {analyticsData.topPerformers?.byOpenRate?.slice(0, 5).map((campaign, index) => (
                         <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -479,7 +454,7 @@ const RecipientStatusTable = ({ recipients, searchTerm, filterStatus }) => {
                 {/* Recent Activity */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold">Recent Activity (Last 7 Days)</h3>
+                    <h3 className="text-lg text-black font-semibold">Recent Activity (Last 7 Days)</h3>
                     <div className="flex items-center text-sm text-gray-500">
                       <Clock className="w-4 h-4 mr-1" />
                       Updated just now
@@ -511,60 +486,73 @@ const RecipientStatusTable = ({ recipients, searchTerm, filterStatus }) => {
         )}
 
         {/* Campaigns Tab */}
-        {activeTab === 'campaigns' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">All Campaigns</h2>
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search campaigns..."
-                    className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg"
-                  />
-                </div>
-                <select className="px-4 py-2 border border-gray-200 rounded-lg">
-                  <option>All Status</option>
-                  <option>Completed</option>
-                  <option>Pending</option>
-                </select>
-              </div>
-            </div>
-            
-            {campaigns.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {campaigns.map((campaign) => (
-                  <CampaignCard
-                    key={campaign._id}
-                    campaign={campaign}
-                    onClick={(campaign) => {
-                      setSelectedCampaign(campaign);
-                      fetchCampaignDetails(campaign._id);
-                      setActiveTab('analytics');
-                    }}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
-                <Mail className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No campaigns found</p>
-              </div>
-            )}
-          </div>
-        )}
-
+{/* Campaigns Tab */}
+{activeTab === 'campaigns' && (
+  <div className="space-y-6">
+    <div className="flex justify-between items-center">
+      <h2 className="text-2xl font-bold text-gray-900">All Campaigns</h2>
+      <div className="flex items-center space-x-4">
+        <div className="relative">
+          <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search campaigns..."
+            className="pl-9 text-black pr-4 py-2 border border-gray-200 rounded-lg"
+            value={campaignSearchTerm}
+            onChange={(e) => setCampaignSearchTerm(e.target.value)}
+          />
+        </div>
+        <select 
+          className="px-4 py-2 text-black border border-gray-200 rounded-lg"
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+        >
+          <option value="all">All Status</option>
+          <option value="completed">Completed</option>
+          <option value="pending">Pending</option>
+        </select>
+      </div>
+    </div>
+    
+    {campaigns.length > 0 ? (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {campaigns.filter(campaign => {
+          const matchesSearch = campaign.campaignName.toLowerCase().includes(campaignSearchTerm.toLowerCase()) ||
+                               campaign.status.toLowerCase().includes(campaignSearchTerm.toLowerCase());
+          const matchesStatus = filterStatus === 'all' || campaign.status === filterStatus;
+          return matchesSearch && matchesStatus;
+        }).map((campaign) => (
+          <CampaignCard
+            key={campaign._id}
+            campaign={campaign}
+            onClick={(campaign) => {
+              setSelectedCampaign(campaign);
+              fetchCampaignDetails(campaign._id);
+              setActiveTab('analytics');
+            }}
+          />
+        ))}
+      </div>
+    ) : (
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+        <Mail className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+        <p className="text-gray-500">No campaigns found</p>
+      </div>
+    )}
+  </div>
+)}
         {/* Recipients Tab */}
         {activeTab === 'recipients' && (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-900">Recipient Analysis</h2>
             {detailedAnalytics?.detailedAnalytics?.recipientStatus ? (
-              <RecipientStatusTable
-                recipients={detailedAnalytics.detailedAnalytics.recipientStatus}
-                searchTerm={searchTerm}
-                filterStatus={filterStatus}
-              />
+            <RecipientStatusTable
+              recipients={detailedAnalytics.detailedAnalytics?.recipientStatus || []}
+              recipientSearchTerm={recipientSearchTerm}
+              setRecipientSearchTerm={setRecipientSearchTerm}
+              filterStatus={filterStatus}
+              setFilterStatus={setFilterStatus}
+            />
             ) : (
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
                 <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -625,7 +613,7 @@ const RecipientStatusTable = ({ recipients, searchTerm, filterStatus }) => {
                 {/* Hourly Activity Chart */}
                 {detailedAnalytics.detailedAnalytics?.hourlyData && (
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                    <h3 className="text-lg font-semibold mb-4">24-Hour Activity</h3>
+                    <h3 className="text-lg text-black font-semibold mb-4">24-Hour Activity</h3>
                     <ResponsiveContainer width="100%" height={300}>
                       <AreaChart data={detailedAnalytics.detailedAnalytics.hourlyData}>
                         <CartesianGrid strokeDasharray="3 3" />
@@ -642,8 +630,10 @@ const RecipientStatusTable = ({ recipients, searchTerm, filterStatus }) => {
                 {/* Recipient Status Table */}
                 <RecipientStatusTable
                   recipients={detailedAnalytics.detailedAnalytics?.recipientStatus || []}
-                  searchTerm={searchTerm}
+                  recipientSearchTerm={recipientSearchTerm}
+                  setRecipientSearchTerm={setRecipientSearchTerm}
                   filterStatus={filterStatus}
+                  setFilterStatus={setFilterStatus}
                 />
               </>
             ) : (
