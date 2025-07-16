@@ -16,6 +16,7 @@ import {
   MessageForm,
   NumberScraper
 } from "../config/lazyComponents.jsx";
+import EmailValidator from "../components/Pages/EmailValidator/EmailValidator.js";
 
 const ProtectedRoutes = () => (
   <>
@@ -87,6 +88,13 @@ const ProtectedRoutes = () => (
       <Route index element={
         <Suspense fallback={<LoadingSpinner />}>
           <SenderBody />
+        </Suspense>
+      } />
+    </Route>
+    <Route path="/email-validator" element={<ProtectedLayout />}>
+      <Route index element={
+        <Suspense fallback={<LoadingSpinner />}>
+          <EmailValidator/>
         </Suspense>
       } />
     </Route>

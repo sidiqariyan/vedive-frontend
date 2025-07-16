@@ -26,12 +26,41 @@ export default function EditBlogPost() {
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', type: '' });
 
+  // Helper function to get token
+  const getToken = () => {
+    return localStorage.getItem('token') || localStorage.getItem('authToken');
+  };
+
+  // Helper function to check token expiry
+  const checkTokenExpiry = () => {
+    const token = getToken();
+    if (!token) return false;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Date.now() / 1000;
+      return payload.exp > currentTime;
+    } catch (error) {
+      console.error('Error checking token expiry:', error);
+      return false;
+    }
+  };
+
+  // Helper function to handle authentication errors
+  const handleAuthError = (message = 'Authentication failed. Please log in again.') => {
+    setMessage({ text: message, type: 'error' });
+    localStorage.removeItem('token');
+    localStorage.removeItem('authToken');
+    navigate('/login', { state: { returnUrl: `/admin/blog/edit/${id}` } });
+  };
+
   // Redirect if not admin
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
         navigate("/login", { state: { returnUrl: `/admin/blog/edit/${id}` } });
       } else if (user.role !== "admin") {
+        setMessage({ text: 'You do not have permission to access this page.', type: 'error' });
         navigate("/");
       }
     }
@@ -59,6 +88,13 @@ export default function EditBlogPost() {
             const file = input.files[0];
             if (!file) return;
             
+            // Check authentication before upload
+            const token = getToken();
+            if (!token || !checkTokenExpiry()) {
+              handleAuthError('Session expired. Please log in again.');
+              return;
+            }
+            
             // Show loading state
             const range = quill.getSelection(true);
             quill.insertText(range.index, 'Uploading image...', 'user');
@@ -70,8 +106,7 @@ export default function EditBlogPost() {
               
               const res = await axios.post("https://vedive.com:3000/api/blog/upload-image", form, {
                 headers: {
-                  "Content-Type": "multipart/form-data",
-                  Authorization: `Bearer ${localStorage.getItem("token") || localStorage.getItem("authToken")}`
+                  Authorization: `Bearer ${token}`
                 }
               });
               
@@ -94,7 +129,12 @@ export default function EditBlogPost() {
             } catch (err) {
               console.error("Image upload failed:", err);
               quill.deleteText(range.index, 18);
-              setMessage({ text: "Image upload failed. Please try again.", type: "error" });
+              
+              if (err.response?.status === 401 || err.response?.status === 403) {
+                handleAuthError('Authentication failed during image upload.');
+              } else {
+                setMessage({ text: "Image upload failed. Please try again.", type: "error" });
+              }
             }
           };
         }
@@ -113,8 +153,9 @@ export default function EditBlogPost() {
     const fetchPost = async () => {
       try {
         setIsLoading(true);
-        const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+        const token = getToken();
         
+        // For fetching, we can try without auth first since it might be a public endpoint
         const config = token ? {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -137,8 +178,10 @@ export default function EditBlogPost() {
       } catch (error) {
         console.error('Error fetching post:', error);
         if (error.response?.status === 401) {
-          setMessage({ text: 'Authentication required to edit posts', type: 'error' });
-          navigate('/login');
+          handleAuthError('Authentication required to edit posts');
+        } else if (error.response?.status === 404) {
+          setMessage({ text: 'Blog post not found', type: 'error' });
+          navigate('/admin/blog');
         } else {
           setMessage({ text: 'Failed to load blog post', type: 'error' });
         }
@@ -169,6 +212,7 @@ export default function EditBlogPost() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     if (!formData.title || !formData.content) {
       setMessage({ text: "Title and content are required fields", type: "error" });
       return;
@@ -178,6 +222,25 @@ export default function EditBlogPost() {
     setMessage({ text: '', type: '' });
 
     try {
+      // Check token validity
+      const token = getToken();
+      
+      if (!token) {
+        handleAuthError('No authentication token found. Please log in again.');
+        return;
+      }
+      
+      if (!checkTokenExpiry()) {
+        handleAuthError('Your session has expired. Please log in again.');
+        return;
+      }
+      
+      // Check user role
+      if (!user || user.role !== 'admin') {
+        setMessage({ text: 'You do not have permission to perform this action.', type: 'error' });
+        return;
+      }
+      
       const data = new FormData();
       
       // Append form fields
@@ -194,21 +257,20 @@ export default function EditBlogPost() {
         data.append('coverImage', coverImage);
       }
 
-      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+      console.log('Making update request...', {
+        id,
+        userRole: user?.role,
+        hasToken: !!token,
+        tokenPreview: token?.substring(0, 20) + '...'
+      });
       
-      if (!token) {
-        setMessage({ text: 'Authentication required. Please log in again.', type: 'error' });
-        navigate('/login');
-        return;
-      }
-
-      await axios.put(
+      const response = await axios.put(
         `https://vedive.com:3000/api/blog/update-blog-post/${id}`, 
         data,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data'
+            'Authorization': `Bearer ${token}`
+            // Don't set Content-Type manually - let browser handle it for FormData
           }
         }
       );
@@ -218,12 +280,23 @@ export default function EditBlogPost() {
       
     } catch (error) {
       console.error('Error updating post:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
       
       if (error.response?.status === 401) {
-        setMessage({ text: 'Authentication failed. Please log in again.', type: 'error' });
-        navigate('/login');
+        handleAuthError('Authentication failed. Please log in again.');
+      } else if (error.response?.status === 403) {
+        setMessage({ 
+          text: 'You do not have permission to update this post. Please contact an administrator.', 
+          type: 'error' 
+        });
+      } else if (error.response?.status === 404) {
+        setMessage({ text: 'Blog post not found.', type: 'error' });
       } else {
-        setMessage({ text: error.response?.data?.message || 'Failed to update blog post', type: 'error' });
+        setMessage({ 
+          text: error.response?.data?.message || 'Failed to update blog post. Please try again.', 
+          type: 'error' 
+        });
       }
     } finally {
       setIsSubmitting(false);
